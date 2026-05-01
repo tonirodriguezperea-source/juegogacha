@@ -3,254 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gacha Quest | Pixel Dex</title>
+    <title>Gacha Quest | Battle System</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --primary: #38bdf8;
-            --text: #f1f5f9;
-            /* Rarezas */
-            --comun: #94a3b8;
-            --raro: #4ade80;
-            --epico: #a855f7;
-            --legendario: #f59e0b;
-            --secreto: #f43f5e;
+            --bg: #0f172a; --card: #1e293b; --primary: #38bdf8; --text: #f1f5f9;
+            --fuego: #f87171; --agua: #60a5fa; --planta: #4ade80; --viento: #fbbf24;
         }
-
-        body {
-            margin: 0;
-            font-family: 'Courier New', Courier, monospace; /* Toque retro */
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
+        body { margin: 0; font-family: 'Courier New', monospace; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; height: 100vh; }
         .pantalla { text-align: center; width: 95%; max-width: 800px; height: 90vh; display: flex; flex-direction: column; }
         .oculto { display: none !important; }
-
-        /* Estética Pixel para botones */
-        .btn-principal {
-            background: var(--primary);
-            color: #000;
-            border: 4px solid #fff;
-            padding: 10px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            image-rendering: pixelated;
-            margin: 10px;
-        }
-
-        /* --- CONTENEDOR POKEDEX --- */
-        .album-container {
-            background: #27272a;
-            border: 6px solid #52525b;
-            border-radius: 10px;
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-        }
-
-        /* Miniatura de personaje en el álbum */
-        .slot-dex {
-            background: #3f3f46;
-            border: 3px solid #71717a;
-            padding: 10px;
-            border-radius: 5px;
-            position: relative;
-            font-size: 0.8rem;
-        }
-
-        .slot-dex img {
-            width: 64px;
-            height: 64px;
-            image-rendering: pixelated; /* ¡IMPORTANTE PARA PIXEL ART! */
-        }
-
-        .mini-tag {
-            font-size: 0.6rem;
-            padding: 2px 4px;
-            border-radius: 3px;
-            display: inline-block;
-            margin-top: 5px;
-        }
-
-        /* Pestañas de Sagas */
-        .tabs-sagas {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 10px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-
-        .tab {
-            background: #3f3f46;
-            padding: 5px 15px;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .tab.activa {
-            border-color: var(--primary);
-            background: var(--card);
-        }
-
-        /* Carta de Resultado (Gacha) */
-        .carta-grande {
-            background: var(--card);
-            border: 8px double var(--comun);
-            padding: 20px;
-            margin: 20px auto;
-            width: 250px;
-        }
+        .btn { background: var(--primary); border: 4px solid #fff; padding: 10px 20px; font-weight: bold; cursor: pointer; margin: 5px; }
+        
+        /* --- ESTILOS DE COMBATE --- */
+        .battle-arena { display: flex; justify-content: space-between; align-items: flex-end; padding: 40px 20px; background: #1e293b; border: 4px solid #334155; border-radius: 10px; margin-top: 20px; min-height: 250px; }
+        .fighter { width: 45%; }
+        .sprite-batalla { font-size: 5rem; image-rendering: pixelated; margin-bottom: 10px; }
+        .hb-container { background: #451a1a; border: 2px solid #fff; height: 15px; width: 100%; border-radius: 5px; overflow: hidden; }
+        .hb-fill { background: #4ade80; height: 100%; width: 100%; transition: width 0.3s; }
+        .battle-log { background: #000; border: 2px solid #52525b; padding: 10px; height: 80px; overflow-y: auto; font-size: 0.8rem; margin-top: 10px; text-align: left; }
     </style>
 </head>
 <body>
 
     <section id="p-inicio" class="pantalla">
         <h1 style="font-size: 3rem;">GACHA QUEST</h1>
-        <p>PIXEL EDITION</p>
-        <button class="btn-principal" onclick="navegar('menu')">START</button>
+        <button class="btn" onclick="navegar('menu')">START</button>
     </section>
 
     <section id="p-menu" class="pantalla oculto">
-        <h2>MENU</h2>
-        <button class="btn-principal" onclick="tirarGacha()">INVOCAR (GACHA)</button>
-        <button class="btn-principal" onclick="abrirAlbum()">COLECCION (DEX)</button>
-        <button class="btn-principal" onclick="borrarTodo()" style="background: var(--danger)">RESET</button>
+        <h2>CENTRO DE MANDO</h2>
+        <button class="btn" onclick="tirarGacha()">INVOCAR (GACHA)</button>
+        <button class="btn" onclick="prepararCombate()">COMBATE (ARENA)</button>
+        <button class="btn" onclick="navegar('album')">COLECCIÓN</button>
     </section>
 
-    <section id="p-resultado" class="pantalla oculto">
-        <div id="res-carta" class="carta-grande">
-            <h4 id="res-rareza">COMÚN</h4>
-            <div id="res-sprite" style="font-size: 4rem;">❓</div>
-            <h3 id="res-nombre">Héroe</h3>
-            <p id="res-saga" style="font-size: 0.7rem; color: var(--primary);">Saga</p>
-            <div style="font-size: 0.8rem; text-align: left; margin-top: 10px;">
-                HP: <span id="res-hp">0</span><br>
-                ATK: <span id="res-atk">0</span>
+    <section id="p-combate" class="pantalla oculto">
+        <h2 id="battle-status">¡PREPÁRATE!</h2>
+        
+        <div class="battle-arena">
+            <div class="fighter" id="player-side">
+                <div class="sprite-batalla" id="p-img">👤</div>
+                <div style="font-size: 0.8rem;" id="p-name">TU HÉROE</div>
+                <div class="hb-container"><div id="p-hp-bar" class="hb-fill"></div></div>
+                <div style="font-size: 0.7rem;">HP: <span id="p-hp-txt">100/100</span></div>
+            </div>
+
+            <div style="font-weight: bold; margin-bottom: 50px;">VS</div>
+
+            <div class="fighter" id="enemy-side">
+                <div class="sprite-batalla" id="e-img">👾</div>
+                <div style="font-size: 0.8rem;" id="e-name">ENEMIGO</div>
+                <div class="hb-container"><div id="e-hp-bar" class="hb-fill"></div></div>
+                <div style="font-size: 0.7rem;">HP: <span id="e-hp-txt">100/100</span></div>
             </div>
         </div>
-        <button class="btn-principal" onclick="navegar('menu')">VOLVER</button>
-    </section>
 
-    <section id="p-album" class="pantalla oculto">
-        <h2>PIXEL-DEX</h2>
-        
-        <div class="tabs-sagas" id="tabs-sagas">
-            </div>
+        <div class="battle-log" id="log">Bienvenido a la Arena...</div>
 
-        <div class="album-container" id="contenedor-album">
-            </div>
-
-        <button class="btn-principal" onclick="navegar('menu')">CERRAR</button>
+        <div id="battle-controls" style="margin-top: 10px;">
+            <button class="btn" onclick="ataqueJugador()">ATACAR</button>
+            <button class="btn" style="background: #94a3b8" onclick="navegar('menu')">HUIR</button>
+        </div>
+        <button id="btn-finalizar" class="btn oculto" onclick="navegar('menu')">VOLVER AL MENÚ</button>
     </section>
 
     <script>
-        // 1. BASE DE DATOS (Sagas y Personajes)
-        // Nota: He usado emojis como "sprites" temporales, pero puedes poner URLs de imágenes pixel art.
+        // --- BASE DE DATOS Y LÓGICA ANTERIOR ---
         const database = [
-            { id: 1, saga: "Kanto", nombre: "Bulbasaur", tipo: "Planta", desc: "Una semilla en su lomo.", emoji: "🍃" },
-            { id: 2, saga: "Kanto", nombre: "Charmander", tipo: "Fuego", desc: "La llama indica su vida.", emoji: "🔥" },
-            { id: 3, saga: "Kanto", nombre: "Squirtle", tipo: "Agua", desc: "Su caparazón lo protege.", emoji: "💧" },
-            { id: 4, saga: "Z-Warriors", nombre: "Goku", tipo: "Fuego", desc: "El saiyan legendario.", emoji: "👊" },
-            { id: 5, saga: "Z-Warriors", nombre: "Vegeta", tipo: "Fuego", desc: "El príncipe saiyan.", emoji: "👑" },
-            { id: 6, saga: "Shinobi", nombre: "Naruto", tipo: "Viento", desc: "Séptimo Hokage.", emoji: "🍥" }
+            { id: 1, saga: "Kanto", nombre: "Bulbasaur", tipo: "Planta", emoji: "🍃" },
+            { id: 2, saga: "Kanto", nombre: "Charmander", tipo: "Fuego", emoji: "🔥" },
+            { id: 3, saga: "Kanto", nombre: "Squirtle", tipo: "Agua", emoji: "💧" }
         ];
 
-        const rarezas = [
-            { n: "Común", c: 60, m: 1, color: "var(--comun)" },
-            { n: "Raro", c: 25, m: 1.5, color: "var(--raro)" },
-            { n: "Épico", c: 10, m: 2.2, color: "var(--epico)" },
-            { n: "Legendario", c: 4, m: 3.5, color: "var(--legendario)" },
-            { n: "Secreto", c: 1, m: 6, color: "var(--secreto)" }
-        ];
+        const tablaTipos = {
+            "Fuego": { "Planta": 2, "Agua": 0.5, "Fuego": 1 },
+            "Agua": { "Fuego": 2, "Planta": 0.5, "Agua": 1 },
+            "Planta": { "Agua": 2, "Fuego": 0.5, "Planta": 1 }
+        };
 
         let miColeccion = JSON.parse(localStorage.getItem("dex_coleccion")) || [];
-        let sagaActual = "Kanto";
+        
+        // --- VARIABLES DE COMBATE ---
+        let pActual, eActual;
+        let pHP, eHP;
 
-        function tirarGacha() {
-            let r = Math.random() * 100;
-            let acum = 0;
-            let cal = rarezas[0];
-            for (let c of rarezas) { acum += c.c; if (r <= acum) { cal = c; break; } }
-
-            const pBase = database[Math.floor(Math.random() * database.length)];
+        function prepararCombate() {
+            if(miColeccion.length === 0) return alert("¡Primero necesitas invocar a alguien!");
             
-            const nuevo = {
-                ...pBase,
-                instanciaId: Date.now(),
-                calidad: cal.n,
-                hp: Math.floor(100 * cal.m),
-                atk: Math.floor(20 * cal.m),
-                color: cal.color
-            };
+            // Elegimos tu último personaje capturado
+            pActual = miColeccion[miColeccion.length - 1];
+            pHP = pActual.hp;
 
-            miColeccion.push(nuevo);
-            localStorage.setItem("dex_coleccion", JSON.stringify(miColeccion));
-            mostrarResultado(nuevo);
-        }
+            // Generamos un enemigo al azar
+            const baseE = database[Math.floor(Math.random() * database.length)];
+            eActual = {...baseE, hp: 100, atk: 15, calidad: "Raro"};
+            eHP = eActual.hp;
 
-        function mostrarResultado(h) {
-            document.getElementById('res-nombre').innerText = h.nombre;
-            document.getElementById('res-sprite').innerText = h.emoji;
-            document.getElementById('res-rareza').innerText = h.calidad;
-            document.getElementById('res-rareza').style.color = h.color;
-            document.getElementById('res-saga').innerText = "SAGA: " + h.saga;
-            document.getElementById('res-hp').innerText = h.hp;
-            document.getElementById('res-atk').innerText = h.atk;
-            document.getElementById('res-carta').style.borderColor = h.color;
-            navegar('resultado');
-        }
-
-        function abrirAlbum() {
-            renderTabs();
-            renderPersonajes();
-            navegar('album');
-        }
-
-        function renderTabs() {
-            const container = document.getElementById('tabs-sagas');
-            const sagasUnicas = [...new Set(database.map(p => p.saga))];
+            // Actualizar UI
+            document.getElementById('p-name').innerText = pActual.nombre;
+            document.getElementById('p-img').innerText = pActual.emoji;
+            document.getElementById('e-name').innerText = eActual.nombre;
+            document.getElementById('e-img').innerText = eActual.emoji;
             
-            container.innerHTML = sagasUnicas.map(s => `
-                <div class="tab ${s === sagaActual ? 'activa' : ''}" onclick="cambiarSaga('${s}')">
-                    ${s}
-                </div>
-            `).join('');
+            actualizarBarras();
+            document.getElementById('log').innerHTML = "¡Un " + eActual.nombre + " salvaje aparece!";
+            document.getElementById('battle-controls').classList.remove('oculto');
+            document.getElementById('btn-finalizar').classList.add('oculto');
+            
+            navegar('combate');
         }
 
-        function cambiarSaga(s) {
-            sagaActual = s;
-            renderTabs();
-            renderPersonajes();
-        }
-
-        function renderPersonajes() {
-            const container = document.getElementById('contenedor-album');
-            // Filtramos la colección por la saga seleccionada
-            const filtrados = miColeccion.filter(p => p.saga === sagaActual);
-
-            if (filtrados.length === 0) {
-                container.innerHTML = "<p style='grid-column: 1/-1'>No tienes a nadie de esta saga todavía.</p>";
-                return;
+        function ataqueJugador() {
+            // Calcular multiplicador de tipo
+            let multi = 1;
+            if(tablaTipos[pActual.tipo] && tablaTipos[pActual.tipo][eActual.tipo]) {
+                multi = tablaTipos[pActual.tipo][eActual.tipo];
             }
 
-            container.innerHTML = filtrados.map(p => `
-                <div class="slot-dex" style="border-color: ${p.color}">
-                    <div style="font-size: 2rem;">${p.emoji}</div>
-                    <div style="font-weight: bold;">${p.nombre}</div>
-                    <div class="mini-tag" style="background: ${p.color}; color: #000">${p.calidad}</div>
-                    <div style="font-size: 0.6rem; color: #94a3b8; margin-top: 4px;">ATK: ${p.atk}</div>
-                </div>
-            `).join('');
+            let daño = Math.floor(pActual.atk * multi);
+            eHP -= daño;
+            if(eHP < 0) eHP = 0;
+
+            logMsg(`¡${pActual.nombre} ataca! Hace ${daño} de daño. ${multi > 1 ? '¡Es muy eficaz!' : ''}`);
+            actualizarBarras();
+
+            if(eHP <= 0) {
+                logMsg("¡Has ganado el combate!");
+                terminarBatalla();
+            } else {
+                // Turno del enemigo tras 1 segundo
+                document.getElementById('battle-controls').classList.add('oculto');
+                setTimeout(ataqueEnemigo, 1000);
+            }
+        }
+
+        function ataqueEnemigo() {
+            let daño = eActual.atk;
+            pHP -= daño;
+            if(pHP < 0) pHP = 0;
+
+            logMsg(`¡${eActual.nombre} contraataca! Hace ${daño} de daño.`);
+            actualizarBarras();
+
+            if(pHP <= 0) {
+                logMsg("¡Tu héroe ha sido derrotado!");
+                terminarBatalla();
+            } else {
+                document.getElementById('battle-controls').classList.remove('oculto');
+            }
+        }
+
+        function actualizarBarras() {
+            const pPorcentaje = (pHP / pActual.hp) * 100;
+            const ePorcentaje = (eHP / eActual.hp) * 100;
+            
+            document.getElementById('p-hp-bar').style.width = pPorcentaje + "%";
+            document.getElementById('e-hp-bar').style.width = ePorcentaje + "%";
+            document.getElementById('p-hp-txt').innerText = `${Math.floor(pHP)}/${pActual.hp}`;
+            document.getElementById('e-hp-txt').innerText = `${Math.floor(eHP)}/${eActual.hp}`;
+        }
+
+        function logMsg(msg) {
+            const l = document.getElementById('log');
+            l.innerHTML += `<br>> ${msg}`;
+            l.scrollTop = l.scrollHeight;
+        }
+
+        function terminarBatalla() {
+            document.getElementById('battle-controls').classList.add('oculto');
+            document.getElementById('btn-finalizar').classList.remove('oculto');
         }
 
         function navegar(id) {
@@ -258,7 +179,7 @@
             document.getElementById('p-' + id).classList.remove('oculto');
         }
 
-        function borrarTodo() { if(confirm("¿Borrar todo?")) { localStorage.clear(); location.reload(); } }
+        // ... (Aquí van el resto de funciones como tirarGacha del código anterior)
     </script>
 </body>
 </html>
