@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gacha Quest | RPG Manager</title>
+    <title>Gacha Quest | Drop Rates Edition</title>
     <style>
         :root {
             --bg-dark: #020617; --bg-panel: #0f172a; --accent: #38bdf8;
             --text-main: #f1f5f9; --text-dim: #94a3b8; --border: #1e293b;
             --select: #22c55e; --danger: #ef4444;
-            /* Rarezas */
+            /* Colores de Rareza */
             --comun: #94a3b8; --raro: #4ade80; --epico: #a855f7; --legendario: #f59e0b;
         }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { margin: 0; background-color: var(--bg-dark); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
+        /* NAVEGACIÓN */
         nav { display: flex; justify-content: center; background: var(--bg-panel); border-bottom: 2px solid var(--border); z-index: 100; }
         .nav-item { padding: 20px 25px; cursor: pointer; font-weight: bold; color: var(--text-dim); text-transform: uppercase; transition: 0.3s; border-bottom: 3px solid transparent; }
         .nav-item.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
@@ -68,7 +69,7 @@
         <div class="nav-item active" onclick="tab(this, 'lobby')">Inicio</div>
         <div class="nav-item" onclick="tab(this, 'pokedex')">Pokedex</div>
         <div class="nav-item" onclick="tab(this, 'equipo')">Equipo</div>
-        <div class="nav-item" onclick="tirarGacha()">Invocación</div>
+        <div class="nav-item" onclick="tirarGacha()" style="color: #fbbf24;">INVOCAR</div>
     </nav>
 
     <div class="viewport">
@@ -77,13 +78,16 @@
                 <div class="hero-scene" id="hero-scene">
                     <button style="position:absolute; top:15px; left:15px; color:var(--danger); background:none; border:none; cursor:pointer;" onclick="resetGame()">[REINICIAR]</button>
                 </div>
-                <div id="lobby-news" class="news-panel" style="background:var(--bg-panel); padding:20px; border-radius:20px; border:1px solid var(--border);">
-                    <h3 style="color:var(--accent); margin-top:0;">SISTEMA DE TIPOS</h3>
-                    <p style="font-size:0.8rem; line-height:1.4;">
-                        🔥 <b>FUEGO</b> vence a 🍃 Planta<br>
-                        🍃 <b>PLANTA</b> vence a 💧 Agua<br>
-                        💧 <b>AGUA</b> vence a 🔥 Fuego
-                    </p>
+                <div class="news-panel" style="background:var(--bg-panel); padding:20px; border-radius:20px; border:1px solid var(--border);">
+                    <h3 style="color:var(--accent); margin-top:0;">DROP RATES</h3>
+                    <ul style="font-size:0.8rem; color:var(--text-dim); list-style:none; padding:0;">
+                        <li>⚪ Común: <b>70%</b></li>
+                        <li>🟢 Raro: <b>20%</b></li>
+                        <li>🟣 Épico: <b>8%</b></li>
+                        <li>🟡 Legendario: <b>2%</b></li>
+                    </ul>
+                    <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
+                    <p style="font-size:0.8rem;">🔥 > 🍃 > 💧 > 🔥</p>
                 </div>
             </div>
         </section>
@@ -97,9 +101,9 @@
             <div class="controls">
                 <input type="text" id="busqueda" class="search-input" placeholder="Buscar héroe..." oninput="renderEquipo()">
                 <div style="display:flex; gap:5px;">
-                    <button class="btn-filter active" data-saga="TODAS" onclick="setSaga('TODAS', this)">TODAS</button>
-                    <button class="btn-filter" data-saga="Pokémon" onclick="setSaga('Pokémon', this)">POKÉMON</button>
-                    <button class="btn-filter" data-saga="Dragon Ball" onclick="setSaga('Dragon Ball', this)">DBZ</button>
+                    <button class="btn-filter active" onclick="setSaga('TODAS', this)">TODAS</button>
+                    <button class="btn-filter" onclick="setSaga('Pokémon', this)">POKÉMON</button>
+                    <button class="btn-filter" onclick="setSaga('Dragon Ball', this)">DBZ</button>
                 </div>
                 <div style="display:flex; gap:5px; border-left: 1px solid var(--border); padding-left:10px;">
                     <button class="btn-filter active" onclick="setOrden('id', this)">Nº</button>
@@ -131,8 +135,8 @@
     const COLORES = { fuego: '#f87171', agua: '#60a5fa', planta: '#4ade80' };
     const RAREZAS = { comun: 'var(--comun)', raro: 'var(--raro)', epico: 'var(--epico)', legendario: 'var(--legendario)' };
 
-    let inventario = JSON.parse(localStorage.getItem("gq_v5_inv")) || [];
-    let equipoUids = JSON.parse(localStorage.getItem("gq_v5_team")) || [];
+    let inventario = JSON.parse(localStorage.getItem("gq_v6_inv")) || [];
+    let equipoUids = JSON.parse(localStorage.getItem("gq_v6_team")) || [];
     let currentSaga = 'TODAS';
     let currentOrder = 'id';
 
@@ -148,17 +152,36 @@
     }
 
     function tirarGacha() {
-        const base = DB[Math.floor(Math.random() * DB.length)];
+        const rand = Math.random() * 100;
+        let rarezaElegida = "comun";
+
+        if (rand < 2) rarezaElegida = "legendario";
+        else if (rand < 10) rarezaElegida = "epico";
+        else if (rand < 30) rarezaElegida = "raro";
+        else rarezaElegida = "comun";
+
+        // Filtrar personajes que tengan esa rareza
+        let opciones = DB.filter(p => p.rareza === rarezaElegida);
+        
+        // Si por casualidad no hay nadie en esa rareza, cogemos uno al azar de toda la DB
+        if (opciones.length === 0) opciones = DB;
+
+        const base = opciones[Math.floor(Math.random() * opciones.length)];
         const nuevo = {
             ...base,
             uid: "UID-" + Date.now() + "-" + Math.random(),
-            lvl: 1 // SIEMPRE NIVEL 1
+            lvl: 1
         };
+        
         inventario.push(nuevo);
-        localStorage.setItem("gq_v5_inv", JSON.stringify(inventario));
-        alert(`¡Invocado: ${nuevo.nombre} (${nuevo.rareza.toUpperCase()})!`);
+        localStorage.setItem("gq_v6_inv", JSON.stringify(inventario));
+        
+        // Estilo del mensaje según rareza
+        const color = RAREZAS[base.rareza];
+        alert(`¡Invocación Exitosa!\n\n${base.nombre} [${base.rareza.toUpperCase()}]`);
     }
 
+    // El resto de funciones (renderLobby, renderDex, etc.) se mantienen iguales pero con la key v6 para no mezclar datos.
     function renderLobby() {
         const scene = document.getElementById('hero-scene');
         const team = inventario.filter(p => equipoUids.includes(p.uid));
@@ -171,7 +194,7 @@
                     <div class="hero-tag">${p.nombre}</div>
                 </div>`;
         });
-        scene.innerHTML += `<button class="btn-battle" onclick="alert('IA de Combate cargando...')">READY</button>`;
+        scene.innerHTML += `<button class="btn-battle" onclick="alert('Sistema de combate próximamente...')">READY</button>`;
     }
 
     function renderDex() {
@@ -247,7 +270,7 @@
             const set = equipoUids.includes(u.uid);
             list.innerHTML += `
                 <div class="unit-row ${set ? 'active' : ''}">
-                    <div><span>${u.emoji}</span> <b>LV.${u.lvl}</b> <small style="color:var(--accent)">${u.rareza}</small></div>
+                    <div><span>${u.emoji}</span> <b>LV.${u.lvl}</b> <small style="color:${RAREZAS[u.rareza]}">${u.rareza}</small></div>
                     <button class="btn-filter ${set ? 'active' : ''}" onclick="toggleUnit('${u.uid}')">${set ? 'QUITAR' : 'AÑADIR'}</button>
                 </div>`;
         });
@@ -257,7 +280,7 @@
         const idx = equipoUids.indexOf(uid);
         if(idx > -1) equipoUids.splice(idx, 1);
         else if(equipoUids.length < 3) equipoUids.push(uid);
-        localStorage.setItem("gq_v5_team", JSON.stringify(equipoUids));
+        localStorage.setItem("gq_v6_team", JSON.stringify(equipoUids));
         const item = inventario.find(x => x.uid === uid);
         openPanel(item.id);
         renderEquipo();
