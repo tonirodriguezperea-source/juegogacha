@@ -1,0 +1,139 @@
+:root {
+    --bg-dark: #020617;
+    --bg-panel: #0f172a;
+    --accent: #38bdf8;
+    --text-main: #f1f5f9;
+    --text-dim: #94a3b8;
+    --border: #1e293b;
+    --comun: #94a3b8;
+    --raro: #4ade80;
+    --epico: #a855f7;
+    --legendario: #f59e0b;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navegación */
+nav {
+    display: flex;
+    justify-content: center;
+    background: var(--bg-panel);
+    border-bottom: 2px solid var(--border);
+    padding: 10px;
+}
+
+nav button {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+nav button:hover { color: var(--accent); }
+
+/* Pantallas */
+.pantalla {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Escena de Batalla */
+#battle-screen {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, #1e293b 0%, #020617 100%);
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.battle-arena {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 50%;
+}
+
+.fighter { text-align: center; transition: transform 0.2s; }
+.fighter-emoji { font-size: 6rem; filter: drop-shadow(0 0 10px white); }
+
+/* Barras de Vida */
+.hp-container {
+    width: 200px;
+    height: 15px;
+    background: #334155;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    margin: 10px auto;
+}
+
+.hp-fill {
+    height: 100%;
+    background: #22c55e;
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+/* Energía (Cargas) */
+.energy-bar {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #1e293b;
+    border: 1px solid var(--accent);
+}
+
+.dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 5px var(--accent);
+}
+
+/* Log y Botones */
+#battle-log {
+    background: rgba(0,0,0,0.5);
+    padding: 15px;
+    border-radius: 10px;
+    height: 100px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    border: 1px solid var(--border);
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.btn-action {
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: var(--bg-panel);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
