@@ -3,200 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gacha Quest | Prototipo</title>
+    <title>Gacha Quest | Pixel Dex</title>
     <style>
-        /* --- ESTILOS CSS (El aspecto visual) --- */
         :root {
-            --primary: #38bdf8;
-            --primary-hover: #7dd3fc;
-            --bg: #020617;
+            --bg: #0f172a;
             --card: #1e293b;
-            --text-main: #f1f5f9;
-            --text-dim: #94a3b8;
-            --danger: #ef4444;
+            --primary: #38bdf8;
+            --text: #f1f5f9;
+            /* Rarezas */
+            --comun: #94a3b8;
+            --raro: #4ade80;
+            --epico: #a855f7;
+            --legendario: #f59e0b;
+            --secreto: #f43f5e;
         }
 
         body {
             margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace; /* Toque retro */
             background-color: var(--bg);
-            color: var(--text-main);
+            color: var(--text);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
         }
 
-        /* Contenedor universal para las pantallas */
-        .pantalla {
-            text-align: center;
-            width: 90%;
-            max-width: 600px;
-            animation: aparecer 0.5s ease-out;
-        }
+        .pantalla { text-align: center; width: 95%; max-width: 800px; height: 90vh; display: flex; flex-direction: column; }
+        .oculto { display: none !important; }
 
-        /* Clase para ocultar elementos */
-        .oculto {
-            display: none !important;
-        }
-
-        /* Estilos de la Pantalla de Inicio */
-        .titulo-juego {
-            font-size: 4rem;
-            margin-bottom: 10px;
-            background: linear-gradient(to bottom, #fff, var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3));
-        }
-
-        /* Estilos del Menú */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .opcion-menu {
-            background: var(--card);
-            padding: 25px;
-            border-radius: 15px;
-            border: 2px solid #334155;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .opcion-menu:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-        }
-
-        .opcion-menu i {
-            display: block;
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        /* Botones */
+        /* Estética Pixel para botones */
         .btn-principal {
-            background-color: var(--primary);
-            color: var(--bg);
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
+            background: var(--primary);
+            color: #000;
+            border: 4px solid #fff;
+            padding: 10px 20px;
             font-weight: bold;
-            border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
-            transition: 0.3s;
+            image-rendering: pixelated;
+            margin: 10px;
         }
 
-        .btn-principal:hover {
-            transform: scale(1.05);
-            background-color: var(--primary-hover);
+        /* --- CONTENEDOR POKEDEX --- */
+        .album-container {
+            background: #27272a;
+            border: 6px solid #52525b;
+            border-radius: 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
         }
 
-        .btn-reset {
-            margin-top: 40px;
-            background: none;
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 8px 15px;
+        /* Miniatura de personaje en el álbum */
+        .slot-dex {
+            background: #3f3f46;
+            border: 3px solid #71717a;
+            padding: 10px;
             border-radius: 5px;
-            cursor: pointer;
+            position: relative;
             font-size: 0.8rem;
-            opacity: 0.7;
         }
 
-        .btn-reset:hover { opacity: 1; background: rgba(239, 68, 68, 0.1); }
+        .slot-dex img {
+            width: 64px;
+            height: 64px;
+            image-rendering: pixelated; /* ¡IMPORTANTE PARA PIXEL ART! */
+        }
 
-        @keyframes aparecer {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .mini-tag {
+            font-size: 0.6rem;
+            padding: 2px 4px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        /* Pestañas de Sagas */
+        .tabs-sagas {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab {
+            background: #3f3f46;
+            padding: 5px 15px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .tab.activa {
+            border-color: var(--primary);
+            background: var(--card);
+        }
+
+        /* Carta de Resultado (Gacha) */
+        .carta-grande {
+            background: var(--card);
+            border: 8px double var(--comun);
+            padding: 20px;
+            margin: 20px auto;
+            width: 250px;
         }
     </style>
 </head>
 <body>
 
-    <section id="pantalla-inicio" class="pantalla">
-        <h1 class="titulo-juego">GACHA QUEST</h1>
-        <p style="color: var(--text-dim);">Colecciona héroes y domina el mundo.</p>
-        <br>
-        <button class="btn-principal" onclick="navegar('menu')">JUGAR AHORA</button>
+    <section id="p-inicio" class="pantalla">
+        <h1 style="font-size: 3rem;">GACHA QUEST</h1>
+        <p>PIXEL EDITION</p>
+        <button class="btn-principal" onclick="navegar('menu')">START</button>
     </section>
 
-    <section id="pantalla-menu" class="pantalla oculto">
-        <h1>MENÚ PRINCIPAL</h1>
-        <p>Bienvenido de nuevo, Comandante.</p>
+    <section id="p-menu" class="pantalla oculto">
+        <h2>MENU</h2>
+        <button class="btn-principal" onclick="tirarGacha()">INVOCAR (GACHA)</button>
+        <button class="btn-principal" onclick="abrirAlbum()">COLECCION (DEX)</button>
+        <button class="btn-principal" onclick="borrarTodo()" style="background: var(--danger)">RESET</button>
+    </section>
 
-        <div class="menu-grid">
-            <div class="opcion-menu" onclick="alert('Próximamente: Invocar Personajes')">
-                <span>🎲</span><br>
-                <strong>GACHA</strong>
-            </div>
-            <div class="opcion-menu" onclick="alert('Próximamente: Batallas en tiempo real')">
-                <span>⚔️</span><br>
-                <strong>COMBATE</strong>
-            </div>
-            <div class="opcion-menu" onclick="alert('Próximamente: Tu Inventario')">
-                <span>🎴</span><br>
-                <strong>COLECCIÓN</strong>
-            </div>
-            <div class="opcion-menu" onclick="navegar('inicio')">
-                <span>🏠</span><br>
-                <strong>SALIR</strong>
+    <section id="p-resultado" class="pantalla oculto">
+        <div id="res-carta" class="carta-grande">
+            <h4 id="res-rareza">COMÚN</h4>
+            <div id="res-sprite" style="font-size: 4rem;">❓</div>
+            <h3 id="res-nombre">Héroe</h3>
+            <p id="res-saga" style="font-size: 0.7rem; color: var(--primary);">Saga</p>
+            <div style="font-size: 0.8rem; text-align: left; margin-top: 10px;">
+                HP: <span id="res-hp">0</span><br>
+                ATK: <span id="res-atk">0</span>
             </div>
         </div>
+        <button class="btn-principal" onclick="navegar('menu')">VOLVER</button>
+    </section>
 
-        <button class="btn-reset" onclick="borrarPartida()">BORRAR PROGRESO</button>
+    <section id="p-album" class="pantalla oculto">
+        <h2>PIXEL-DEX</h2>
+        
+        <div class="tabs-sagas" id="tabs-sagas">
+            </div>
+
+        <div class="album-container" id="contenedor-album">
+            </div>
+
+        <button class="btn-principal" onclick="navegar('menu')">CERRAR</button>
     </section>
 
     <script>
-        /* --- LÓGICA JAVASCRIPT (El cerebro) --- */
+        // 1. BASE DE DATOS (Sagas y Personajes)
+        // Nota: He usado emojis como "sprites" temporales, pero puedes poner URLs de imágenes pixel art.
+        const database = [
+            { id: 1, saga: "Kanto", nombre: "Bulbasaur", tipo: "Planta", desc: "Una semilla en su lomo.", emoji: "🍃" },
+            { id: 2, saga: "Kanto", nombre: "Charmander", tipo: "Fuego", desc: "La llama indica su vida.", emoji: "🔥" },
+            { id: 3, saga: "Kanto", nombre: "Squirtle", tipo: "Agua", desc: "Su caparazón lo protege.", emoji: "💧" },
+            { id: 4, saga: "Z-Warriors", nombre: "Goku", tipo: "Fuego", desc: "El saiyan legendario.", emoji: "👊" },
+            { id: 5, saga: "Z-Warriors", nombre: "Vegeta", tipo: "Fuego", desc: "El príncipe saiyan.", emoji: "👑" },
+            { id: 6, saga: "Shinobi", nombre: "Naruto", tipo: "Viento", desc: "Séptimo Hokage.", emoji: "🍥" }
+        ];
 
-        const inicio = document.getElementById('pantalla-inicio');
-        const menu = document.getElementById('pantalla-menu');
+        const rarezas = [
+            { n: "Común", c: 60, m: 1, color: "var(--comun)" },
+            { n: "Raro", c: 25, m: 1.5, color: "var(--raro)" },
+            { n: "Épico", c: 10, m: 2.2, color: "var(--epico)" },
+            { n: "Legendario", c: 4, m: 3.5, color: "var(--legendario)" },
+            { n: "Secreto", c: 1, m: 6, color: "var(--secreto)" }
+        ];
 
-        // 1. Al cargar la página, miramos el LocalStorage
-        window.onload = function() {
-            const estado = localStorage.getItem("gacha_quest_save");
-            if (estado === "en_menu") {
-                mostrarMenu();
+        let miColeccion = JSON.parse(localStorage.getItem("dex_coleccion")) || [];
+        let sagaActual = "Kanto";
+
+        function tirarGacha() {
+            let r = Math.random() * 100;
+            let acum = 0;
+            let cal = rarezas[0];
+            for (let c of rarezas) { acum += c.c; if (r <= acum) { cal = c; break; } }
+
+            const pBase = database[Math.floor(Math.random() * database.length)];
+            
+            const nuevo = {
+                ...pBase,
+                instanciaId: Date.now(),
+                calidad: cal.n,
+                hp: Math.floor(100 * cal.m),
+                atk: Math.floor(20 * cal.m),
+                color: cal.color
+            };
+
+            miColeccion.push(nuevo);
+            localStorage.setItem("dex_coleccion", JSON.stringify(miColeccion));
+            mostrarResultado(nuevo);
+        }
+
+        function mostrarResultado(h) {
+            document.getElementById('res-nombre').innerText = h.nombre;
+            document.getElementById('res-sprite').innerText = h.emoji;
+            document.getElementById('res-rareza').innerText = h.calidad;
+            document.getElementById('res-rareza').style.color = h.color;
+            document.getElementById('res-saga').innerText = "SAGA: " + h.saga;
+            document.getElementById('res-hp').innerText = h.hp;
+            document.getElementById('res-atk').innerText = h.atk;
+            document.getElementById('res-carta').style.borderColor = h.color;
+            navegar('resultado');
+        }
+
+        function abrirAlbum() {
+            renderTabs();
+            renderPersonajes();
+            navegar('album');
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('tabs-sagas');
+            const sagasUnicas = [...new Set(database.map(p => p.saga))];
+            
+            container.innerHTML = sagasUnicas.map(s => `
+                <div class="tab ${s === sagaActual ? 'activa' : ''}" onclick="cambiarSaga('${s}')">
+                    ${s}
+                </div>
+            `).join('');
+        }
+
+        function cambiarSaga(s) {
+            sagaActual = s;
+            renderTabs();
+            renderPersonajes();
+        }
+
+        function renderPersonajes() {
+            const container = document.getElementById('contenedor-album');
+            // Filtramos la colección por la saga seleccionada
+            const filtrados = miColeccion.filter(p => p.saga === sagaActual);
+
+            if (filtrados.length === 0) {
+                container.innerHTML = "<p style='grid-column: 1/-1'>No tienes a nadie de esta saga todavía.</p>";
+                return;
             }
-        };
 
-        // 2. Función para cambiar de pantalla
-        function navegar(donde) {
-            if (donde === 'menu') {
-                localStorage.setItem("gacha_quest_save", "en_menu");
-                mostrarMenu();
-            } else {
-                localStorage.setItem("gacha_quest_save", "en_inicio");
-                mostrarInicio();
-            }
+            container.innerHTML = filtrados.map(p => `
+                <div class="slot-dex" style="border-color: ${p.color}">
+                    <div style="font-size: 2rem;">${p.emoji}</div>
+                    <div style="font-weight: bold;">${p.nombre}</div>
+                    <div class="mini-tag" style="background: ${p.color}; color: #000">${p.calidad}</div>
+                    <div style="font-size: 0.6rem; color: #94a3b8; margin-top: 4px;">ATK: ${p.atk}</div>
+                </div>
+            `).join('');
         }
 
-        // Funciones visuales
-        function mostrarMenu() {
-            inicio.classList.add('oculto');
-            menu.classList.remove('oculto');
+        function navegar(id) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.add('oculto'));
+            document.getElementById('p-' + id).classList.remove('oculto');
         }
 
-        function mostrarInicio() {
-            menu.classList.add('oculto');
-            inicio.classList.remove('oculto');
-        }
-
-        // 3. Función para resetear todo
-        function borrarPartida() {
-            if (confirm("¿Seguro que quieres borrar tu partida? Esto eliminará todo tu progreso.")) {
-                localStorage.clear();
-                location.reload(); // Recarga la página
-            }
-        }
+        function borrarTodo() { if(confirm("¿Borrar todo?")) { localStorage.clear(); location.reload(); } }
     </script>
 </body>
 </html>
