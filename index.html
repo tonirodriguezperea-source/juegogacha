@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gacha Quest | Prototipo</title>
+    <style>
+        /* --- ESTILOS CSS (El aspecto visual) --- */
+        :root {
+            --primary: #38bdf8;
+            --primary-hover: #7dd3fc;
+            --bg: #020617;
+            --card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+            --danger: #ef4444;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Contenedor universal para las pantallas */
+        .pantalla {
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+            animation: aparecer 0.5s ease-out;
+        }
+
+        /* Clase para ocultar elementos */
+        .oculto {
+            display: none !important;
+        }
+
+        /* Estilos de la Pantalla de Inicio */
+        .titulo-juego {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to bottom, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.3));
+        }
+
+        /* Estilos del Menú */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .opcion-menu {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #334155;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .opcion-menu:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .opcion-menu i {
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        /* Botones */
+        .btn-principal {
+            background-color: var(--primary);
+            color: var(--bg);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+            transition: 0.3s;
+        }
+
+        .btn-principal:hover {
+            transform: scale(1.05);
+            background-color: var(--primary-hover);
+        }
+
+        .btn-reset {
+            margin-top: 40px;
+            background: none;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .btn-reset:hover { opacity: 1; background: rgba(239, 68, 68, 0.1); }
+
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <section id="pantalla-inicio" class="pantalla">
+        <h1 class="titulo-juego">GACHA QUEST</h1>
+        <p style="color: var(--text-dim);">Colecciona héroes y domina el mundo.</p>
+        <br>
+        <button class="btn-principal" onclick="navegar('menu')">JUGAR AHORA</button>
+    </section>
+
+    <section id="pantalla-menu" class="pantalla oculto">
+        <h1>MENÚ PRINCIPAL</h1>
+        <p>Bienvenido de nuevo, Comandante.</p>
+
+        <div class="menu-grid">
+            <div class="opcion-menu" onclick="alert('Próximamente: Invocar Personajes')">
+                <span>🎲</span><br>
+                <strong>GACHA</strong>
+            </div>
+            <div class="opcion-menu" onclick="alert('Próximamente: Batallas en tiempo real')">
+                <span>⚔️</span><br>
+                <strong>COMBATE</strong>
+            </div>
+            <div class="opcion-menu" onclick="alert('Próximamente: Tu Inventario')">
+                <span>🎴</span><br>
+                <strong>COLECCIÓN</strong>
+            </div>
+            <div class="opcion-menu" onclick="navegar('inicio')">
+                <span>🏠</span><br>
+                <strong>SALIR</strong>
+            </div>
+        </div>
+
+        <button class="btn-reset" onclick="borrarPartida()">BORRAR PROGRESO</button>
+    </section>
+
+    <script>
+        /* --- LÓGICA JAVASCRIPT (El cerebro) --- */
+
+        const inicio = document.getElementById('pantalla-inicio');
+        const menu = document.getElementById('pantalla-menu');
+
+        // 1. Al cargar la página, miramos el LocalStorage
+        window.onload = function() {
+            const estado = localStorage.getItem("gacha_quest_save");
+            if (estado === "en_menu") {
+                mostrarMenu();
+            }
+        };
+
+        // 2. Función para cambiar de pantalla
+        function navegar(donde) {
+            if (donde === 'menu') {
+                localStorage.setItem("gacha_quest_save", "en_menu");
+                mostrarMenu();
+            } else {
+                localStorage.setItem("gacha_quest_save", "en_inicio");
+                mostrarInicio();
+            }
+        }
+
+        // Funciones visuales
+        function mostrarMenu() {
+            inicio.classList.add('oculto');
+            menu.classList.remove('oculto');
+        }
+
+        function mostrarInicio() {
+            menu.classList.add('oculto');
+            inicio.classList.remove('oculto');
+        }
+
+        // 3. Función para resetear todo
+        function borrarPartida() {
+            if (confirm("¿Seguro que quieres borrar tu partida? Esto eliminará todo tu progreso.")) {
+                localStorage.clear();
+                location.reload(); // Recarga la página
+            }
+        }
+    </script>
+</body>
+</html>
