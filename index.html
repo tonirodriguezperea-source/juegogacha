@@ -3,186 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gacha Quest | Rebirth Edition</title>
+    <title>Gacha Quest | Squad Manager</title>
     <style>
         :root {
-            --bg-dark: #020617;
-            --bg-panel: #0f172a;
-            --accent: #38bdf8;
-            --text-main: #f1f5f9;
-            --text-dim: #94a3b8;
-            --border: #1e293b;
-            --raro: #4ade80;
-            --legendario: #f59e0b;
+            --bg-dark: #020617; --bg-panel: #0f172a; --accent: #38bdf8;
+            --text-main: #f1f5f9; --text-dim: #94a3b8; --border: #1e293b;
+            --select: #22c55e;
         }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; background-color: var(--bg-dark); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        body {
-            margin: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        /* NAVEGACIÓN */
+        nav { display: flex; justify-content: center; background: var(--bg-panel); border-bottom: 2px solid var(--border); z-index: 100; }
+        .nav-item { padding: 20px 30px; cursor: pointer; font-weight: bold; color: var(--text-dim); text-transform: uppercase; transition: 0.3s; border-bottom: 3px solid transparent; }
+        .nav-item.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
 
-        nav {
-            display: flex;
-            justify-content: center;
-            background: var(--bg-panel);
-            border-bottom: 2px solid var(--border);
-            z-index: 100;
-        }
-
-        .nav-item {
-            padding: 20px 30px;
-            cursor: pointer;
-            font-weight: bold;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: 0.3s;
-            border-bottom: 3px solid transparent;
-        }
-
-        .nav-item.active {
-            color: var(--accent);
-            border-bottom: 3px solid var(--accent);
-        }
-
-        .viewport { flex-grow: 1; overflow-y: auto; position: relative; }
-        .pantalla { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
-        .pantalla.active { display: flex; flex-direction: column; align-items: center; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .viewport { flex-grow: 1; overflow-y: auto; padding: 20px; }
+        .pantalla { display: none; flex-direction: column; align-items: center; animation: fadeIn 0.3s ease; }
+        .pantalla.active { display: flex; }
 
         /* LOBBY */
-        .lobby-container { display: grid; grid-template-columns: 1fr 300px; gap: 20px; width: 100%; height: 80vh; }
-        
-        .hero-scene {
-            background: radial-gradient(circle, #1e293b 0%, #020617 100%);
-            border-radius: 20px;
-            border: 2px solid var(--border);
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            padding-bottom: 100px;
-            position: relative;
+        .hero-scene { 
+            background: radial-gradient(circle, #1e293b 0%, #020617 100%); 
+            border-radius: 20px; border: 2px solid var(--border); 
+            display: flex; justify-content: center; align-items: flex-end; 
+            padding-bottom: 80px; position: relative; width: 100%; max-width: 900px; height: 400px;
         }
-
         .hero-spot { display: flex; flex-direction: column; align-items: center; margin: 0 20px; }
-        .hero-display { font-size: 7rem; filter: drop-shadow(0 0 15px var(--accent)); image-rendering: pixelated; }
+        .hero-display { font-size: 6rem; filter: drop-shadow(0 0 10px var(--accent)); }
         .hero-tag { background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 10px; font-size: 0.8rem; margin: 5px; border: 1px solid var(--border); }
+        .btn-reset { position: absolute; top: 20px; left: 20px; background: #451a1a; color: #f87171; border: 1px solid #7f1d1d; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; }
 
-        .news-panel { background: var(--bg-panel); border-radius: 20px; padding: 20px; border: 1px solid var(--border); }
-        .news-item { background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--accent); font-size: 0.85rem; }
+        /* GESTIÓN EQUIPO */
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; max-width: 800px; }
+        .search-bar { background: var(--bg-panel); border: 1px solid var(--border); color: white; padding: 10px; border-radius: 8px; flex-grow: 1; }
+        
+        .dex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; width: 100%; max-width: 1000px; }
+        .card { background: var(--bg-panel); border: 2px solid var(--border); border-radius: 15px; padding: 10px; text-align: center; cursor: pointer; position: relative; }
+        .card:hover { border-color: var(--accent); }
+        .card-emoji { font-size: 2.5rem; }
+        .badge { position: absolute; top: -5px; right: -5px; background: var(--accent); color: black; font-weight: bold; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; }
 
-        .btn-battle {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 100%);
-            color: white; border: none; padding: 15px 60px; border-radius: 50px;
-            font-size: 1.5rem; font-weight: 900; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        /* PANEL DESPLEGABLE DE INSTANCIAS */
+        #instancias-panel {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 300px;
+            background: #0f172a; border-top: 3px solid var(--accent);
+            padding: 20px; z-index: 1000; display: none; overflow-y: auto;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
         }
-
-        /* GRID */
-        .dex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; width: 100%; }
-        .card { 
-            background: var(--bg-panel); border: 2px solid var(--border); border-radius: 15px; 
-            padding: 15px; text-align: center; position: relative; transition: 0.3s;
+        .instancia-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #1e293b; padding: 10px 20px; border-radius: 10px; margin-bottom: 10px;
+            border: 1px solid transparent;
         }
-        .card.locked { filter: grayscale(1) brightness(0.2); }
-        .card.selected { border-color: var(--accent); background: #1e293b; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
-        .card-emoji { font-size: 3rem; margin: 10px 0; }
+        .instancia-row.selected { border-color: var(--select); background: #14532d; }
 
-        .btn-select { 
-            background: var(--accent); border: none; padding: 8px; border-radius: 5px; 
-            cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; color: var(--bg-dark);
-        }
-        .btn-select.active { background: #f43f5e; color: white; }
+        .btn-select-mini { background: var(--accent); border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <nav>
         <div class="nav-item active" onclick="tab(this, 'lobby')">Inicio</div>
-        <div class="nav-item" onclick="tab(this, 'coleccion')">Pixel-Dex</div>
         <div class="nav-item" onclick="tab(this, 'equipo')">Equipo</div>
-        <div class="nav-item" onclick="tirarGacha()">Invocación</div>
+        <div class="nav-item" onclick="tirarGacha()">Gacha</div>
     </nav>
 
     <div class="viewport">
         <section id="lobby" class="pantalla active">
-            <div class="lobby-container">
-                <div class="hero-scene" id="hero-scene">
-                    <button class="btn-battle">BATTLE</button>
+            <div class="hero-scene" id="hero-scene">
                 </div>
-                <div class="news-panel">
-                    <h3 style="color: var(--accent); margin-top: 0;">NOTICIAS</h3>
-                    <div class="news-item"><b>EQUIPO:</b> Selecciona hasta 3 héroes en la pestaña "Equipo".</div>
-                    <div class="news-item"><b>DATA:</b> Los personajes repetidos tienen IDs únicos.</div>
-                </div>
+            <div style="margin-top: 20px; text-align: center;">
+                <h3 id="team-status">Equipo: 0/3</h3>
             </div>
         </section>
 
-        <section id="coleccion" class="pantalla">
-            <h1>PIXEL-DEX</h1>
-            <div class="dex-grid" id="dex-container"></div>
-        </section>
-
         <section id="equipo" class="pantalla">
-            <h1>GESTIÓN DE EQUIPO</h1>
-            <p id="counter-equipo">Seleccionados: 0 / 3</p>
+            <div class="controls">
+                <input type="text" id="busqueda" class="search-bar" placeholder="Buscar por nombre..." oninput="renderEquipo()">
+                <button onclick="setOrden('lvl')" class="btn-select-mini">Nivel</button>
+                <button onclick="setOrden('id')" class="btn-select-mini">ID</button>
+            </div>
             <div class="dex-grid" id="equipo-container"></div>
         </section>
     </div>
 
+    <div id="instancias-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 id="panel-titulo">Selecciona un Guerrero</h3>
+            <button onclick="cerrarPanel()" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">CERRAR</button>
+        </div>
+        <div id="instancias-lista"></div>
+    </div>
+
 <script>
-    const DB_PERSONAJES = [
-        { id: 1, nombre: "Bulbasaur", saga: "Pokémon", tipo: "Planta", emoji: "🍃" },
-        { id: 4, nombre: "Charmander", saga: "Pokémon", tipo: "Fuego", emoji: "🔥" },
-        { id: 7, nombre: "Squirtle", saga: "Pokémon", tipo: "Agua", emoji: "💧" },
-        { id: 101, nombre: "Goku", saga: "Dragon Ball", tipo: "Fuego", emoji: "👊" },
-        { id: 102, nombre: "Vegeta", saga: "Dragon Ball", tipo: "Fuego", emoji: "👑" },
-        { id: 103, nombre: "Gohan", saga: "Dragon Ball", tipo: "Viento", emoji: "🧒" }
+    const DB = [
+        { id: 1, nombre: "Bulbasaur", emoji: "🍃", saga: "Pokémon" },
+        { id: 4, nombre: "Charmander", emoji: "🔥", saga: "Pokémon" },
+        { id: 7, nombre: "Squirtle", emoji: "💧", saga: "Pokémon" },
+        { id: 101, nombre: "Goku", emoji: "👊", saga: "Dragon Ball" },
+        { id: 102, nombre: "Vegeta", emoji: "👑", saga: "Dragon Ball" },
+        { id: 103, nombre: "Gohan", emoji: "🧒", saga: "Dragon Ball" }
     ];
 
-    let inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
-    let equipoUids = JSON.parse(localStorage.getItem("gq_team_uids")) || [];
+    let inventario = JSON.parse(localStorage.getItem("gq_v3_inv")) || [];
+    let equipoUids = JSON.parse(localStorage.getItem("gq_v3_team")) || [];
+    let ordenActual = 'id';
 
     function tab(btn, id) {
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById(id).classList.add('active');
-        
         if(id === 'lobby') renderLobby();
-        if(id === 'coleccion') renderDex();
-        if(id === 'equipo') renderEquipo();
+        if(id === 'equipo') { cerrarPanel(); renderEquipo(); }
     }
 
     function tirarGacha() {
-        const base = DB_PERSONAJES[Math.floor(Math.random() * DB_PERSONAJES.length)];
+        const base = DB[Math.floor(Math.random() * DB.length)];
         const nuevo = {
             ...base,
-            uid: "UID-" + Date.now() + "-" + Math.floor(Math.random() * 1000), 
-            lvl: 1,
-            hp: 100,
-            atk: 20
+            uid: "UID-" + Date.now() + "-" + Math.random(),
+            lvl: Math.floor(Math.random() * 10) + 1
         };
         inventario.push(nuevo);
-        localStorage.setItem("gq_inv", JSON.stringify(inventario));
-        alert("¡Has invocado a " + nuevo.nombre + "!");
+        localStorage.setItem("gq_v3_inv", JSON.stringify(inventario));
+        alert(`¡Ha aparecido ${nuevo.nombre} Lv.${nuevo.lvl}!`);
+        if(document.getElementById('equipo').classList.contains('active')) renderEquipo();
     }
 
     function renderLobby() {
         const scene = document.getElementById('hero-scene');
         const team = inventario.filter(p => equipoUids.includes(p.uid));
+        document.getElementById('team-status').innerText = `Equipo: ${team.length}/3`;
         
-        scene.innerHTML = '';
+        scene.innerHTML = '<button class="btn-reset" onclick="reset()">REINICIAR</button>';
         team.forEach((p, index) => {
-            const size = index === 1 ? '10rem' : '7rem';
+            const size = index === 1 ? '9rem' : '6.5rem';
             scene.innerHTML += `
                 <div class="hero-spot">
                     <div class="hero-tag">LV. ${p.lvl}</div>
@@ -191,62 +151,92 @@
                 </div>
             `;
         });
-        scene.innerHTML += `<button class="btn-battle" onclick="alert('Próximamente: Sistema de combate mejorado')">BATTLE</button>`;
     }
 
-    function renderDex() {
-        const container = document.getElementById('dex-container');
+    function renderEquipo() {
+        const container = document.getElementById('equipo-container');
+        const texto = document.getElementById('busqueda').value.toLowerCase();
         container.innerHTML = '';
-        DB_PERSONAJES.forEach(p => {
-            const obtenido = inventario.some(inv => inv.id === p.id);
+
+        // Agrupamos solo para mostrar el icono principal de cada especie
+        let especies = {};
+        inventario.forEach(p => {
+            if(!especies[p.id]) especies[p.id] = {...p, cantidad: 0};
+            especies[p.id].cantidad++;
+        });
+
+        let lista = Object.values(especies).filter(p => p.nombre.toLowerCase().includes(texto));
+        
+        lista.forEach(p => {
             container.innerHTML += `
-                <div class="card ${obtenido ? '' : 'locked'}">
-                    <div style="font-size: 0.7rem; color: var(--accent)">#${String(p.id).padStart(3, '0')}</div>
+                <div class="card" onclick="abrirPanel(${p.id})">
+                    <div class="badge">x${p.cantidad}</div>
                     <div class="card-emoji">${p.emoji}</div>
-                    <strong>${obtenido ? p.nombre : '???'}</strong>
+                    <strong>${p.nombre}</strong>
                 </div>
             `;
         });
     }
 
-    function renderEquipo() {
-        const container = document.getElementById('equipo-container');
-        document.getElementById('counter-equipo').innerText = `Seleccionados: ${equipoUids.length} / 3`;
-        container.innerHTML = '';
+    function abrirPanel(idBase) {
+        const panel = document.getElementById('instancias-panel');
+        const lista = document.getElementById('instancias-lista');
+        const personajeBase = DB.find(p => p.id === idBase);
         
-        inventario.forEach(p => {
-            const seleccionado = equipoUids.includes(p.uid);
-            container.innerHTML += `
-                <div class="card ${seleccionado ? 'selected' : ''}">
-                    <div class="card-emoji">${p.emoji}</div>
-                    <strong>${p.nombre}</strong><br>
-                    <small>LV. ${p.lvl}</small>
-                    <button class="btn-select ${seleccionado ? 'active' : ''}" onclick="toggleEquipo('${p.uid}')">
-                        ${seleccionado ? 'QUITAR' : 'ELEGIR'}
+        document.getElementById('panel-titulo').innerText = `Tus ${personajeBase.nombre}s`;
+        panel.style.display = 'block';
+        lista.innerHTML = '';
+
+        // Filtrar todos los que tengo de esa especie
+        let misPersonajes = inventario.filter(p => p.id === idBase);
+        
+        // Ordenar el panel según nivel
+        misPersonajes.sort((a,b) => b.lvl - a.lvl);
+
+        misPersonajes.forEach(p => {
+            const isSel = equipoUids.includes(p.uid);
+            lista.innerHTML += `
+                <div class="instancia-row ${isSel ? 'selected' : ''}">
+                    <div>
+                        <span style="font-size: 1.5rem">${p.emoji}</span>
+                        <strong> LV. ${p.lvl}</strong>
+                        <small style="color: var(--text-dim); margin-left: 10px;">ID: ${p.uid.slice(-4)}</small>
+                    </div>
+                    <button class="btn-select-mini" onclick="toggleHero('${p.uid}')">
+                        ${isSel ? 'QUITAR' : 'ELEGIR'}
                     </button>
                 </div>
             `;
         });
     }
 
-    function toggleEquipo(uid) {
-        const index = equipoUids.indexOf(uid);
-        if (index > -1) {
-            // Si ya está, lo quitamos
-            equipoUids.splice(index, 1);
+    function toggleHero(uid) {
+        const idx = equipoUids.indexOf(uid);
+        if(idx > -1) {
+            equipoUids.splice(idx, 1);
         } else {
-            // Si no está, comprobamos el límite de 3
-            if (equipoUids.length < 3) {
-                equipoUids.push(uid);
-            } else {
-                alert("Tu equipo ya tiene 3 miembros. Quita uno primero.");
-            }
+            if(equipoUids.length < 3) equipoUids.push(uid);
+            else alert("Equipo lleno.");
         }
-        localStorage.setItem("gq_team_uids", JSON.stringify(equipoUids));
+        localStorage.setItem("gq_v3_team", JSON.stringify(equipoUids));
+        
+        // Refrescar panel y equipo
+        const p = inventario.find(i => i.uid === uid);
+        abrirPanel(p.id);
         renderEquipo();
     }
 
-    // Inicio
+    function cerrarPanel() { document.getElementById('instancias-panel').style.display = 'none'; }
+    
+    function setOrden(o) { ordenActual = o; renderEquipo(); }
+
+    function reset() { 
+        if(confirm("¿Borrar partida?")) { 
+            localStorage.clear(); 
+            location.reload(); 
+        } 
+    }
+
     renderLobby();
 </script>
 </body>
