@@ -28,7 +28,6 @@
             overflow: hidden;
         }
 
-        /* --- NAVEGACIÓN --- */
         nav {
             display: flex;
             justify-content: center;
@@ -53,14 +52,13 @@
             border-bottom: 3px solid var(--accent);
         }
 
-        /* --- VIEWPORT --- */
         .viewport { flex-grow: 1; overflow-y: auto; position: relative; }
         .pantalla { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
         .pantalla.active { display: flex; flex-direction: column; align-items: center; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- LOBBY DESIGN --- */
+        /* LOBBY */
         .lobby-container { display: grid; grid-template-columns: 1fr 300px; gap: 20px; width: 100%; height: 80vh; }
         
         .hero-scene {
@@ -88,17 +86,21 @@
             font-size: 1.5rem; font-weight: 900; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
         }
 
-        /* --- PIXEL-DEX & EQUIPO --- */
+        /* GRID */
         .dex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; width: 100%; }
         .card { 
             background: var(--bg-panel); border: 2px solid var(--border); border-radius: 15px; 
             padding: 15px; text-align: center; position: relative; transition: 0.3s;
         }
-        .card.locked { filter: grayscale(1) brightness(0.3); }
-        .card.selected { border-color: var(--accent); background: #1e293b; }
+        .card.locked { filter: grayscale(1) brightness(0.2); }
+        .card.selected { border-color: var(--accent); background: #1e293b; box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
         .card-emoji { font-size: 3rem; margin: 10px 0; }
 
-        .btn-select { background: var(--accent); border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-select { 
+            background: var(--accent); border: none; padding: 8px; border-radius: 5px; 
+            cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; color: var(--bg-dark);
+        }
+        .btn-select.active { background: #f43f5e; color: white; }
     </style>
 </head>
 <body>
@@ -111,36 +113,32 @@
     </nav>
 
     <div class="viewport">
-        
         <section id="lobby" class="pantalla active">
             <div class="lobby-container">
                 <div class="hero-scene" id="hero-scene">
-                    <button class="btn-battle" onclick="alert('Iniciando combate...')">BATTLE</button>
+                    <button class="btn-battle">BATTLE</button>
                 </div>
                 <div class="news-panel">
                     <h3 style="color: var(--accent); margin-top: 0;">NOTICIAS</h3>
-                    <div class="news-item"><b>NUEVO:</b> ¡Goku SSJ añadido a la base de datos!</div>
-                    <div class="news-item"><b>TIP:</b> Sube de nivel en la arena para mejorar tus stats.</div>
-                    <div class="news-item" style="border-color: var(--legendario);"><b>EVENTO:</b> Probabilidad x2 en Pokémon tipo Fuego.</div>
+                    <div class="news-item"><b>EQUIPO:</b> Selecciona hasta 3 héroes en la pestaña "Equipo".</div>
+                    <div class="news-item"><b>DATA:</b> Los personajes repetidos tienen IDs únicos.</div>
                 </div>
             </div>
         </section>
 
         <section id="coleccion" class="pantalla">
-            <h1 style="margin-top: 0;">PIXEL-DEX</h1>
+            <h1>PIXEL-DEX</h1>
             <div class="dex-grid" id="dex-container"></div>
         </section>
 
         <section id="equipo" class="pantalla">
-            <h1 style="margin-top: 0;">GESTIÓN DE EQUIPO</h1>
-            <p style="color: var(--text-dim);">Selecciona 3 personajes para tu escuadrón activo.</p>
+            <h1>GESTIÓN DE EQUIPO</h1>
+            <p id="counter-equipo">Seleccionados: 0 / 3</p>
             <div class="dex-grid" id="equipo-container"></div>
         </section>
-
     </div>
 
 <script>
-    // --- DATABASE ---
     const DB_PERSONAJES = [
         { id: 1, nombre: "Bulbasaur", saga: "Pokémon", tipo: "Planta", emoji: "🍃" },
         { id: 4, nombre: "Charmander", saga: "Pokémon", tipo: "Fuego", emoji: "🔥" },
@@ -150,11 +148,9 @@
         { id: 103, nombre: "Gohan", saga: "Dragon Ball", tipo: "Viento", emoji: "🧒" }
     ];
 
-    // --- STATE ---
     let inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
-    let equipoIds = JSON.parse(localStorage.getItem("gq_team")) || []; // IDs de instancias únicas
+    let equipoUids = JSON.parse(localStorage.getItem("gq_team_uids")) || [];
 
-    // --- NAVEGACIÓN ---
     function tab(btn, id) {
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('active'));
@@ -166,12 +162,11 @@
         if(id === 'equipo') renderEquipo();
     }
 
-    // --- GACHA ---
     function tirarGacha() {
         const base = DB_PERSONAJES[Math.floor(Math.random() * DB_PERSONAJES.length)];
         const nuevo = {
             ...base,
-            uid: Date.now(), // ID único para cada carta que te toque
+            uid: "UID-" + Date.now() + "-" + Math.floor(Math.random() * 1000), 
             lvl: 1,
             hp: 100,
             atk: 20
@@ -179,17 +174,15 @@
         inventario.push(nuevo);
         localStorage.setItem("gq_inv", JSON.stringify(inventario));
         alert("¡Has invocado a " + nuevo.nombre + "!");
-        renderLobby();
     }
 
-    // --- RENDERS ---
     function renderLobby() {
         const scene = document.getElementById('hero-scene');
-        const team = inventario.filter(p => equipoIds.includes(p.uid));
+        const team = inventario.filter(p => equipoUids.includes(p.uid));
         
         scene.innerHTML = '';
         team.forEach((p, index) => {
-            const size = index === 1 ? '10rem' : '7rem'; // El del medio más grande
+            const size = index === 1 ? '10rem' : '7rem';
             scene.innerHTML += `
                 <div class="hero-spot">
                     <div class="hero-tag">LV. ${p.lvl}</div>
@@ -198,7 +191,7 @@
                 </div>
             `;
         });
-        scene.innerHTML += `<button class="btn-battle" onclick="alert('Iniciando combate...')">READY</button>`;
+        scene.innerHTML += `<button class="btn-battle" onclick="alert('Próximamente: Sistema de combate mejorado')">BATTLE</button>`;
     }
 
     function renderDex() {
@@ -218,15 +211,17 @@
 
     function renderEquipo() {
         const container = document.getElementById('equipo-container');
+        document.getElementById('counter-equipo').innerText = `Seleccionados: ${equipoUids.length} / 3`;
         container.innerHTML = '';
+        
         inventario.forEach(p => {
-            const seleccionado = equipoIds.includes(p.uid);
+            const seleccionado = equipoUids.includes(p.uid);
             container.innerHTML += `
                 <div class="card ${seleccionado ? 'selected' : ''}">
                     <div class="card-emoji">${p.emoji}</div>
                     <strong>${p.nombre}</strong><br>
                     <small>LV. ${p.lvl}</small>
-                    <button class="btn-select" onclick="toggleEquipo(${p.uid})">
+                    <button class="btn-select ${seleccionado ? 'active' : ''}" onclick="toggleEquipo('${p.uid}')">
                         ${seleccionado ? 'QUITAR' : 'ELEGIR'}
                     </button>
                 </div>
@@ -235,19 +230,24 @@
     }
 
     function toggleEquipo(uid) {
-        if(equipoIds.includes(uid)) {
-            equipoIds = equipoIds.filter(id => id !== uid);
+        const index = equipoUids.indexOf(uid);
+        if (index > -1) {
+            // Si ya está, lo quitamos
+            equipoUids.splice(index, 1);
         } else {
-            if(equipoIds.length < 3) equipoIds.push(uid);
-            else alert("Máximo 3 personajes.");
+            // Si no está, comprobamos el límite de 3
+            if (equipoUids.length < 3) {
+                equipoUids.push(uid);
+            } else {
+                alert("Tu equipo ya tiene 3 miembros. Quita uno primero.");
+            }
         }
-        localStorage.setItem("gq_team", JSON.stringify(equipoIds));
+        localStorage.setItem("gq_team_uids", JSON.stringify(equipoUids));
         renderEquipo();
     }
 
-    // Inicializar
+    // Inicio
     renderLobby();
 </script>
-
 </body>
 </html>
