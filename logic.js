@@ -24,3 +24,18 @@ function tirarGacha() {
     alert(`¡Invocado: ${nuevo.nombre}!`);
     location.reload(); // Recargamos para ver cambios
 }
+
+function renderLobby() {
+    const display = document.getElementById('hero-display');
+    const team = inventario.filter(p => equipoUids.includes(p.uid));
+    
+    if (team.length === 0) {
+        display.innerHTML = '<p style="color:var(--text-dim)">Equipo vacío. ¡Ve a Equipo!</p>';
+        return;
+    }
+
+    display.innerHTML = team.map((p, index) => {
+        const size = index === 1 ? 'scale(1.3)' : 'scale(1)';
+        return `<span style="transform: ${size}">${p.emoji}</span>`;
+    }).join('');
+}

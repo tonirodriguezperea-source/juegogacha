@@ -2,21 +2,47 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gacha Quest Modular</title>
+    <title>Gacha Quest | Hub Principal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav>
-        <button onclick="mostrar('lobby')">Lobby</button>
-        <button onclick="mostrar('equipo')">Equipo</button>
-        <button onclick="tirarGacha()">Invocar</button>
+        <button class="nav-btn" onclick="mostrar('lobby')">🏠 Inicio</button>
+        <button class="nav-btn" onclick="mostrar('equipo')">🛡️ Equipo</button>
+        <button class="nav-btn" onclick="mostrar('pokedex')">📖 Dex</button>
+        <button class="nav-btn gacha-btn" onclick="tirarGacha()">✨ Invocar</button>
     </nav>
 
-    <div id="pantalla-lobby" class="pantalla">
-        <button class="btn-battle" onclick="iniciarBatalla()">¡A PELEAR!</button>
+    <div class="viewport">
+        <div id="pantalla-lobby" class="pantalla active">
+            <div class="lobby-container">
+                <div class="main-stage">
+                    <div id="hero-display" class="hero-display">
+                        </div>
+                    <button class="btn-play" onclick="iniciarBatalla()">¡A LUCHAR!</button>
+                </div>
+
+                <aside class="news-sidebar">
+                    <h3>NOTICIAS</h3>
+                    <div class="news-item"><b>Evento:</b> ¡Probabilidad x2 en Legendarios!</div>
+                    <div class="news-item"><b>Tip:</b> Usa el tipo Agua contra el Fuego.</div>
+                    <div class="news-item"><b>Update:</b> Sistema de combate V2 activado.</div>
+                </aside>
+            </div>
+        </div>
+
+        <div id="pantalla-equipo" class="pantalla" style="display:none;">
+            <h2 class="section-title">Gestionar Escuadrón</h2>
+            <div id="equipo-grid" class="grid"></div>
+        </div>
+
+        <div id="pantalla-pokedex" class="pantalla" style="display:none;">
+            <h2 class="section-title">Colección de Héroes</h2>
+            <div id="dex-grid" class="grid"></div>
+        </div>
     </div>
 
-    <div id="pantalla-equipo" class="pantalla" style="display:none;">
+    <div id="battle-screen">
         </div>
 
     <script src="database.js"></script>
@@ -26,7 +52,12 @@
         function mostrar(id) {
             document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
             document.getElementById('pantalla-' + id).style.display = 'block';
+            if(id === 'lobby') renderLobby();
+            if(id === 'equipo') renderEquipo();
+            if(id === 'pokedex') renderDex();
         }
+        // Carga inicial
+        window.onload = () => mostrar('lobby');
     </script>
 </body>
 </html>
