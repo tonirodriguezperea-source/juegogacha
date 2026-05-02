@@ -259,3 +259,44 @@ nav {
     transform: scale(1.5); /* Ajusta según necesites */
     image-rendering: pixelated; /* Si usas sprites de 8 bits como Bulbasaur, esto los hace ver nítidos */
 }
+
+/* Contenedor de la imagen en batalla */
+#player-battle-img, #enemy-battle-img {
+    width: 150px; /* Tamaño del área del personaje */
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* El sprite propiamente dicho */
+.luchador-sprite {
+    width: 120px; /* Ajusta según el tamaño de tus imágenes */
+    height: auto;
+    image-rendering: pixelated; /* Mantiene el estilo retro nítido */
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+    animation: flotar 3s ease-in-out infinite;
+}
+
+/* Efecto para el enemigo (opcional: puedes reflejarlo) */
+#enemy-battle-img .luchador-sprite {
+    transform: scaleX(-1); /* Hace que el enemigo mire hacia el jugador */
+    animation-delay: 0.5s;
+}
+
+/* Animación de movimiento suave */
+@keyframes flotar {
+    0%, 100% { transform: translateY(0px) scaleX(1); }
+    50% { transform: translateY(-10px) scaleX(1); }
+}
+
+/* Si es el enemigo y está reflejado, mantenemos el reflejo en la animación */
+#enemy-battle-img .luchador-sprite {
+    animation: flotarEnemigo 3s ease-in-out infinite;
+}
+
+@keyframes flotarEnemigo {
+    0%, 100% { transform: translateY(0px) scaleX(-1); }
+    50% { transform: translateY(-10px) scaleX(-1); }
+}

@@ -1,12 +1,12 @@
+// 1. Configuración Visual
 function obtenerImagenHTML(p, claseExtra = "") {
-    // Si el personaje tiene sprite en la base de datos, devuelve una imagen
-    if (p.sprite) {
-        return `<img src="${p.sprite}" class="sprite-img ${claseExtra}" alt="${p.nombre}">`;
+    if (p && p.sprite) {
+        return `<img src="${p.sprite}" class="sprite-render ${claseExtra}" alt="${p.nombre}">`;
     }
-    // Si no tiene foto, devuelve el emoji de siempre
-    return `<span class="emoji-img ${claseExtra}">${p.emoji}</span>`;
+    return `<span class="emoji-render ${claseExtra}">${p && p.emoji ? p.emoji : '❓'}</span>`;
 }
-// Carga inicial de datos
+
+// 2. Carga inicial de datos
 let inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
 let equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
 
@@ -24,7 +24,7 @@ function guardar() {
     localStorage.setItem("gq_team", JSON.stringify(equipoUids));
 }
 
-// Función de Invocación Corregida
+// 3. Funciones de Juego
 function tirarGacha() {
     if (typeof DB === 'undefined') return console.error("Base de datos no encontrada");
     
@@ -32,7 +32,6 @@ function tirarGacha() {
     let rareza = rand < 2 ? "legendario" : rand < 10 ? "epico" : rand < 30 ? "raro" : "comun";
     let opciones = DB.filter(p => p.rareza === rareza);
     
-    // Si por algún motivo no hay de esa rareza, cogemos común
     if (opciones.length === 0) opciones = DB.filter(p => p.rareza === "comun");
     
     const base = opciones[Math.floor(Math.random() * opciones.length)];
@@ -43,7 +42,6 @@ function tirarGacha() {
     
     alert(`✨ ¡Has invocado a ${nuevo.nombre}! ✨`);
     
-    // Refrescar pantallas si están visibles
     if (document.getElementById('pantalla-equipo').style.display !== 'none') renderEquipo();
     if (document.getElementById('pantalla-lobby').style.display !== 'none') renderLobby();
     if (document.getElementById('pantalla-pokedex').style.display !== 'none') renderDex();
@@ -55,7 +53,6 @@ function renderEquipo() {
     if (!list) return;
     list.innerHTML = '';
 
-    // Agrupamos por ID para mostrar el multiplicador (x2, x5...)
     const especies = {};
     inventario.forEach(p => {
         if (!especies[p.id]) especies[p.id] = { ...p, cantidad: 0, copias: [] };
@@ -63,7 +60,6 @@ function renderEquipo() {
         especies[p.id].copias.push(p);
     });
 
-    // Clasificamos por Sagas para los títulos
     const sagas = {};
     Object.values(especies).forEach(p => {
         if (p.nombre.toLowerCase().includes(filtro)) {
@@ -72,7 +68,6 @@ function renderEquipo() {
         }
     });
 
-    // Dibujamos las secciones
     for (const s in sagas) {
         const sec = document.createElement('div');
         sec.className = 'saga-section';
@@ -87,8 +82,8 @@ function renderEquipo() {
                     <div class="card ${enEquipo ? 'active-team' : ''}" 
                          onclick="abrirMenuCopias('${p.id}')" 
                          onmouseenter="mostrarInfo('${p.id}')">
-                        <span style="font-size:3rem">${p.emoji}</span>
-                        <div style="font-size:0.8rem; font-weight:bold;">${p.nombre}</div>
+                        <div class="card-avatar">${obtenerImagenHTML(p)}</div>
+                        <div class="card-name">${p.nombre}</div>
                     </div>
                 </div>`;
         });
@@ -109,7 +104,7 @@ function mostrarInfo(id) {
         saga: document.getElementById('info-saga')
     };
 
-    if (elements.photo) elements.photo.innerHTML = obtenerImagenHTML(p)
+    if (elements.photo) elements.photo.innerHTML = obtenerImagenHTML(p, "info-sprite");
     if (elements.name) elements.name.innerText = p.nombre;
     if (elements.desc) elements.desc.innerText = descripciones[p.id] || "Héroe listo para la batalla.";
     if (elements.dex) elements.dex.innerText = p.id;
@@ -121,27 +116,26 @@ function abrirMenuCopias(id) {
     const copias = inventario.filter(p => p.id == id);
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
-    overlay.className = "modal-overlay"; // Asegúrate de tener este estilo en CSS
-    
-    // Estilo rápido por si el CSS falla
+    overlay.className = "modal-overlay"; 
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;";
     
-    let html = `<div style="background:var(--bg-panel);padding:25px;border-radius:20px;border:2px solid var(--accent);width:320px;box-shadow: 0 0 20px rgba(0,0,0,0.5);">
-        <h3 style="text-align:center;margin-top:0;color:var(--accent);">Gestionar ${copias[0].nombre}</h3>`;
+    let html = `<div style="background:#1a1a2e;padding:25px;border-radius:20px;border:2px solid #4ade80;width:320px;box-shadow: 0 0 20px rgba(0,0,0,0.5); color: white;">
+        <div style="text-align:center; margin-bottom: 15px;">${obtenerImagenHTML(copias[0], 'modal-sprite')}</div>
+        <h3 style="text-align:center;margin-top:0;color:#4ade80;">Gestionar ${copias[0].nombre}</h3>`;
     
     copias.forEach(c => {
         const enEq = equipoUids.includes(c.uid);
         html += `
-            <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0;padding:12px;background:var(--bg-dark);border-radius:10px;border:1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0;padding:12px;background:#0f0f1b;border-radius:10px;border:1px solid #333;">
                 <span style="font-weight:bold;">NV.${c.lvl} ${enEq ? '⭐' : ''}</span>
                 <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
-                        class="nav-btn" style="padding:5px 15px; font-size:0.8rem; border-color:${enEq ? 'var(--danger)' : 'var(--accent)'}">
+                        style="padding:5px 15px; font-size:0.8rem; cursor:pointer; background:transparent; color:${enEq ? '#ef4444' : '#4ade80'}; border: 1px solid ${enEq ? '#ef4444' : '#4ade80'}; border-radius: 5px;">
                     ${enEq ? 'Quitar' : 'Elegir'}
                 </button>
             </div>`;
     });
     
-    html += `<button onclick="document.getElementById('overlay-copias').remove()" class="nav-btn" style="width:100%;margin-top:15px;color:var(--text-dim);">Regresar</button></div>`;
+    html += `<button onclick="document.getElementById('overlay-copias').remove()" style="width:100%;margin-top:15px; background: #333; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">Regresar</button></div>`;
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
 }
@@ -168,9 +162,9 @@ function renderLobby() {
     if (!display) return;
     
     if (team.length === 0) {
-        display.innerHTML = `<p style="font-size:1rem; color:var(--text-dim)">No hay héroes seleccionados</p>`;
+        display.innerHTML = `<p style="font-size:1rem; color:#888">No hay héroes seleccionados</p>`;
     } else {
-        display.innerHTML = team.map(p => `<span>${obtenerImagenHTML(p)}</span>`).join('');
+        display.innerHTML = team.map(p => `<div class="lobby-hero">${obtenerImagenHTML(p)}</div>`).join('');
     }
 }
 
@@ -181,25 +175,17 @@ function renderDex() {
         const tiene = inventario.some(inv => inv.id === p.id);
         return `
             <div class="card" style="opacity:${tiene ? 1 : 0.2}; filter:${tiene ? 'none' : 'grayscale(100%)'}">
-                <span style="font-size:2.5rem">${obtenerImagenHTML(p)}</span>
-                <div style="font-size:0.7rem; margin-top:5px;">${tiene ? p.nombre : '???'}</div>
+                <div class="card-avatar">${obtenerImagenHTML(p)}</div>
+                <div class="card-name">${tiene ? p.nombre : '???'}</div>
             </div>`;
     }).join('');
 }
 
 function borrarPartida() {
     const confirmar = confirm("⚠️ ¿ESTÁS TOTALMENTE SEGURO? ⚠️\nPerderás todos tus personajes y niveles para siempre.");
-    
     if (confirmar) {
-        localStorage.clear(); // Limpieza total para evitar basura de versiones viejas
+        localStorage.clear();
         alert("Memoria borrada. Reiniciando juego...");
         location.reload();
     }
-}
-
-function obtenerImagenHTML(personaje, claseCustom = "") {
-    if (personaje.sprite) {
-        return `<img src="${personaje.sprite}" class="sprite-render ${claseCustom}" alt="${personaje.nombre}">`;
-    }
-    return `<span class="emoji-render ${claseCustom}">${personaje.emoji}</span>`;
 }
