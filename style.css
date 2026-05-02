@@ -2,11 +2,8 @@
     --bg-dark: #020617;
     --bg-panel: #0f172a;
     --accent: #38bdf8;
-    --accent-glow: rgba(56, 189, 248, 0.4);
     --text-main: #f1f5f9;
-    --text-dim: #94a3b8;
     --border: #1e293b;
-    --danger: #ef4444;
 }
 
 body {
@@ -14,7 +11,6 @@ body {
     background-color: var(--bg-dark);
     color: var(--text-main);
     font-family: 'Segoe UI', sans-serif;
-    min-height: 100vh;
 }
 
 /* NAVEGACIÓN */
@@ -23,241 +19,127 @@ nav {
     justify-content: center;
     gap: 15px;
     background: var(--bg-panel);
-    border-bottom: 2px solid var(--border);
     padding: 15px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    border-bottom: 2px solid var(--border);
 }
 
 .nav-btn {
     background: transparent;
     border: 1px solid var(--border);
-    color: var(--text-dim);
+    color: white;
     padding: 8px 20px;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: bold;
 }
 
-.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
-.gacha-btn { background: linear-gradient(45deg, #f59e0b, #fbbf24); color: black; border: none; }
+.gacha-btn { background: #f59e0b; color: black; border: none; font-weight: bold; }
 
-/* LAYOUT PRINCIPAL */
-.viewport { padding: 20px; max-width: 1200px; margin: 0 auto; }
-
-/* EQUIPO Y SAGAS */
-.equipo-layout {
-    display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 20px;
-}
-
-.saga-title {
-    border-bottom: 2px solid var(--accent);
-    color: var(--accent);
-    padding-bottom: 5px;
-    text-transform: uppercase;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 15px;
-    padding: 20px 0;
-}
-
-/* CARTAS Y REPETIDOS */
-.card-stack {
-    position: relative;
-    display: inline-block;
-}
-
-.card {
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.card-avatar {
-    height: 60px;
+/* LOBBY ORIGINAL */
+.lobby-container {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 5px;
+    padding: 40px;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.card.active-team { border: 2px solid var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
-
-.stack-count {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--accent);
-    color: black;
-    padding: 2px 6px;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    z-index: 10;
-}
-
-/* PANEL INFO DERECHA */
-.info-panel {
-    background: var(--bg-panel);
-    border: 2px solid var(--border);
+.main-stage {
+    flex: 2;
+    text-align: center;
+    background: radial-gradient(circle, #1e293b 0%, #020617 70%);
     border-radius: 20px;
-    padding: 20px;
-    position: sticky;
-    top: 90px;
-    height: fit-content;
+    padding: 50px;
 }
 
-.info-photo { 
-    height: 120px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    margin-bottom: 15px; 
+.hero-display {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    min-height: 200px;
+    margin-bottom: 30px;
+}
+
+.lobby-hero img {
+    width: 150px;
+    image-rendering: pixelated;
+}
+
+.btn-play {
+    background: white;
+    color: black;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
 }
 
 /* PANTALLA DE BATALLA */
 #battle-screen {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--bg-dark);
+    background: #020617;
     z-index: 9999;
-    display: none; 
+    display: none;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
-    align-items: center;
 }
 
-.battle-arena { 
-    display: flex; 
-    justify-content: space-around; 
-    align-items: center;
-    width: 100%; 
-    max-width: 900px; 
-    margin-bottom: 40px; 
-}
-
-/* SPRITES EN COMBATE */
-#player-battle-img, #enemy-battle-img {
-    width: 180px; 
-    height: 180px;
+.battle-arena {
     display: flex;
+    justify-content: space-around;
     align-items: center;
-    justify-content: center;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 30px;
 }
 
-/* Clase base para imágenes */
+.fighter { text-align: center; }
+
+/* SPRITES EN BATALLA */
 .sprite-render {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+    width: 180px !important;
+    height: 180px !important;
     image-rendering: pixelated;
 }
 
-/* El jugador mira a la derecha */
-.sprite-jugador {
-    transform: scaleX(-1); 
-    filter: drop-shadow(-5px 5px 10px rgba(0,0,0,0.5));
+.sprite-jugador { transform: scaleX(-1); } /* Bulbasaur mirando a la derecha */
+
+.luchador-anim { animation: float 3s ease-in-out infinite; }
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
 }
 
-/* El rival mira a la izquierda (normal) */
-.sprite-rival {
-    filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.5));
-}
+/* HUD DE VIDA */
+.hp-wrapper { width: 200px; height: 15px; background: #334155; border-radius: 10px; margin-bottom: 10px; }
+.hp-fill { height: 100%; background: #22c55e; transition: width 0.3s; border-radius: 10px; }
 
-/* Animación de respiración */
-.luchador-anim {
-    animation: flotar 3s ease-in-out infinite;
-}
-
-@keyframes flotar {
-    0%, 100% { transform: translateY(0) scaleX(-1); } /* El jugador mantiene el giro */
-    50% { transform: translateY(-10px) scaleX(-1); }
-}
-
-/* Animación específica para el rival (sin giro) */
-#enemy-battle-img .luchador-anim {
-    animation: flotarRival 3s ease-in-out infinite;
-}
-
-@keyframes flotarRival {
-    0%, 100% { transform: translateY(0) scaleX(1); }
-    50% { transform: translateY(-10px) scaleX(1); }
-}
-
-/* LOG Y HUD */
 #battle-log {
-    width: 90%; 
-    max-width: 600px; 
+    width: 80%;
+    max-width: 600px;
     height: 120px;
-    background: #0f172a; 
-    border: 1px solid var(--border);
-    padding: 15px; 
-    overflow-y: auto; 
-    color: var(--text-dim); 
-    margin-bottom: 20px;
-    border-radius: 10px;
-    font-size: 0.9rem;
-}
-
-.hp-wrapper {
-    width: 180px;
-    height: 15px;
-    background: #1e293b;
-    border: 2px solid #334155;
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 10px auto;
-}
-
-.hp-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #22c55e, #4ade80);
-    width: 100%;
-    transition: width 0.5s ease-in-out;
-}
-
-/* LOBBY */
-.hero-display {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
+    background: #0f172a;
+    padding: 15px;
+    overflow-y: auto;
+    border: 1px solid #1e293b;
     margin-bottom: 20px;
 }
 
-.lobby-hero {
-    width: 100px;
-    height: 100px;
-    filter: drop-shadow(0 0 10px var(--accent));
-}
-
-/* BOTONES ACCIÓN */
 .actions-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    width: 95%;
-    max-width: 500px;
+    gap: 10px;
 }
 
 .btn-action {
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
+    padding: 12px 25px;
+    background: #1e293b;
     color: white;
-    padding: 15px;
-    border-radius: 12px;
-    font-weight: bold;
+    border: 1px solid #334155;
+    border-radius: 8px;
     cursor: pointer;
 }
-
-.btn-action:hover:not(:disabled) { border-color: var(--accent); background: rgba(56, 189, 248, 0.1); }
-.btn-action:disabled { opacity: 0.3; cursor: not-allowed; }

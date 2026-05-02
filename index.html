@@ -2,90 +2,48 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gacha Quest | Hub Principal</title>
     <link rel="stylesheet" href="style.css">
+    <title>Gacha Quest</title>
 </head>
 <body>
     <nav>
         <button class="nav-btn" onclick="mostrar('lobby')">🏠 Inicio</button>
         <button class="nav-btn" onclick="mostrar('equipo')">🛡️ Equipo</button>
-        <button class="nav-btn" onclick="mostrar('pokedex')">📖 Dex</button>
         <button class="nav-btn gacha-btn" onclick="tirarGacha()">✨ Invocar</button>
     </nav>
 
-    <div class="viewport">
-        <div id="pantalla-lobby" class="pantalla">
-            <div class="lobby-container">
-                <div class="main-stage">
-                    <div id="hero-display" class="hero-display"></div>
-                    <button class="btn-play" onclick="iniciarBatalla()">¡A LUCHAR!</button>
-                </div>
-                <aside class="news-sidebar">
-                    <h3>NOTICIAS</h3>
-                    <div class="news-item"><b>Evento:</b> ¡Probabilidad x2 en Legendarios!</div>
-                    <div class="news-item"><b>Tip:</b> Usa el tipo Agua contra el Fuego.</div>
-                    <button class="nav-btn" 
-                            style="width: 100%; margin-top: 20px; border-color: #ef4444; color: #ef4444;" 
-                            onclick="borrarPartida()">
-                        🗑️ Borrar Partida
-                    </button>
-                </aside>
+    <div id="pantalla-lobby" class="pantalla">
+        <div class="lobby-container">
+            <div class="main-stage">
+                <div id="hero-display" class="hero-display"></div>
+                <button class="btn-play" onclick="iniciarBatalla()">¡A LUCHAR!</button>
             </div>
-        </div>
-
-        <div id="pantalla-equipo" class="pantalla" style="display:none;">
-            <div class="search-container">
-                <input type="text" id="busqueda-equipo" placeholder="🔍 Buscar héroe..." oninput="renderEquipo()">
+            <div class="news-sidebar">
+                <h3>NOTICIAS</h3>
+                <p>Evento x2 Probabilidad</p>
+                <button onclick="borrarPartida()" style="color:red; background:none; border:1px solid red; cursor:pointer;">Borrar Datos</button>
             </div>
-            <div class="equipo-layout">
-                <div id="sagas-list" class="sagas-container"></div>
-                <aside class="info-panel">
-                    <div id="info-photo" class="info-photo">❓</div>
-                    <h2 id="info-name" class="info-name">Héroe</h2>
-                    <p id="info-desc" class="info-desc">Selecciona un personaje.</p>
-                    <div class="info-stats">
-                        <div class="stat-box"><strong>Nº Dex</strong> <span id="info-dex">-</span></div>
-                        <div class="stat-box"><strong>Tipo</strong> <span id="info-tipo">-</span></div>
-                        <div class="stat-box"><strong>Saga</strong> <span id="info-saga">-</span></div>
-                    </div>
-                </aside>
-            </div>
-        </div>
-
-        <div id="pantalla-pokedex" class="pantalla" style="display:none;">
-            <h2 class="section-title">Colección</h2>
-            <div id="dex-grid" class="grid"></div>
         </div>
     </div>
 
-    <div id="battle-screen" style="display:none;">
+    <div id="battle-screen">
         <div class="battle-arena">
             <div class="fighter">
                 <div class="hp-wrapper"><div id="player-hp-bar" class="hp-fill"></div></div>
-                <div id="player-battle-img" class="fighter-emoji">❓</div>
+                <div id="player-battle-img"></div>
                 <h3 id="player-battle-name">Jugador</h3>
-                <div id="player-energy" class="energy-container"></div> 
             </div>
-
             <div class="vs-badge">VS</div>
-
             <div class="fighter">
                 <div class="hp-wrapper"><div id="enemy-hp-bar" class="hp-fill"></div></div>
-                <div id="enemy-battle-img" class="fighter-emoji">👾</div>
+                <div id="enemy-battle-img"></div>
                 <h3 id="enemy-battle-name">Rival</h3>
-                <div id="enemy-energy" class="energy-container"></div> 
             </div>
         </div>
-
         <div id="battle-log"></div>
-
         <div class="actions-grid">
-            <button class="btn-action" onclick="playerMove('recargar')">🔋 Cargar</button>
-            <button id="btn-ataque" class="btn-action" onclick="playerMove('ataque')">⚔️ Ataque (1)</button>
-            <button id="btn-fuerte" class="btn-action" onclick="playerMove('fuerte')">💥 Fuerte (2)</button>
-            <button id="btn-defensa" class="btn-action" onclick="playerMove('defensa')">🛡️ Defensa</button>
-            <button class="btn-action btn-escape" onclick="finalizarBatalla(false)">🏳️ Huir</button>
-            <button class="btn-action" onclick="cambiarBicho()">🔄 Relevo</button>
+            <button class="btn-action" onclick="playerMove('ataque')">Ataque</button>
+            <button class="btn-action" onclick="playerMove('recargar')">Recargar</button>
         </div>
     </div>
 
@@ -94,16 +52,10 @@
     <script src="battle.js"></script>
     <script>
         function mostrar(id) {
-            // Oculta todas las pantallas incluyendo la de batalla por si acaso
             document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
-            document.getElementById('battle-screen').style.display = 'none';
-            
-            // Muestra la seleccionada
-            document.getElementById('pantalla-' + id).style.display = 'block';
-            
-            if(id === 'equipo') renderEquipo();
+            const target = document.getElementById('pantalla-' + id);
+            if(target) target.style.display = 'block';
             if(id === 'lobby') renderLobby();
-            if(id === 'pokedex') renderDex();
         }
         window.onload = () => mostrar('lobby');
     </script>
