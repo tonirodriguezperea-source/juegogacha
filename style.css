@@ -232,3 +232,24 @@ nav {
     border-color: #475569;
     color: var(--text-dim);
 }
+
+.energy-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    height: 20px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    background: #334155; /* Color gris apagado */
+    border-radius: 50%;
+    border: 1px solid #475569;
+}
+
+.dot.active {
+    background: #fbbf24; /* Color amarillo brillante */
+    box-shadow: 0 0 10px #fbbf24;
+}
