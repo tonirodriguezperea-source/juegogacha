@@ -44,15 +44,106 @@ function tirarGacha() {
 
 // 4. Renderizar PANTALLA DE EQUIPO
 function renderEquipo() {
-    const grid = document.getElementById('equipo-grid');
-    if (!grid) return; // Si no estamos en la pestaña equipo, no hace nada
+    const sagasList = document.getElementById('sagas-list');
+    const filtro = document.getElementById('busqueda-equipo').value.toLowerCase();
+    if (!sagasList) return;
 
-    grid.innerHTML = ''; 
+    sagasList.innerHTML = '';
 
-    if (inventario.length === 0) {
-        grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1; padding: 50px; color: var(--text-dim);">Aún no tienes héroes. ¡Usa el botón Invocar!</p>';
-        return;
+    // 1. Agrupar inventario por Sagas y por ID (para el contador x2, x3...)
+    const sagas = {};
+    
+    // Obtenemos una lista de "especies únicas" para mostrar en la cuadrícula
+    const especiesUnicas = {};
+    inventario.forEach(p => {
+        if (!especiesUnicas[p.id]) {
+            especiesUnicas[p.id] = { ...p, cantidad: 0, copias: [] };
+        }
+        especiesUnicas[p.id].cantidad++;
+        especiesUnicas[p.id].copias.push(p);
+    });
+
+    // Clasificar por Saga
+    Object.values(especiesUnicas).forEach(p => {
+        if (p.nombre.toLowerCase().includes(filtro)) {
+            if (!sagas[p.saga]) sagas[p.saga] = [];
+            sagas[p.saga].push(p);
+        }
+    });
+
+    // 2. Dibujar cada sección de Saga
+    for (const nombreSaga in sagas) {
+        const seccion = document.createElement('div');
+        seccion.className = 'saga-section';
+        seccion.innerHTML = `<h3 class="saga-title">${nombreSaga}</h3>`;
+        
+        const grid = document.createElement('div');
+        grid.className = 'grid'; // Reutilizamos tu clase de rejilla
+
+        sagas[nombreSaga].forEach(p => {
+            const wrap = document.createElement('div');
+            wrap.className = 'card-stack';
+            
+            // Si tienes más de 1, sale el numerito
+            const badge = p.cantidad > 1 ? `<div class="stack-count">x${p.cantidad}</div>` : '';
+            
+            const estaEnEquipo = p.copias.some(c => equipoUids.includes(c.uid));
+
+            wrap.innerHTML = `
+                ${badge}
+                <div class="card ${estaEnEquipo ? 'active-team' : ''}" 
+                     onmouseenter="mostrarInfo('${p.id}')"
+                     onclick="abrirSelectorCopias('${p.id}')">
+                    <span class="card-emoji" style="font-size:3rem;">${p.emoji}</span>
+                    <div style="font-size:0.8rem;">${p.nombre}</div>
+                </div>
+            `;
+            grid.appendChild(wrap);
+        });
+        
+        seccion.appendChild(grid);
+        sagasList.appendChild(seccion);
     }
+}
+
+// Función para actualizar el panel derecho al pasar el ratón
+function mostrarInfo(personajeId) {
+    const p = DB.find(x => x.id == personajeId);
+    if (!p) return;
+
+    // Aquí puedes añadir descripciones personalizadas en tu database.js
+    const descripciones = {
+        "1": "Un extraño pokémon semilla que es muy dócil. Su planta crece con él.",
+        "101": "El guerrero saiyan más fuerte de la Tierra. Siempre busca superar sus límites.",
+        "4": "Prefiere las cosas calientes. Se dice que cuando llueve sale vapor de su cola.",
+        "102": "El orgulloso príncipe de los Saiyans. Su rivalidad con Goku no tiene fin."
+    };
+
+    document.getElementById('info-photo').innerText = p.emoji;
+    document.getElementById('info-name').innerText = p.nombre;
+    document.getElementById('info-desc').innerText = descripciones[p.id] || "Sin descripción disponible para este héroe.";
+    document.getElementById('info-dex').innerText = p.id;
+    document.getElementById('info-tipo').innerText = p.tipo.toUpperCase();
+    document.getElementById('info-saga').innerText = p.saga;
+}
+
+// Función para cuando haces clic (abre la opción de elegir cuál de tus Gokus quieres)
+function abrirSelectorCopias(personajeId) {
+    const copias = inventario.filter(p => p.id == personajeId);
+    
+    if (copias.length === 1) {
+        togglePersonajeEquipo(copias[0].uid);
+    } else {
+        // Por ahora, para no complicar el HTML, usamos un prompt o elegimos el de mayor nivel
+        // En el futuro podemos hacer un modal aquí
+        let msg = `Tienes ${copias.length} copias. ¿Cuál quieres usar?\n`;
+        copias.forEach((c, i) => msg += `${i}: Nivel ${c.lvl} ${equipoUids.includes(c.uid) ? '(En Equipo)' : ''}\n`);
+        let choice = prompt(msg);
+        if (choice !== null && copias[choice]) {
+            togglePersonajeEquipo(copias[choice].uid);
+        }
+    }
+}
 
     inventario.forEach(p => {
         const estaEnEquipo = equipoUids.includes(p.uid);

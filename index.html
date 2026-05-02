@@ -32,9 +32,28 @@
         </div>
 
         <div id="pantalla-equipo" class="pantalla" style="display:none;">
-            <h2 class="section-title">Gestionar Escuadrón</h2>
-            <div id="equipo-grid" class="grid"></div>
-        </div>
+    <div class="search-container">
+        <input type="text" id="busqueda-equipo" placeholder="🔍 Buscar héroe por nombre..." oninput="renderEquipo()">
+    </div>
+
+    <div class="equipo-layout">
+        <div class="sagas-container" id="sagas-list">
+            </div>
+
+        <aside class="info-panel" id="info-panel">
+            <div class="info-card">
+                <div class="info-photo" id="info-photo">❓</div>
+                <h2 class="info-name" id="info-name">Selecciona un héroe</h2>
+                <p class="info-desc" id="info-desc">Pasa el ratón por encima de un personaje para ver sus detalles y estadísticas.</p>
+                <div class="info-stats">
+                    <div class="stat-box"><strong>Nº Dex:</strong> <span id="info-dex">-</span></div>
+                    <div class="stat-box"><strong>Tipo:</strong> <span id="info-tipo">-</span></div>
+                    <div class="stat-box"><strong>Saga:</strong> <span id="info-saga">-</span></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
 
         <div id="pantalla-pokedex" class="pantalla" style="display:none;">
             <h2 class="section-title">Colección de Héroes</h2>
