@@ -1,3 +1,4 @@
+// 1. DEFINICIÓN DE TIPOS (Solo una vez)
 const TABLA_TIPOS = {
     "fuego": { fuerte: "planta", debil: "agua" },
     "agua": { fuerte: "fuego", debil: "planta" },
@@ -6,6 +7,7 @@ const TABLA_TIPOS = {
     "monstruo": { fuerte: "magia", debil: "guerrero" }
 };
 
+// 2. ESTADO GLOBAL
 let battleState = {
     player: null,
     enemy: null,
@@ -18,17 +20,30 @@ let battleState = {
     enemyIdx: 0
 };
 
+// 3. FUNCIONES DE APOYO
 function calcularMultiplicador(tipoAtacante, tipoDefensor) {
     if (!tipoAtacante || !tipoDefensor) return 1;
     const atacante = tipoAtacante.toLowerCase();
     const defensor = tipoDefensor.toLowerCase();
     const relacion = TABLA_TIPOS[atacante];
-    
     if (relacion?.fuerte === defensor) return 1.5;
     if (relacion?.debil === defensor) return 0.5;
     return 1;
 }
 
+function escribirLog(msg) {
+    const log = document.getElementById('battle-log');
+    if (log) log.innerHTML = `<div>> ${msg}</div>` + log.innerHTML;
+}
+
+function dibujarPuntos(id, cant) {
+    const container = document.getElementById(id);
+    if (!container) return;
+    container.innerHTML = "";
+    for(let i=0; i<3; i++) container.innerHTML += `<div class="dot ${i<cant?'active':''}"></div>`;
+}
+
+// 4. LÓGICA DE COMBATE
 function iniciarBatalla() {
     battleState.playerTeam = inventario.filter(p => equipoUids.includes(p.uid));
     if (battleState.playerTeam.length === 0) return alert("¡Elige a alguien en tu equipo!");
@@ -40,7 +55,6 @@ function iniciarBatalla() {
     for (let i = 0; i < numEnemigos; i++) {
         const base = DB[Math.floor(Math.random() * DB.length)];
         const nivelRival = Math.max(1, Math.floor(nivelMedioJugador + (Math.random() * 10 - 5)));
-        
         battleState.enemyTeam.push({
             ...base,
             lvl: nivelRival,
@@ -56,7 +70,7 @@ function iniciarBatalla() {
     setupFighter('enemy');
 
     document.getElementById('battle-screen').style.display = 'flex';
-    escribirLog(`¡Inicia el combate! El rival tiene ${numEnemigos} luchador(es).`);
+    escribirLog(`¡Combate iniciado! El rival tiene ${numEnemigos} héroes.`);
     actualizarInterfazBatalla();
 }
 
@@ -74,19 +88,6 @@ function setupFighter(tipo) {
     }
 }
 
-function cambiarBicho() {
-    if (battleState.turn !== 'player') return;
-    if (battleState.playerTeam.length <= 1) return alert("¡No tienes a nadie más!");
-
-    battleState.playerIdx = (battleState.playerIdx + 1) % battleState.playerTeam.length;
-    setupFighter('player');
-    escribirLog(`¡Cambio! Sale ${battleState.player.nombre}.`);
-    
-    battleState.turn = 'enemy';
-    actualizarInterfazBatalla();
-    setTimeout(turnoEnemigo, 1000);
-}
-
 function playerMove(tipo) {
     if (battleState.turn !== 'player') return;
     const p = battleState.player;
@@ -95,13 +96,10 @@ function playerMove(tipo) {
     if (tipo === 'recargar') {
         p.energy = Math.min(p.energy + 1, 3);
         escribirLog(`${p.nombre} carga energía.`);
-    } 
-    else if (tipo === 'defensa') {
+    } else if (tipo === 'defensa') {
         battleState.isDefending = true;
-        escribirLog(`${p.nombre} se pone en guardia.`);
-    } 
-    else {
-        // Lógica de ATACAR (Normal o Fuerte)
+        escribirLog(`${p.nombre} se defiende.`);
+    } else {
         const mult = calcularMultiplicador(p.tipo, e.tipo);
         let dmgBase = (tipo === 'fuerte') ? 35 : 15;
         let totalDmg = Math.floor((dmgBase + (p.lvl * 2)) * mult);
@@ -109,16 +107,12 @@ function playerMove(tipo) {
         if (battleState.enemyDefending) {
             totalDmg = Math.floor(totalDmg / 2);
             battleState.enemyDefending = false;
-            escribirLog(`¡El rival bloqueó parte del golpe!`);
+            escribirLog(`¡Bloqueado!`);
         }
 
         e.hp -= totalDmg;
         p.energy -= (tipo === 'fuerte') ? 2 : 1;
-
-        let msg = `${p.nombre} usa ${tipo.toUpperCase()}.`;
-        if (mult > 1) msg += " ¡Es súper efectivo! 💥";
-        if (mult < 1) msg += " No es muy efectivo... 💧";
-        escribirLog(`${msg} Daño: ${totalDmg}`);
+        escribirLog(`${p.nombre} ataca. Daño: ${totalDmg} ${mult > 1 ? '¡Efectivo!' : ''}`);
     }
 
     actualizarInterfazBatalla();
@@ -128,36 +122,18 @@ function playerMove(tipo) {
 function turnoEnemigo() {
     const e = battleState.enemy;
     const p = battleState.player;
-    let decision;
-    const rand = Math.random();
-
-    if (e.energy >= 2 && rand > 0.3) decision = 'fuerte';
-    else if (e.hp < 30 && e.energy >= 1 && rand > 0.5) decision = 'defensa';
-    else if (e.energy >= 1 && rand > 0.4) decision = 'ataque';
-    else decision = 'recargar';
+    let decision = (e.energy >= 2) ? 'fuerte' : (e.energy >= 1 ? 'ataque' : 'recargar');
 
     if (decision === 'recargar') {
         e.energy = Math.min(e.energy + 1, 3);
-        escribirLog(`${e.nombre} concentra energía...`);
-    } else if (decision === 'defensa') {
-        battleState.enemyDefending = true;
-        escribirLog(`${e.nombre} se defiende.`);
+        escribirLog(`${e.nombre} recarga.`);
     } else {
         const mult = calcularMultiplicador(e.tipo, p.tipo);
-        let dmgBase = (decision === 'fuerte') ? 35 : 15;
-        let totalDmg = Math.floor((dmgBase + (e.lvl * 2)) * mult);
-
-        if (battleState.isDefending) {
-            totalDmg = Math.floor(totalDmg / 2);
-            escribirLog("¡Defendiste el golpe!");
-        }
-
-        p.hp -= totalDmg;
-        e.energy -= (decision === 'fuerte') ? 2 : 1;
-
-        let msg = `${e.nombre} usa ${decision.toUpperCase()}.`;
-        if (mult > 1) msg += " ¡Es súper efectivo! 💥";
-        escribirLog(`${msg} Daño: ${totalDmg}`);
+        let dmg = Math.floor(((decision === 'fuerte' ? 35 : 15) + (e.lvl * 2)) * mult);
+        if (battleState.isDefending) dmg = Math.floor(dmg / 2);
+        p.hp -= dmg;
+        e.energy -= (decision === 'fuerte' ? 2 : 1);
+        escribirLog(`${e.nombre} ataca. Daño: ${dmg}`);
     }
 
     battleState.isDefending = false;
@@ -167,33 +143,31 @@ function turnoEnemigo() {
 }
 
 function verificarEstado() {
-    const e = battleState.enemy;
-    const p = battleState.player;
-
-    if (e.hp <= 0) {
+    if (battleState.enemy.hp <= 0) {
         battleState.enemyIdx++;
         if (battleState.enemyIdx < battleState.enemyTeam.length) {
-            escribirLog(`¡Rival caído! Entra el siguiente.`);
             setupFighter('enemy');
-            actualizarInterfazBatalla();
+            escribirLog("¡Siguiente rival!");
         } else {
-            alert("¡VICTORIA!");
+            alert("¡Victoria!");
             finalizarBatalla(true);
+            return;
         }
-    } else if (p.hp <= 0) {
+    } else if (battleState.player.hp <= 0) {
         battleState.playerIdx++;
         if (battleState.playerIdx < battleState.playerTeam.length) {
-            escribirLog(`¡${p.nombre} debilitado! ¡Cambio automático!`);
             setupFighter('player');
-            actualizarInterfazBatalla();
+            escribirLog("¡Cambio automático!");
         } else {
-            alert("DERROTA...");
+            alert("Derrota...");
             finalizarBatalla(false);
+            return;
         }
     } else if (battleState.turn === 'player') {
         battleState.turn = 'enemy';
         setTimeout(turnoEnemigo, 1000);
     }
+    actualizarInterfazBatalla();
 }
 
 function actualizarInterfazBatalla() {
@@ -211,25 +185,8 @@ function actualizarInterfazBatalla() {
     dibujarPuntos('player-energy', p.energy);
     dibujarPuntos('enemy-energy', e.energy);
 
-    const btns = document.querySelectorAll('.btn-action');
-    btns.forEach(b => {
-        const id = b.id;
-        if(id === 'btn-ataque') b.disabled = (p.energy < 1 || battleState.turn === 'enemy');
-        else if(id === 'btn-fuerte') b.disabled = (p.energy < 2 || battleState.turn === 'enemy');
-        else b.disabled = (battleState.turn === 'enemy');
-    });
-}
-
-function dibujarPuntos(id, cant) {
-    const container = document.getElementById(id);
-    if (!container) return;
-    container.innerHTML = "";
-    for(let i=0; i<3; i++) container.innerHTML += `<div class="dot ${i<cant?'active':''}"></div>`;
-}
-
-function escribirLog(msg) {
-    const log = document.getElementById('battle-log');
-    if (log) log.innerHTML = `<div>> ${msg}</div>` + log.innerHTML;
+    document.getElementById('btn-ataque').disabled = (p.energy < 1 || battleState.turn === 'enemy');
+    document.getElementById('btn-fuerte').disabled = (p.energy < 2 || battleState.turn === 'enemy');
 }
 
 function finalizarBatalla(victoria) {
@@ -242,4 +199,13 @@ function finalizarBatalla(victoria) {
     }
     document.getElementById('battle-screen').style.display = 'none';
     mostrar('lobby');
+}
+
+function cambiarBicho() {
+    if (battleState.turn !== 'player') return;
+    battleState.playerIdx = (battleState.playerIdx + 1) % battleState.playerTeam.length;
+    setupFighter('player');
+    battleState.turn = 'enemy';
+    actualizarInterfazBatalla();
+    setTimeout(turnoEnemigo, 1000);
 }
