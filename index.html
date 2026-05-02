@@ -17,8 +17,7 @@
         <div id="pantalla-lobby" class="pantalla active">
             <div class="lobby-container">
                 <div class="main-stage">
-                    <div id="hero-display" class="hero-display">
-                        </div>
+                    <div id="hero-display" class="hero-display"></div>
                     <button class="btn-play" onclick="iniciarBatalla()">¡A LUCHAR!</button>
                 </div>
 
@@ -32,28 +31,27 @@
         </div>
 
         <div id="pantalla-equipo" class="pantalla" style="display:none;">
-    <div class="search-container">
-        <input type="text" id="busqueda-equipo" placeholder="🔍 Buscar héroe por nombre..." oninput="renderEquipo()">
-    </div>
-
-    <div class="equipo-layout">
-        <div class="sagas-container" id="sagas-list">
+            <div class="search-container">
+                <input type="text" id="busqueda-equipo" placeholder="🔍 Buscar héroe por nombre..." oninput="renderEquipo()">
             </div>
 
-        <aside class="info-panel" id="info-panel">
-            <div class="info-card">
-                <div class="info-photo" id="info-photo">❓</div>
-                <h2 class="info-name" id="info-name">Selecciona un héroe</h2>
-                <p class="info-desc" id="info-desc">Pasa el ratón por encima de un personaje para ver sus detalles y estadísticas.</p>
-                <div class="info-stats">
-                    <div class="stat-box"><strong>Nº Dex:</strong> <span id="info-dex">-</span></div>
-                    <div class="stat-box"><strong>Tipo:</strong> <span id="info-tipo">-</span></div>
-                    <div class="stat-box"><strong>Saga:</strong> <span id="info-saga">-</span></div>
-                </div>
+            <div class="equipo-layout">
+                <div class="sagas-container" id="sagas-list"></div>
+
+                <aside class="info-panel" id="info-panel">
+                    <div class="info-card">
+                        <div class="info-photo" id="info-photo">❓</div>
+                        <h2 class="info-name" id="info-name">Selecciona un héroe</h2>
+                        <p class="info-desc" id="info-desc">Pasa el ratón por encima de un personaje para ver sus detalles y estadísticas.</p>
+                        <div class="info-stats">
+                            <div class="stat-box"><strong>Nº Dex:</strong> <span id="info-dex">-</span></div>
+                            <div class="stat-box"><strong>Tipo:</strong> <span id="info-tipo">-</span></div>
+                            <div class="stat-box"><strong>Saga:</strong> <span id="info-saga">-</span></div>
+                        </div>
+                    </div>
+                </aside>
             </div>
-        </aside>
-    </div>
-</div>
+        </div>
 
         <div id="pantalla-pokedex" class="pantalla" style="display:none;">
             <h2 class="section-title">Colección de Héroes</h2>
@@ -61,59 +59,59 @@
         </div>
     </div>
 
-    <div id="battle-screen">
-        <div id="battle-screen">
-    <div class="battle-arena">
-        <div class="fighter">
-            <div class="hp-container"><div id="player-hp-bar" class="hp-fill"></div></div>
-            <div id="player-battle-img" class="fighter-emoji">❓</div>
-            <h3 id="player-battle-name">Héroe</h3>
-            <div class="energy-bar" id="player-energy">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div id="battle-screen" style="display: none;">
+        <div class="battle-arena">
+            <div class="fighter">
+                <div class="hp-container"><div id="player-hp-bar" class="hp-fill"></div></div>
+                <div id="player-battle-img" class="fighter-emoji">❓</div>
+                <h3 id="player-battle-name">Héroe</h3>
+                <div class="energy-bar" id="player-energy">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+            </div>
+
+            <div style="font-size: 2rem; font-weight: bold; color: var(--danger);">VS</div>
+
+            <div class="fighter">
+                <div class="hp-container"><div id="enemy-hp-bar" class="hp-fill"></div></div>
+                <div id="enemy-battle-img" class="fighter-emoji">👾</div>
+                <h3 id="enemy-battle-name">Rival</h3>
+                <div class="energy-bar" id="enemy-energy">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
             </div>
         </div>
 
-        <div style="font-size: 2rem; font-weight: bold; color: var(--danger);">VS</div>
+        <div id="battle-log"></div>
 
-        <div class="fighter">
-            <div class="hp-container"><div id="enemy-hp-bar" class="hp-fill"></div></div>
-            <div id="enemy-battle-img" class="fighter-emoji">👾</div>
-            <h3 id="enemy-battle-name">Rival</h3>
-            <div class="energy-bar" id="enemy-energy">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-            </div>
+        <div class="actions-grid">
+            <button class="btn-action" onclick="playerMove('recargar')">🔋 Recargar</button>
+            <button id="btn-ataque" class="btn-action" onclick="playerMove('ataque')">⚔️ Ataque (1)</button>
+            <button id="btn-fuerte" class="btn-action" onclick="playerMove('fuerte')">💥 Fuerte (2)</button>
+            <button id="btn-defensa" class="btn-action" onclick="playerMove('defensa')">🛡️ Defensa</button>
+            <button class="btn-action" style="border-color: var(--danger);" onclick="finalizarBatalla(false)">🏳️ Huir</button>
         </div>
     </div>
-
-    <div id="battle-log"></div>
-
-    <div class="actions-grid">
-        <button class="btn-action" onclick="playerMove('recargar')">🔋 Recargar</button>
-        <button id="btn-ataque" class="btn-action" onclick="playerMove('ataque')">⚔️ Ataque (1)</button>
-        <button id="btn-fuerte" class="btn-action" onclick="playerMove('fuerte')">💥 Fuerte (2)</button>
-        <button id="btn-defensa" class="btn-action" onclick="playerMove('defensa')">🛡️ Defensa</button>
-        <button class="btn-action" style="border-color: var(--danger);" onclick="location.reload()">🏳️ Huir</button>
-    </div>
-</div>
-        </div>
 
     <script src="database.js"></script>
     <script src="logic.js"></script>
     <script src="battle.js"></script>
     <script>
         function mostrar(id) {
-    // Ocultar todas las pantallas
-    document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
-    
-    // Mostrar la elegida
-    const pantallaActual = document.getElementById('pantalla-' + id);
-    if(pantallaActual) pantallaActual.style.display = 'block';
+            // Ocultar todas las pantallas principales
+            document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
+            // Asegurarnos de ocultar la batalla al cambiar de pestaña
+            document.getElementById('battle-screen').style.display = 'none';
+            
+            const pantallaActual = document.getElementById('pantalla-' + id);
+            if(pantallaActual) pantallaActual.style.display = 'block';
 
-    // EJECUTAR EL RENDER CORRESPONDIENTE
-    if(id === 'lobby') renderLobby();
-    if(id === 'equipo') renderEquipo(); // <--- ESTO ES VITAL
-    if(id === 'pokedex') renderDex();
-}
+            if(id === 'lobby') renderLobby();
+            if(id === 'equipo') renderEquipo();
+            if(id === 'pokedex') renderDex();
+        }
+        // Carga inicial
+        window.onload = () => mostrar('lobby');
     </script>
 </body>
 </html>

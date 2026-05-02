@@ -1,235 +1,90 @@
-:root {
-    --bg-dark: #020617;
-    --bg-panel: #0f172a;
-    --accent: #38bdf8;
-    --accent-glow: rgba(56, 189, 248, 0.4);
-    --text-main: #f1f5f9;
-    --text-dim: #94a3b8;
-    --border: #1e293b;
-    --danger: #ef4444;
-}
+/* --- CORRECCIONES DE POSICIONAMIENTO --- */
 
-body {
-    margin: 0;
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Navegación Premium */
-nav {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    background: var(--bg-panel);
-    border-bottom: 2px solid var(--border);
-    padding: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-}
-
-.nav-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    padding: 8px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.nav-btn:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-    background: rgba(56, 189, 248, 0.05);
-}
-
-.gacha-btn {
-    background: linear-gradient(45deg, #f59e0b, #fbbf24);
-    color: black;
-    border: none;
-}
-
-/* Layout del Lobby */
-.lobby-container {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 30px;
-    max-width: 1200px;
-    margin: 30px auto;
-    height: 500px;
-}
-
-.main-stage {
-    background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
-    border-radius: 24px;
-    border: 2px solid var(--border);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    padding-bottom: 50px;
-    box-shadow: 0 0 40px rgba(0,0,0,0.5);
-}
-
-.hero-display {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 20px;
-    margin-bottom: 40px;
-}
-
-.hero-display span {
-    font-size: 7rem;
-    filter: drop-shadow(0 0 15px var(--accent-glow));
-}
-
-/* El Botón de Lucha */
-.btn-play {
-    background: linear-gradient(180deg, var(--accent), #0284c7);
-    color: white;
-    border: none;
-    padding: 15px 60px;
-    font-size: 1.5rem;
-    font-weight: 900;
-    border-radius: 50px;
-    cursor: pointer;
-    box-shadow: 0 0 20px var(--accent-glow);
-    transition: 0.3s;
-}
-
-.btn-play:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 30px var(--accent);
-}
-
-/* Noticias */
-.news-sidebar {
-    background: var(--bg-panel);
-    border-radius: 20px;
-    padding: 20px;
-    border: 1px solid var(--border);
-}
-
-.news-item {
-    background: #1e293b;
-    padding: 12px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    font-size: 0.85rem;
-    border-left: 4px solid var(--accent);
-}
-
-/* Grid General */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 15px;
-    padding: 20px;
-}
-
-.section-title { text-align: center; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; }
-
-/* Layout Equipo */
-.search-container {
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-#busqueda-equipo {
-    width: 100%;
-    padding: 15px;
-    background: var(--bg-panel);
-    border: 2px solid var(--border);
-    border-radius: 50px;
-    color: white;
-    font-size: 1.1rem;
-}
-
-.equipo-layout {
-    display: grid;
-    grid-template-columns: 1fr 350px; /* Izquierda flexible, derecha fija */
-    gap: 20px;
-    height: calc(100vh - 200px);
-}
-
-.sagas-container {
-    overflow-y: auto;
-    padding-right: 10px;
-}
-
-.saga-section {
-    margin-bottom: 30px;
-}
-
-.saga-title {
-    border-bottom: 2px solid var(--accent);
-    padding-bottom: 5px;
-    margin-bottom: 15px;
-    color: var(--accent);
-    text-transform: uppercase;
-}
-
-/* Panel de Información Derecha */
-.info-panel {
-    background: var(--bg-panel);
-    border: 2px solid var(--border);
-    border-radius: 20px;
-    padding: 20px;
-    position: sticky;
-    top: 0;
-    height: fit-content;
-}
-
-.info-photo {
-    font-size: 8rem;
-    text-align: center;
-    background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
-    border-radius: 15px;
-    margin-bottom: 20px;
-}
-
-.info-name { text-align: center; color: var(--accent); margin: 10px 0; }
-.info-desc { font-size: 0.9rem; color: var(--text-dim); line-height: 1.4; height: 60px; }
-
-.info-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.stat-box {
-    background: var(--bg-dark);
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    text-align: center;
-    border: 1px solid var(--border);
-}
-
-.stat-box strong { display: block; color: var(--accent); }
-
-/* Recuadros de personajes con contador */
+/* 1. ACERCAR EL CONTADOR x2, x5 (Estaba muy lejos en tu captura) */
 .card-stack {
     position: relative;
     display: inline-block;
+    margin: 5px; /* Espacio entre cartas */
 }
 
 .stack-count {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: 2px !important;   /* Lo bajamos para que toque la carta */
+    right: 2px !important; /* Lo metemos hacia adentro */
     background: var(--accent);
     color: black;
-    padding: 2px 8px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+/* 2. ARREGLAR LA BATALLA (Para que no se vea abajo, sino encima de todo) */
+#battle-screen {
+    position: fixed; /* Flota sobre las pestañas */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-dark); /* Fondo sólido */
+    z-index: 9999; /* Por encima de la navegación y todo lo demás */
+    display: none; /* Se activa con 'flex' desde logic.js */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Estilos internos de la arena de batalla */
+.battle-arena {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 30px;
+}
+
+.fighter-emoji { font-size: 8rem; margin: 20px 0; }
+
+/* 3. MENÚ DE SELECCIÓN DE COPIAS (MODAL) */
+#overlay-copias {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-copias-content {
+    background: var(--bg-panel);
+    border: 2px solid var(--accent);
+    padding: 25px;
+    border-radius: 20px;
+    width: 320px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+.copia-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background: var(--bg-dark);
+    border: 1px solid var(--border);
     border-radius: 10px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    z-index: 10;
+}
+
+/* Estilo de carta seleccionada en equipo */
+.card.active-team {
+    border: 2px solid var(--accent) !important;
+    background: rgba(56, 189, 248, 0.1);
+    box-shadow: 0 0 15px var(--accent-glow);
 }
