@@ -1,5 +1,5 @@
 const DB = [
-    { id: 1, nombre: "Bulbasaur", emoji: "🍃", saga: "Pokémon", tipo: "planta", rareza: "comun" },
+    { id: 1, nombre: "Bulbasaur", emoji: "🍃", saga: "Pokémon", tipo: "planta", rareza: "comun", sprite: "https://www.pngfind.com/mpng/hJxbTRw_16-bit-pixels-lion-png-bulbasaur-pixel-art/" },
     { id: 4, nombre: "Charmander", emoji: "🔥", saga: "Pokémon", tipo: "fuego", rareza: "comun" },
     { id: 7, nombre: "Squirtle", emoji: "💧", saga: "Pokémon", tipo: "agua", rareza: "comun" },
     { id: 101, nombre: "Goku", emoji: "👊", saga: "Dragon Ball", tipo: "fuego", rareza: "legendario" },

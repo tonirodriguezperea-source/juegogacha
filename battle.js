@@ -139,8 +139,8 @@
         if(!p || !e) return;
         document.getElementById('player-hp-bar').style.width = Math.max(0, (p.hp/p.maxHp)*100) + "%";
         document.getElementById('enemy-hp-bar').style.width = Math.max(0, (e.hp/e.maxHp)*100) + "%";
-        document.getElementById('player-battle-img').innerText = p.emoji;
-        document.getElementById('enemy-battle-img').innerText = e.emoji;
+        document.getElementById('player-battle-img').innerHTML = obtenerImagenHTML(p, "luchador-sprite");
+        document.getElementById('enemy-battle-img').innerHTML = obtenerImagenHTML(e, "luchador-sprite");
         document.getElementById('player-battle-name').innerText = `${p.nombre} (LV.${p.lvl})`;
         document.getElementById('enemy-battle-name').innerText = `${e.nombre} (LV.${e.lvl})`;
         

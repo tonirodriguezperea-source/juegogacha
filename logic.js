@@ -1,3 +1,11 @@
+function obtenerImagenHTML(p, claseExtra = "") {
+    // Si el personaje tiene sprite en la base de datos, devuelve una imagen
+    if (p.sprite) {
+        return `<img src="${p.sprite}" class="sprite-img ${claseExtra}" alt="${p.nombre}">`;
+    }
+    // Si no tiene foto, devuelve el emoji de siempre
+    return `<span class="emoji-img ${claseExtra}">${p.emoji}</span>`;
+}
 // Carga inicial de datos
 let inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
 let equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
@@ -101,7 +109,7 @@ function mostrarInfo(id) {
         saga: document.getElementById('info-saga')
     };
 
-    if (elements.photo) elements.photo.innerText = p.emoji;
+    if (elements.photo) elements.photo.innerHTML = obtenerImagenHTML(p)
     if (elements.name) elements.name.innerText = p.nombre;
     if (elements.desc) elements.desc.innerText = descripciones[p.id] || "Héroe listo para la batalla.";
     if (elements.dex) elements.dex.innerText = p.id;
@@ -162,7 +170,7 @@ function renderLobby() {
     if (team.length === 0) {
         display.innerHTML = `<p style="font-size:1rem; color:var(--text-dim)">No hay héroes seleccionados</p>`;
     } else {
-        display.innerHTML = team.map(p => `<span>${p.emoji}</span>`).join('');
+        display.innerHTML = team.map(p => `<span>${obtenerImagenHTML(p)}</span>`).join('');
     }
 }
 
@@ -173,7 +181,7 @@ function renderDex() {
         const tiene = inventario.some(inv => inv.id === p.id);
         return `
             <div class="card" style="opacity:${tiene ? 1 : 0.2}; filter:${tiene ? 'none' : 'grayscale(100%)'}">
-                <span style="font-size:2.5rem">${p.emoji}</span>
+                <span style="font-size:2.5rem">${obtenerImagenHTML(p)}</span>
                 <div style="font-size:0.7rem; margin-top:5px;">${tiene ? p.nombre : '???'}</div>
             </div>`;
     }).join('');
@@ -187,4 +195,11 @@ function borrarPartida() {
         alert("Memoria borrada. Reiniciando juego...");
         location.reload();
     }
+}
+
+function obtenerImagenHTML(personaje, claseCustom = "") {
+    if (personaje.sprite) {
+        return `<img src="${personaje.sprite}" class="sprite-render ${claseCustom}" alt="${personaje.nombre}">`;
+    }
+    return `<span class="emoji-render ${claseCustom}">${personaje.emoji}</span>`;
 }

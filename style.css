@@ -245,3 +245,17 @@ nav {
     margin-top: 5px;
     color: var(--text-dim);
 }
+
+.sprite-render {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Para que no se deforme */
+    display: block;
+    margin: 0 auto;
+}
+
+/* Ajuste específico para que en el combate se vea grande */
+.luchador-sprite {
+    transform: scale(1.5); /* Ajusta según necesites */
+    image-rendering: pixelated; /* Si usas sprites de 8 bits como Bulbasaur, esto los hace ver nítidos */
+}
