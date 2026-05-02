@@ -2,33 +2,65 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gacha Quest</title>
+    <title>Gacha Quest | Hub Principal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav>
         <button class="nav-btn" onclick="mostrar('lobby')">🏠 Inicio</button>
         <button class="nav-btn" onclick="mostrar('equipo')">🛡️ Equipo</button>
+        <button class="nav-btn" onclick="mostrar('pokedex')">📖 Dex</button>
         <button class="nav-btn gacha-btn" onclick="tirarGacha()">✨ Invocar</button>
     </nav>
 
     <div class="viewport">
         <div id="pantalla-lobby" class="pantalla">
-            <div id="hero-display" class="info-photo"></div>
-            <button class="nav-btn" style="width:100%; padding:20px; font-size:1.5rem" onclick="iniciarBatalla()">¡A LUCHAR!</button>
+            <div class="lobby-container">
+                <div class="main-stage">
+                    <div id="hero-display" class="hero-display"></div>
+                    <button class="btn-play" onclick="iniciarBatalla()">¡A LUCHAR!</button>
+                </div>
+                <aside class="news-sidebar">
+                    <h3>NOTICIAS</h3>
+                    <div class="news-item"><b>Evento:</b> ¡Probabilidad x2 en Legendarios!</div>
+                    <div class="news-item"><b>Tip:</b> Usa el tipo Agua contra el Fuego.</div>
+                    <aside class="news-sidebar">
+    <h3>NOTICIAS</h3>
+    <div class="news-item"><b>Evento:</b> ¡Probabilidad x2 en Legendarios!</div>
+    <div class="news-item"><b>Tip:</b> Usa el tipo Agua contra el Fuego.</div>
+    
+    <button class="nav-btn" 
+            style="width: 100%; margin-top: 20px; border-color: var(--danger); color: var(--danger);" 
+            onclick="borrarPartida()">
+        🗑️ Borrar Partida
+    </button>
+</aside>
+                </aside>
+            </div>
         </div>
 
         <div id="pantalla-equipo" class="pantalla" style="display:none;">
+            <div class="search-container">
+                <input type="text" id="busqueda-equipo" placeholder="🔍 Buscar héroe..." oninput="renderEquipo()">
+            </div>
             <div class="equipo-layout">
-                <div id="sagas-list"></div>
+                <div id="sagas-list" class="sagas-container"></div>
                 <aside class="info-panel">
                     <div id="info-photo" class="info-photo">❓</div>
-                    <h2 id="info-name">Héroe</h2>
-                    <p id="info-desc">Pasa el ratón para ver detalles.</p>
-                    <p>Dex: <span id="info-dex">-</span> | Tipo: <span id="info-tipo">-</span></p>
-                    <p>Saga: <span id="info-saga">-</span></p>
+                    <h2 id="info-name" class="info-name">Héroe</h2>
+                    <p id="info-desc" class="info-desc">Selecciona un personaje.</p>
+                    <div class="info-stats">
+                        <div class="stat-box"><strong>Nº Dex</strong> <span id="info-dex">-</span></div>
+                        <div class="stat-box"><strong>Tipo</strong> <span id="info-tipo">-</span></div>
+                        <div class="stat-box"><strong>Saga</strong> <span id="info-saga">-</span></div>
+                    </div>
                 </aside>
             </div>
+        </div>
+
+        <div id="pantalla-pokedex" class="pantalla" style="display:none;">
+            <h2 class="section-title">Colección</h2>
+            <div id="dex-grid" class="grid"></div>
         </div>
     </div>
 
@@ -37,25 +69,31 @@
             <div class="fighter">
                 <div class="hp-container"><div id="player-hp-bar" class="hp-fill"></div></div>
                 <div id="player-battle-img" class="fighter-emoji">❓</div>
+                <h3 id="player-battle-name">Tú</h3>
             </div>
-            <h2 style="color:var(--danger)">VS</h2>
+            <div style="font-size: 2rem; font-weight: bold; color: var(--danger);">VS</div>
             <div class="fighter">
                 <div class="hp-container"><div id="enemy-hp-bar" class="hp-fill"></div></div>
                 <div id="enemy-battle-img" class="fighter-emoji">👾</div>
+                <h3 id="enemy-battle-name">Rival</h3>
             </div>
         </div>
         <div id="battle-log"></div>
-        <button class="nav-btn" onclick="document.getElementById('battle-screen').style.display='none'">HUIR</button>
+        <div class="actions-grid">
+            <button class="nav-btn" onclick="finalizarBatalla(false)">🏳️ Huir</button>
+        </div>
     </div>
 
     <script src="database.js"></script>
     <script src="logic.js"></script>
+    <script src="battle.js"></script>
     <script>
         function mostrar(id) {
             document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
             document.getElementById('pantalla-' + id).style.display = 'block';
             if(id === 'equipo') renderEquipo();
             if(id === 'lobby') renderLobby();
+            if(id === 'pokedex') renderDex();
         }
         window.onload = () => mostrar('lobby');
     </script>
