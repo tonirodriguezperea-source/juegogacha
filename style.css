@@ -83,6 +83,14 @@ nav {
     transition: 0.2s;
 }
 
+.card-avatar {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+
 .card.active-team { border: 2px solid var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
 
 .stack-count {
@@ -109,9 +117,15 @@ nav {
     height: fit-content;
 }
 
-.info-photo { font-size: 5rem; text-align: center; margin-bottom: 15px; }
+.info-photo { 
+    height: 120px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-bottom: 15px; 
+}
 
-/* PANTALLA DE BATALLA FULLSCREEN */
+/* PANTALLA DE BATALLA */
 #battle-screen {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -132,13 +146,59 @@ nav {
     margin-bottom: 40px; 
 }
 
-.fighter { text-align: center; }
-.fighter-emoji { font-size: 6rem; margin: 15px 0; }
+/* SPRITES EN COMBATE */
+#player-battle-img, #enemy-battle-img {
+    width: 180px; 
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
+/* Clase base para imágenes */
+.sprite-render {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+/* El jugador mira a la derecha */
+.sprite-jugador {
+    transform: scaleX(-1); 
+    filter: drop-shadow(-5px 5px 10px rgba(0,0,0,0.5));
+}
+
+/* El rival mira a la izquierda (normal) */
+.sprite-rival {
+    filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.5));
+}
+
+/* Animación de respiración */
+.luchador-anim {
+    animation: flotar 3s ease-in-out infinite;
+}
+
+@keyframes flotar {
+    0%, 100% { transform: translateY(0) scaleX(-1); } /* El jugador mantiene el giro */
+    50% { transform: translateY(-10px) scaleX(-1); }
+}
+
+/* Animación específica para el rival (sin giro) */
+#enemy-battle-img .luchador-anim {
+    animation: flotarRival 3s ease-in-out infinite;
+}
+
+@keyframes flotarRival {
+    0%, 100% { transform: translateY(0) scaleX(1); }
+    50% { transform: translateY(-10px) scaleX(1); }
+}
+
+/* LOG Y HUD */
 #battle-log {
     width: 90%; 
     max-width: 600px; 
-    height: 150px;
+    height: 120px;
     background: #0f172a; 
     border: 1px solid var(--border);
     padding: 15px; 
@@ -146,31 +206,17 @@ nav {
     color: var(--text-dim); 
     margin-bottom: 20px;
     border-radius: 10px;
+    font-size: 0.9rem;
 }
 
-/* LOBBY */
-.lobby-container { display: grid; grid-template-columns: 1fr 300px; gap: 20px; min-height: 500px; margin-top: 20px; }
-.main-stage { background: radial-gradient(circle, #1e293b, #020617); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--border); padding: 40px; }
-.hero-display span { font-size: 5rem; margin: 0 10px; filter: drop-shadow(0 0 10px var(--accent)); }
-.btn-play { background: var(--accent); color: black; border: none; padding: 15px 40px; border-radius: 50px; font-weight: 900; font-size: 1.5rem; cursor: pointer; margin-top: 30px; transition: transform 0.2s; }
-.btn-play:hover { transform: scale(1.05); }
-
-.news-sidebar { background: var(--bg-panel); padding: 20px; border-radius: 20px; border: 1px solid var(--border); }
-.news-item { background: var(--bg-dark); padding: 10px; margin-bottom: 10px; border-radius: 8px; font-size: 0.8rem; border-left: 3px solid var(--accent); }
-
-/* BUSCADOR */
-.search-container { margin-bottom: 20px; }
-#busqueda-equipo { width: 100%; padding: 12px; border-radius: 50px; background: var(--bg-panel); border: 1px solid var(--border); color: white; box-sizing: border-box; }
-
-/* HUD DE COMBATE */
 .hp-wrapper {
-    width: 200px;
-    height: 20px;
+    width: 180px;
+    height: 15px;
     background: #1e293b;
     border: 2px solid #334155;
     border-radius: 10px;
-    position: relative;
     overflow: hidden;
+    margin: 10px auto;
 }
 
 .hp-fill {
@@ -180,37 +226,21 @@ nav {
     transition: width 0.5s ease-in-out;
 }
 
-.energy-container {
+/* LOBBY */
+.hero-display {
     display: flex;
+    gap: 20px;
     justify-content: center;
-    gap: 8px;
-    margin-top: 15px;
-    height: 20px;
+    margin-bottom: 20px;
 }
 
-.dot {
-    width: 14px;
-    height: 14px;
-    background: #1e293b;
-    border-radius: 50%;
-    border: 2px solid #334155;
-    transition: 0.3s;
+.lobby-hero {
+    width: 100px;
+    height: 100px;
+    filter: drop-shadow(0 0 10px var(--accent));
 }
 
-.dot.active {
-    background: #fbbf24;
-    border-color: #f59e0b;
-    box-shadow: 0 0 10px #fbbf24;
-}
-
-.vs-badge {
-    font-size: 3rem;
-    font-weight: 900;
-    color: var(--danger);
-    text-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
-    font-style: italic;
-}
-
+/* BOTONES ACCIÓN */
 .actions-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -227,76 +257,7 @@ nav {
     border-radius: 12px;
     font-weight: bold;
     cursor: pointer;
-    transition: 0.2s;
 }
 
-.btn-action:hover:not(:disabled) {
-    border-color: var(--accent);
-    background: rgba(56, 189, 248, 0.1);
-}
-
-.btn-action:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-.btn-escape {
-    grid-column: span 2;
-    margin-top: 5px;
-    color: var(--text-dim);
-}
-
-.sprite-render {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; /* Para que no se deforme */
-    display: block;
-    margin: 0 auto;
-}
-
-/* Ajuste específico para que en el combate se vea grande */
-.luchador-sprite {
-    transform: scale(1.5); /* Ajusta según necesites */
-    image-rendering: pixelated; /* Si usas sprites de 8 bits como Bulbasaur, esto los hace ver nítidos */
-}
-
-/* Contenedor de la imagen en batalla */
-#player-battle-img, #enemy-battle-img {
-    width: 150px; /* Tamaño del área del personaje */
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-/* El sprite propiamente dicho */
-.luchador-sprite {
-    width: 120px; /* Ajusta según el tamaño de tus imágenes */
-    height: auto;
-    image-rendering: pixelated; /* Mantiene el estilo retro nítido */
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
-    animation: flotar 3s ease-in-out infinite;
-}
-
-/* Efecto para el enemigo (opcional: puedes reflejarlo) */
-#enemy-battle-img .luchador-sprite {
-    transform: scaleX(-1); /* Hace que el enemigo mire hacia el jugador */
-    animation-delay: 0.5s;
-}
-
-/* Animación de movimiento suave */
-@keyframes flotar {
-    0%, 100% { transform: translateY(0px) scaleX(1); }
-    50% { transform: translateY(-10px) scaleX(1); }
-}
-
-/* Si es el enemigo y está reflejado, mantenemos el reflejo en la animación */
-#enemy-battle-img .luchador-sprite {
-    animation: flotarEnemigo 3s ease-in-out infinite;
-}
-
-@keyframes flotarEnemigo {
-    0%, 100% { transform: translateY(0px) scaleX(-1); }
-    50% { transform: translateY(-10px) scaleX(-1); }
-}
+.btn-action:hover:not(:disabled) { border-color: var(--accent); background: rgba(56, 189, 248, 0.1); }
+.btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
