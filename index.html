@@ -50,14 +50,18 @@
     <script src="battle.js"></script>
     <script>
         function mostrar(id) {
-            document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
-            document.getElementById('pantalla-' + id).style.display = 'block';
-            if(id === 'lobby') renderLobby();
-            if(id === 'equipo') renderEquipo();
-            if(id === 'pokedex') renderDex();
-        }
-        // Carga inicial
-        window.onload = () => mostrar('lobby');
+    // Ocultar todas las pantallas
+    document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
+    
+    // Mostrar la elegida
+    const pantallaActual = document.getElementById('pantalla-' + id);
+    if(pantallaActual) pantallaActual.style.display = 'block';
+
+    // EJECUTAR EL RENDER CORRESPONDIENTE
+    if(id === 'lobby') renderLobby();
+    if(id === 'equipo') renderEquipo(); // <--- ESTO ES VITAL
+    if(id === 'pokedex') renderDex();
+}
     </script>
 </body>
 </html>

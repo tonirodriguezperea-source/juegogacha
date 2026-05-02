@@ -1,41 +1,61 @@
-let inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
-let equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
+// --- logic.js ---
 
-function guardar() {
-    localStorage.setItem("gq_inv", JSON.stringify(inventario));
-    localStorage.setItem("gq_team", JSON.stringify(equipoUids));
-}
+// Función para renderizar la lista de personajes en la pantalla de EQUIPO
+function renderEquipo() {
+    const grid = document.getElementById('equipo-grid');
+    if (!grid) return;
 
-function tirarGacha() {
-    const rand = Math.random() * 100;
-    let rareza = rand < 2 ? "legendario" : rand < 10 ? "epico" : rand < 30 ? "raro" : "comun";
-    let opciones = DB.filter(p => p.rareza === rareza);
-    const base = opciones[Math.floor(Math.random() * opciones.length)];
-    
-    const nuevo = { 
-        ...base, 
-        uid: "UID-" + Date.now(), 
-        lvl: 1, 
-        xp: 0 
-    };
-    
-    inventario.push(nuevo);
-    guardar();
-    alert(`¡Invocado: ${nuevo.nombre}!`);
-    location.reload(); // Recargamos para ver cambios
-}
+    grid.innerHTML = ''; // Limpiamos para no duplicar
 
-function renderLobby() {
-    const display = document.getElementById('hero-display');
-    const team = inventario.filter(p => equipoUids.includes(p.uid));
-    
-    if (team.length === 0) {
-        display.innerHTML = '<p style="color:var(--text-dim)">Equipo vacío. ¡Ve a Equipo!</p>';
+    if (inventario.length === 0) {
+        grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">No tienes personajes. ¡Ve a invocar!</p>';
         return;
     }
 
-    display.innerHTML = team.map((p, index) => {
-        const size = index === 1 ? 'scale(1.3)' : 'scale(1)';
-        return `<span style="transform: ${size}">${p.emoji}</span>`;
-    }).join('');
+    // Agrupamos por especie (id) para mostrar cuánto tienes de cada uno
+    // Opcional: Si prefieres ver todos los duplicados, quita la lógica de "especies"
+    inventario.forEach(p => {
+        const estaEnEquipo = equipoUids.includes(p.uid);
+        
+        const card = document.createElement('div');
+        card.className = `card ${estaEnEquipo ? 'active-team' : ''}`;
+        card.style.borderColor = estaEnEquipo ? 'var(--accent)' : 'var(--border)';
+        card.onclick = () => togglePersonajeEquipo(p.uid);
+
+        card.innerHTML = `
+            <div class="rarity-line" style="background:${RAREZAS[p.rareza]}"></div>
+            <span class="card-emoji" style="font-size:3rem; display:block; margin:10px 0;">${p.emoji}</span>
+            <strong>${p.nombre}</strong><br>
+            <small style="color:var(--accent)">LV.${p.lvl}</small>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// Función para añadir/quitar del equipo (máximo 3)
+function togglePersonajeEquipo(uid) {
+    const index = equipoUids.indexOf(uid);
+    
+    if (index > -1) {
+        // Si ya está, lo quitamos
+        equipoUids.splice(index, 1);
+    } else {
+        // Si no está, comprobamos el límite de 3
+        if (equipoUids.length < 3) {
+            equipoUids.push(uid);
+        } else {
+            alert("¡El equipo está lleno! Quita a alguien primero.");
+            return;
+        }
+    }
+    
+    guardar();       // Guardamos en LocalStorage
+    renderEquipo();  // Refrescamos la pantalla de equipo
+    renderLobby();   // Refrescamos el lobby por si volvemos
+}
+
+// Asegúrate de que la función guardar existe
+function guardar() {
+    localStorage.setItem("gq_inv", JSON.stringify(inventario));
+    localStorage.setItem("gq_team", JSON.stringify(equipoUids));
 }
