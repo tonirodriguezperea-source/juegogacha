@@ -25,9 +25,6 @@
                     <div class="news-item"><b>Evento:</b> ¡Probabilidad x2 en Legendarios!</div>
                     <div class="news-item"><b>Tip:</b> Usa el tipo Agua contra el Fuego.</div>
                     <aside class="news-sidebar">
-    <h3>NOTICIAS</h3>
-    <div class="news-item"><b>Evento:</b> ¡Probabilidad x2 en Legendarios!</div>
-    <div class="news-item"><b>Tip:</b> Usa el tipo Agua contra el Fuego.</div>
     
     <button class="nav-btn" 
             style="width: 100%; margin-top: 20px; border-color: var(--danger); color: var(--danger);" 
@@ -65,17 +62,42 @@
     </div>
 
     <div id="battle-screen">
-        <div class="battle-arena">
-            <div class="fighter">
-                <div class="hp-container"><div id="player-hp-bar" class="hp-fill"></div></div>
-                <div id="player-battle-img" class="fighter-emoji">❓</div>
-                <h3 id="player-battle-name">Tú</h3>
+        <div id="battle-screen">
+    <div class="battle-arena">
+        <div class="fighter">
+            <div class="hp-wrapper">
+                <div id="player-hp-bar" class="hp-fill"></div>
+                <span class="hp-text">HP</span>
             </div>
-            <div style="font-size: 2rem; font-weight: bold; color: var(--danger);">VS</div>
-            <div class="fighter">
-                <div class="hp-container"><div id="enemy-hp-bar" class="hp-fill"></div></div>
-                <div id="enemy-battle-img" class="fighter-emoji">👾</div>
-                <h3 id="enemy-battle-name">Rival</h3>
+            <div id="player-battle-img" class="fighter-emoji">❓</div>
+            <h3 id="player-battle-name">Héroe</h3>
+            <div class="energy-container" id="player-energy">
+                </div>
+        </div>
+
+        <div class="vs-badge">VS</div>
+
+        <div class="fighter">
+            <div class="hp-wrapper">
+                <div id="enemy-hp-bar" class="hp-fill"></div>
+                <span class="hp-text">HP</span>
+            </div>
+            <div id="enemy-battle-img" class="fighter-emoji">👾</div>
+            <h3 id="enemy-battle-name">Rival</h3>
+            <div class="energy-container" id="enemy-energy"></div>
+        </div>
+    </div>
+
+    <div id="battle-log"></div>
+
+    <div class="actions-grid">
+        <button class="btn-action" onclick="playerMove('recargar')">🔋 Cargar</button>
+        <button id="btn-ataque" class="btn-action" onclick="playerMove('ataque')">⚔️ Ataque (1)</button>
+        <button id="btn-fuerte" class="btn-action" onclick="playerMove('fuerte')">💥 Fuerte (2)</button>
+        <button id="btn-defensa" class="btn-action" onclick="playerMove('defensa')">🛡️ Defensa</button>
+        <button class="btn-action btn-escape" onclick="finalizarBatalla(false)">🏳️ Huir</button>
+    </div>
+</div>
             </div>
         </div>
         <div id="battle-log"></div>
