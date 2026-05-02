@@ -1,3 +1,19 @@
+const TABLA_TIPOS = {
+    "fuego": { fuerte: "planta", debil: "agua" },
+    "agua": { fuerte: "fuego", debil: "planta" },
+    "planta": { fuerte: "agua", debil: "fuego" },
+    "guerrero": { fuerte: "monstruo", debil: "magia" }, // Ejemplo para DBZ
+    "monstruo": { fuerte: "magia", debil: "guerrero" }
+};
+
+function calcularMultiplicador(tipoAtacante, tipoDefensor) {
+    if (!tipoAtacante || !tipoDefensor) return 1;
+    const relacion = TABLA_TIPOS[tipoAtacante.toLowerCase()];
+    
+    if (relacion?.fuerte === tipoDefensor.toLowerCase()) return 1.5; // ¡Súper efectivo!
+    if (relacion?.debil === tipoDefensor.toLowerCase()) return 0.5;  // Poco efectivo...
+    return 1;
+}
 let battleState = {
     player: null,
     enemy: null,
@@ -102,6 +118,20 @@ function playerMove(tipo) {
 
     actualizarInterfazBatalla();
     verificarEstado();
+
+    // Dentro de playerMove, donde calculas el daño:
+const mult = calcularMultiplicador(p.tipo, e.tipo);
+let dmgBase = (tipo === 'fuerte') ? 35 : 15;
+let totalDmg = Math.floor((dmgBase + (p.lvl * 2)) * mult);
+
+if (battleState.enemyDefending) { // Si la IA se defendió
+    totalDmg = Math.floor(totalDmg / 2);
+    battleState.enemyDefending = false; 
+    escribirLog(`¡${e.nombre} bloqueó parte del golpe!`);
+}
+
+e.hp -= totalDmg;
+// ... resto del log con el mensaje de "Súper efectivo" si mult > 1
 }
 
 function verificarEstado() {
@@ -138,18 +168,48 @@ function turnoEnemigo() {
     const e = battleState.enemy;
     const p = battleState.player;
     
-    if (e.energy >= 1) {
-        let dmg = 12 + (e.lvl * 1.5);
-        if (battleState.isDefending) dmg = Math.floor(dmg / 2);
-        p.hp -= Math.floor(dmg);
-        e.energy--;
-        escribirLog(`${e.nombre} ataca y quita ${Math.floor(dmg)} HP.`);
+    // IA Inteligente
+    let decision;
+    const rand = Math.random();
+
+    if (e.energy >= 2 && rand > 0.3) {
+        decision = 'fuerte';
+    } else if (e.hp < 30 && e.energy >= 1 && rand > 0.5) {
+        decision = 'defensa'; // Si está muriendo, intenta aguantar
+    } else if (e.energy >= 1 && rand > 0.4) {
+        decision = 'ataque';
     } else {
-        e.energy++;
-        escribirLog(`${e.nombre} recarga.`);
+        decision = 'recargar';
     }
 
-    battleState.isDefending = false;
+    // Ejecutar decisión
+    if (decision === 'recargar') {
+        e.energy = Math.min(e.energy + 1, 3);
+        escribirLog(`${e.nombre} está concentrando energía...`);
+    } else if (decision === 'defensa') {
+        battleState.enemyDefending = true; // Necesitarás esta variable en el estado
+        escribirLog(`${e.nombre} se pone en posición defensiva.`);
+    } else {
+        // ATAQUES (Con tabla de tipos)
+        const mult = calcularMultiplicador(e.tipo, p.tipo);
+        let dmgBase = (decision === 'fuerte') ? 35 : 15;
+        let totalDmg = Math.floor((dmgBase + (e.lvl * 2)) * mult);
+
+        if (battleState.isDefending) {
+            totalDmg = Math.floor(totalDmg / 2);
+            escribirLog("¡Tu defensa redujo el daño!");
+        }
+
+        p.hp -= totalDmg;
+        e.energy -= (decision === 'fuerte') ? 2 : 1;
+
+        let msg = `${e.nombre} usa ${decision.toUpperCase()}.`;
+        if (mult > 1) msg += " ¡Es súper efectivo! 💥";
+        if (mult < 1) msg += " No es muy efectivo... 💧";
+        escribirLog(`${msg} Daño: ${totalDmg}`);
+    }
+
+    battleState.isDefending = false; // Reset de tu defensa
     battleState.turn = 'player';
     actualizarInterfazBatalla();
     if (p.hp <= 0) verificarEstado();
