@@ -17,6 +17,7 @@ body {
     min-height: 100vh;
 }
 
+/* NAVEGACIÓN */
 nav {
     display: flex;
     justify-content: center;
@@ -42,14 +43,89 @@ nav {
 .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
 .gacha-btn { background: linear-gradient(45deg, #f59e0b, #fbbf24); color: black; border: none; }
 
+/* LAYOUT PRINCIPAL */
 .viewport { padding: 20px; max-width: 1200px; margin: 0 auto; }
 
-/* CARTAS */
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; padding: 20px 0; }
-.card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; }
+/* EQUIPO Y SAGAS */
+.equipo-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 20px;
+}
+
+.saga-title {
+    border-bottom: 2px solid var(--accent);
+    color: var(--accent);
+    padding-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    padding: 20px 0;
+}
+
+/* CARTAS Y REPETIDOS */
+.card-stack {
+    position: relative;
+    display: inline-block;
+}
+
+.card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.card-avatar {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5px;
+}
+
 .card.active-team { border: 2px solid var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
 
-/* SISTEMA DE COMBATE CSS */
+.stack-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--accent);
+    color: black;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    z-index: 10;
+}
+
+/* PANEL INFO DERECHA */
+.info-panel {
+    background: var(--bg-panel);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    padding: 20px;
+    position: sticky;
+    top: 90px;
+    height: fit-content;
+}
+
+.info-photo { 
+    height: 120px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-bottom: 15px; 
+}
+
+/* PANTALLA DE BATALLA */
 #battle-screen {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -61,56 +137,127 @@ nav {
     align-items: center;
 }
 
-.battle-arena { display: flex; justify-content: space-around; align-items: center; width: 100%; max-width: 900px; margin-bottom: 40px; }
+.battle-arena { 
+    display: flex; 
+    justify-content: space-around; 
+    align-items: center;
+    width: 100%; 
+    max-width: 900px; 
+    margin-bottom: 40px; 
+}
 
-/* Contenedores de los personajes */
+/* SPRITES EN COMBATE */
 #player-battle-img, #enemy-battle-img {
-    width: 220px;
-    height: 220px;
+    width: 180px; 
+    height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
 }
 
-/* El sprite base */
+/* Clase base para imágenes */
 .sprite-render {
     max-width: 100%;
     max-height: 100%;
+    object-fit: contain;
     image-rendering: pixelated;
 }
 
-/* JUGADOR: Mirando a la derecha */
+/* El jugador mira a la derecha */
 .sprite-jugador {
-    width: 180px !important;
-    height: auto !important;
-    transform: scaleX(-1);
+    transform: scaleX(-1); 
     filter: drop-shadow(-5px 5px 10px rgba(0,0,0,0.5));
 }
 
-/* RIVAL: Mirando a la izquierda */
+/* El rival mira a la izquierda (normal) */
 .sprite-rival {
-    width: 180px !important;
-    height: auto !important;
     filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.5));
 }
 
-/* Animación de combate */
-.luchador-anim { animation: idleBattle 3s ease-in-out infinite; }
-
-@keyframes idleBattle {
-    0%, 100% { margin-bottom: 0px; }
-    50% { margin-bottom: 20px; }
+/* Animación de respiración */
+.luchador-anim {
+    animation: flotar 3s ease-in-out infinite;
 }
 
-/* HUD COMBATE */
-.hp-wrapper { width: 200px; height: 18px; background: #1e293b; border: 2px solid #334155; border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
-.hp-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #4ade80); width: 100%; transition: width 0.5s; }
-.energy-container { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
-.dot { width: 12px; height: 12px; background: #1e293b; border-radius: 50%; border: 2px solid #334155; }
-.dot.active { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
-#battle-log { width: 90%; max-width: 600px; height: 120px; background: #0f172a; border: 1px solid var(--border); padding: 15px; overflow-y: auto; color: var(--text-dim); border-radius: 10px; margin-bottom: 20px; }
-.actions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 90%; max-width: 500px; }
-.btn-action { background: var(--bg-panel); border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+@keyframes flotar {
+    0%, 100% { transform: translateY(0) scaleX(-1); } /* El jugador mantiene el giro */
+    50% { transform: translateY(-10px) scaleX(-1); }
+}
+
+/* Animación específica para el rival (sin giro) */
+#enemy-battle-img .luchador-anim {
+    animation: flotarRival 3s ease-in-out infinite;
+}
+
+@keyframes flotarRival {
+    0%, 100% { transform: translateY(0) scaleX(1); }
+    50% { transform: translateY(-10px) scaleX(1); }
+}
+
+/* LOG Y HUD */
+#battle-log {
+    width: 90%; 
+    max-width: 600px; 
+    height: 120px;
+    background: #0f172a; 
+    border: 1px solid var(--border);
+    padding: 15px; 
+    overflow-y: auto; 
+    color: var(--text-dim); 
+    margin-bottom: 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+
+.hp-wrapper {
+    width: 180px;
+    height: 15px;
+    background: #1e293b;
+    border: 2px solid #334155;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px auto;
+}
+
+.hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    width: 100%;
+    transition: width 0.5s ease-in-out;
+}
+
+/* LOBBY */
+.hero-display {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.lobby-hero {
+    width: 100px;
+    height: 100px;
+    filter: drop-shadow(0 0 10px var(--accent));
+}
+
+/* BOTONES ACCIÓN */
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 95%;
+    max-width: 500px;
+}
+
+.btn-action {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 .btn-action:hover:not(:disabled) { border-color: var(--accent); background: rgba(56, 189, 248, 0.1); }
-.btn-action:disabled { opacity: 0.3; }
+.btn-action:disabled { opacity: 0.3; cursor: not-allowed; }

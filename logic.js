@@ -1,8 +1,10 @@
-// 1. Configuración Visual
+// 1. Configuración Visual (CORREGIDA PARA COMBATE)
 function obtenerImagenHTML(p, claseExtra = "") {
     if (p && p.sprite) {
+        // Ahora inyecta correctamente las clases de giro y animación
         return `<img src="${p.sprite}" class="sprite-render ${claseExtra}" alt="${p.nombre}">`;
     }
+    // Si no hay sprite, mantiene el emoji pero permite clases
     return `<span class="emoji-render ${claseExtra}">${p && p.emoji ? p.emoji : '❓'}</span>`;
 }
 
@@ -164,7 +166,8 @@ function renderLobby() {
     if (team.length === 0) {
         display.innerHTML = `<p style="font-size:1rem; color:#888">No hay héroes seleccionados</p>`;
     } else {
-        display.innerHTML = team.map(p => `<div class="lobby-hero">${obtenerImagenHTML(p)}</div>`).join('');
+        // Añadimos una clase de tamaño para que en el lobby no se vean minúsculos
+        display.innerHTML = team.map(p => `<div class="lobby-hero">${obtenerImagenHTML(p, "sprite-lobby")}</div>`).join('');
     }
 }
 
