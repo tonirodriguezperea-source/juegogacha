@@ -1,5 +1,4 @@
 {
-    // Definición segura
     const TABLA_TIPOS = {
         "fuego": { fuerte: "planta", debil: "agua" },
         "agua": { fuerte: "fuego", debil: "planta" },
@@ -8,7 +7,6 @@
         "monstruo": { fuerte: "magia", debil: "guerrero" }
     };
 
-    // Estado de batalla
     window.battleState = {
         player: null, enemy: null, turn: 'player',
         playerTeam: [], enemyTeam: [],
@@ -16,10 +14,7 @@
         isDefending: false, enemyDefending: false
     };
 
-    // FUNCIÓN PRINCIPAL (Exportada a la ventana global)
     window.iniciarBatalla = function() {
-        console.log("Iniciando motor de combate...");
-        
         const equipo = inventario.filter(p => equipoUids.includes(p.uid));
         if (equipo.length === 0) return alert("¡Tu equipo está vacío!");
 
@@ -68,12 +63,10 @@
             const mult = calcularMult(p.tipo, e.tipo);
             let dmg = Math.floor(((tipo === 'fuerte' ? 35 : 15) + (p.lvl * 2)) * mult);
             if (battleState.enemyDefending) { dmg = Math.floor(dmg / 2); battleState.enemyDefending = false; }
-            
             e.hp -= dmg;
             p.energy -= (tipo === 'fuerte' ? 2 : 1);
             escribirLog(`${p.nombre} ataca (${dmg} daño). ${mult > 1 ? '¡Efectivo!' : ''}`);
         }
-
         actualizarInterfazBatalla();
         checkEstado();
     };
@@ -137,10 +130,14 @@
         const p = battleState.player;
         const e = battleState.enemy;
         if(!p || !e) return;
+        
         document.getElementById('player-hp-bar').style.width = Math.max(0, (p.hp/p.maxHp)*100) + "%";
         document.getElementById('enemy-hp-bar').style.width = Math.max(0, (e.hp/e.maxHp)*100) + "%";
-        document.getElementById('player-battle-img').innerHTML = obtenerImagenHTML(p, "luchador-sprite");
-        document.getElementById('enemy-battle-img').innerHTML = obtenerImagenHTML(e, "luchador-sprite");
+        
+        // APLICACIÓN DE CLASES PARA LOS SPRITES
+        document.getElementById('player-battle-img').innerHTML = obtenerImagenHTML(p, "sprite-jugador luchador-anim");
+        document.getElementById('enemy-battle-img').innerHTML = obtenerImagenHTML(e, "sprite-rival luchador-anim");
+        
         document.getElementById('player-battle-name').innerText = `${p.nombre} (LV.${p.lvl})`;
         document.getElementById('enemy-battle-name').innerText = `${e.nombre} (LV.${e.lvl})`;
         
