@@ -664,3 +664,15 @@ nav {
     0% { transform: scale(0) rotate(720deg); opacity: 0; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
+
+/* El Pokémon del JUGADOR (Izquierda) debe mirar a la DERECHA */
+.player-side .sprite-container img {
+    transform: scaleX(-1); /* Esto lo gira horizontalmente */
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+}
+
+/* El Pokémon ENEMIGO (Derecha) ya suele mirar a la IZQUIERDA por defecto */
+.enemy-side .sprite-container img {
+    transform: scaleX(1); /* Lo dejamos normal */
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+}
