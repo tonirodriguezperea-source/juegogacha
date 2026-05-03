@@ -431,3 +431,20 @@ nav {
     width: 150px !important;
     height: 150px !important;
 }
+
+/* Esto girará al jugador para que mire al rival (a la derecha) */
+.sprite-jugador {
+    transform: scaleX(-1) !important;
+    /* Si tienes filtros de sombra, asegúrate de que se mantengan */
+    filter: drop-shadow(-5px 5px 0px rgba(0,0,0,0.2)); 
+}
+
+/* El rival no se toca, para que mire a la izquierda (hacia ti) */
+.sprite-rival {
+    transform: scaleX(1) !important;
+}
+
+/* Ajuste para que la animación no rompa el giro */
+.luchador-anim {
+    display: inline-block;
+}
