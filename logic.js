@@ -68,105 +68,14 @@ window.obtenerImagenHTML = function(p, clases = "") {
 // ================================================================
 // 3. SISTEMA DE TIENDA DINÁMICA (ROTACIÓN DIARIA)
 // ================================================================
-function comprobarRotacionTienda() {
-    const hoy = new Date().toLocaleDateString();
-    if (ultimaFechaTienda !== hoy) {
-        if (typeof DB !== 'undefined' && DB.length > 0) {
-            // Mezclar y seleccionar 6 bichos aleatorios
-            let mezclados = [...DB].sort(() => 0.5 - Math.random());
-            stockTienda = mezclados.slice(0, 6);
-            ultimaFechaTienda = hoy;
-            guardar();
-            console.log("🏪 Tienda rotada con éxito para el día: " + hoy);
-        }
-    }
-}
 
-function renderTienda() {
-    const grid = document.getElementById('tienda-grid');
-    if (!grid) return;
-    comprobarRotacionTienda();
-    
-    let html = "";
 
-    // ARTÍCULO FIJO: Ticket de Invocación
-    html += `
-        <div class="item-tienda fijo" style="background:#1e1e2e; padding:20px; border-radius:15px; border:2px solid #f59e0b; text-align:center;">
-            <div style="font-size:3rem; margin-bottom:10px;">🎟️</div>
-            <h4 style="color:white; margin:5px 0;">Ticket Gacha</h4>
-            <p style="color:#aaa; font-size:0.8rem;">Úsalo para invocar héroes</p>
-            <button onclick="comprarTicket()" style="background:#f59e0b; color:black; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%; margin-top:15px; transition:0.3s;">
-                500 💰
-            </button>
-        </div>
-    `;
 
-    // ARTÍCULOS ROTATIVOS: 6 Bichos
-    stockTienda.forEach(p => {
-        const copias = inventario.filter(inv => inv.id === p.id).length;
-        const estaLleno = copias >= 10;
-        const precio = PRECIOS_RAREZA[p.rareza] || 1000;
-        const color = RAREZAS[p.rareza] || '#4ade80';
-
-        html += `
-            <div class="item-tienda" style="background:#1a1a2e; padding:20px; border-radius:15px; border:2px solid ${estaLleno ? '#333' : color}; text-align:center; opacity: ${estaLleno ? '0.6' : '1'}; transition: 0.3s;">
-                <div style="margin-bottom:15px; transform: scale(1.2);">${obtenerImagenHTML(p)}</div>
-                <h4 style="color:white; margin:5px 0; font-size:1.1rem;">${p.nombre}</h4>
-                <p style="color:${color}; font-size:0.75rem; font-weight:bold; text-transform:uppercase;">${p.rareza}</p>
-                <p style="color:#666; font-size:0.8rem; margin:10px 0;">Posees: ${copias}/10</p>
-                
-                ${estaLleno ? 
-                    `<button disabled style="background:#333; color:#777; border:none; padding:12px; border-radius:8px; width:100%; cursor:not-allowed; font-weight:bold;">COMPLETADO</button>` :
-                    `<button onclick="comprarBicho('${p.id}', ${precio})" style="background:${color}; color:black; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%; transition:0.3s;">
-                        ${precio} 💰
-                    </button>`
-                }
-            </div>
-        `;
-    });
-    grid.innerHTML = html;
-}
 
 // ================================================================
 // 4. FUNCIONES DE COMPRA Y TRANSACCIÓN
 // ================================================================
-function comprarTicket() {
-    if (monedas >= 500) {
-        monedas -= 500;
-        ticketsNormales += 1;
-        guardar();
-        actualizarHUD();
-        renderTienda();
-        alert("🎟️ ¡Has obtenido 1 Ticket de Invocación!");
-    } else {
-        alert("❌ Monedas insuficientes. ¡Sigue luchando!");
-    }
-}
 
-function comprarBicho(id, precio) {
-    const copias = inventario.filter(inv => inv.id == id).length;
-    if (copias >= 10) return alert("⚠️ Ya tienes el máximo de copias (10/10).");
-
-    if (monedas >= precio) {
-        const bichoBase = DB.find(p => p.id == id);
-        if (!bichoBase) return;
-
-        monedas -= precio;
-        const nuevoBicho = { 
-            ...bichoBase, 
-            uid: "UID-" + Date.now() + "-" + Math.floor(Math.random()*1000), 
-            lvl: 1 
-        };
-        inventario.push(nuevoBicho);
-        
-        guardar();
-        actualizarHUD();
-        renderTienda();
-        alert(`✅ ¡${bichoBase.nombre} se ha unido a tu colección!`);
-    } else {
-        alert("❌ No tienes suficientes monedas para este héroe.");
-    }
-}
 
 // ================================================================
 // 5. GESTIÓN DE EQUIPO Y MENÚ DE COPIAS
