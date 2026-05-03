@@ -1,16 +1,14 @@
 // 1. PROTECCIÓN DE TIPOS: Usamos var para que el navegador no bloquee el script si se recarga
-if (typeof TABLA_TIPOS === 'undefined') {
-    var TABLA_TIPOS = {
-        "fuego": { fuerte: "planta", debil: "agua" },
-        "agua": { fuerte: "fuego", debil: "planta" },
-        "planta": { fuerte: "agua", debil: "fuego" },
-        "guerrero": { fuerte: "monstruo", debil: "magia" },
-        "monstruo": { fuerte: "magia", debil: "guerrero" }
-    };
-}
+window.TABLA_TIPOS = window.TABLA_TIPOS || {
+    "fuego": { fuerte: "planta", debil: "agua" },
+    "agua": { fuerte: "fuego", debil: "planta" },
+    "planta": { fuerte: "agua", debil: "fuego" },
+    "guerrero": { fuerte: "monstruo", debil: "magia" },
+    "monstruo": { fuerte: "magia", debil: "guerrero" }
+};
 
 // 2. ESTADO DE BATALLA GLOBAL (Usamos window para asegurar acceso total)
-window.battleState = {
+window.battleState = window.battleState || {
     player: null, 
     enemy: null, 
     turn: 'player',
@@ -24,20 +22,25 @@ window.battleState = {
 
 // 3. FUNCIÓN PRINCIPAL: Inicia el combate
 window.iniciarBatalla = function() {
-    console.log("Pulsado!");
+    console.log("¡BOTÓN DETECTADO!"); 
     
-    if (typeof inventario === 'undefined') return alert("Error: Inventario no cargado");
+    if (typeof inventario === 'undefined') {
+        alert("Error: No se encuentra el inventario. Revisa el orden de los scripts.");
+        return;
+    }
 
     const equipo = inventario.filter(p => equipoUids.includes(p.uid));
     if (equipo.length === 0) return alert("¡Tu equipo está vacío!");
 
-    battleState.playerTeam = equipo;
-    battleState.enemyTeam = generarRivales(equipo);
-    battleState.playerIdx = 0;
-    battleState.enemyIdx = 0;
+    // Configuramos el estado usando la variable global
+    window.battleState.playerTeam = equipo;
+    window.battleState.enemyTeam = generarRivales(equipo);
+    window.battleState.playerIdx = 0;
+    window.battleState.enemyIdx = 0;
 
     prepararLuchadores();
     
+    // Cambiamos las pantallas
     document.getElementById('pantalla-lobby').style.display = 'none';
     document.getElementById('battle-screen').style.display = 'flex';
     
