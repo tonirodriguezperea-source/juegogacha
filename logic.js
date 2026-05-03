@@ -142,23 +142,29 @@ function toggleEquipo(uid) {
 }
 
 // --- FUNCIÓN RENDER LOBBY MEJORADA PARA QUE SE VEAN LOS DIBUJOS ---
-function renderLobby() {
-    const team = inventario.filter(p => equipoUids.includes(p.uid));
-    const display = document.getElementById('hero-display');
-    if (!display) return;
+window.renderLobby = function() {
+    const contenedor = document.getElementById('hero-display');
+    if (!contenedor) return;
     
-    if (team.length === 0) {
-        display.innerHTML = `<p style="font-size:1.2rem; color:#888">¡Tu equipo está vacío!</p>`;
-    } else {
-        // Usamos la clase 'lobby-hero' que definimos en el CSS para que los dibujos salgan grandes
-        display.innerHTML = team.map(p => `
-            <div class="lobby-hero">
-                ${obtenerImagenHTML(p)}
-                <div style="text-align:center; font-weight:bold; margin-top:10px;">${p.nombre}</div>
+    // Obtenemos los personajes que están en el equipo actual
+    const equipo = inventario.filter(p => equipoUids.includes(p.uid));
+    
+    contenedor.innerHTML = "";
+    
+    equipo.forEach(p => {
+        const div = document.createElement('div');
+        div.className = "lobby-character-card";
+        // Usamos la misma función obtenerImagenHTML que usas en el combate
+        div.innerHTML = `
+            <div class="lobby-sprite">${obtenerImagenHTML(p)}</div>
+            <div class="lobby-info">
+                <span class="tipo-icon">${obtenerIconoTipo(p.tipo)}</span>
+                <p>${p.nombre}</p>
             </div>
-        `).join('');
-    }
-}
+        `;
+        contenedor.appendChild(div);
+    });
+};
 
 function renderDex() {
     const grid = document.getElementById('dex-grid');
