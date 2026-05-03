@@ -142,4 +142,3 @@ window.actualizarHUD = function() {
     if (elMonedas) {
         elMonedas.innerText = monedas;
     }
-};
