@@ -1,11 +1,19 @@
 // 1. Configuración Visual (CORREGIDA PARA QUE SE VEAN LOS DIBUJOS)
-function obtenerImagenHTML(p, claseExtra = "") {
-    if (p && p.sprite) {
-        // Usamos siempre 'sprite-render' para que el CSS le de el tamaño correcto
-        return `<img src="${p.sprite}" class="sprite-render ${claseExtra}" alt="${p.nombre}">`;
-    }
-    return `<span class="emoji-render ${claseExtra}">${p && p.emoji ? p.emoji : '❓'}</span>`;
-}
+window.obtenerImagenHTML = function(p, clases = "") {
+    if (!p) return "";
+
+    // Si el personaje tiene una ruta de imagen definida
+    if (p.img) {
+        return `<img src="${p.img}" 
+                     class="sprite ${clases}" 
+                     alt="${p.nombre}" 
+                     onerror="this.style.display='none'; this.nextSibling.style.display='block';">
+                <span class="sprite-emoji ${clases}" style="display:none;">${p.emoji || "❓"}</span>`;
+    } 
+    
+    // Si no tiene imagen en la base de datos, tira de emoji
+    return `<span class="sprite-emoji ${clases}">${p.emoji || "❓"}</span>`;
+};
 
 // 2. Carga inicial de datos (TU CÓDIGO ORIGINAL)
 let inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
@@ -146,24 +154,21 @@ window.renderLobby = function() {
     const contenedor = document.getElementById('hero-display');
     if (!contenedor) return;
     
-    // Obtenemos los personajes que están en el equipo actual
+    // Verificamos qué hay en el equipo
     const equipo = inventario.filter(p => equipoUids.includes(p.uid));
-    
-    contenedor.innerHTML = "";
-    
-    equipo.forEach(p => {
-        const div = document.createElement('div');
-        div.className = "lobby-character-card";
-        // Usamos la misma función obtenerImagenHTML que usas en el combate
-        div.innerHTML = `
-            <div class="lobby-sprite">${obtenerImagenHTML(p)}</div>
-            <div class="lobby-info">
-                <span class="tipo-icon">${obtenerIconoTipo(p.tipo)}</span>
-                <p>${p.nombre}</p>
-            </div>
-        `;
-        contenedor.appendChild(div);
-    });
+    console.log("Equipo detectado para Lobby:", equipo);
+
+    if (equipo.length === 0) {
+        contenedor.innerHTML = "<p style='color:white'>Equipo vacío. Ve a la pestaña EQUIPO.</p>";
+        return;
+    }
+
+    contenedor.innerHTML = equipo.map(p => `
+        <div class="lobby-character-card">
+            <div class="lobby-sprite">${obtenerImagenHTML(p, "luchador-anim")}</div>
+            <p>${p.nombre}</p>
+        </div>
+    `).join("");
 };
 
 function renderDex() {
@@ -185,3 +190,18 @@ function borrarPartida() {
         location.reload();
     }
 }
+
+window.obtenerImagenHTML = function(p, clases = "") {
+    if (!p) return `<span class="sprite ${clases}">❓</span>`;
+
+    // Si tiene una URL de imagen
+    if (p.img && p.img.includes('http')) {
+        return `<img src="${p.img}" class="sprite ${clases}" onerror="this.src='https://via.placeholder.com/150?text=Error'">`;
+    } 
+    
+    // Si no tiene imagen, usamos el emoji. 
+    // IMPORTANTE: Si p.emoji no existe, usamos el de la DB o uno por defecto.
+    const emojiMostrar = p.emoji || (DB.find(d => d.id === p.id)?.emoji) || "👤";
+    
+    return `<span class="sprite ${clases}" style="display: inline-block;">${emojiMostrar}</span>`;
+};
