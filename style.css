@@ -664,19 +664,17 @@ nav {
     0% { transform: scale(0) rotate(720deg); opacity: 0; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
-
-/* El Pokémon del JUGADOR (Izquierda) debe mirar a la DERECHA */
-.player-side .sprite-container img {
-    transform: scaleX(-1); /* Esto lo gira horizontalmente */
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+/* Localizamos el contenedor de la IZQUIERDA (Jugador) y giramos su imagen */
+#player-battle-img img {
+    transform: scaleX(-1) !important;
+    filter: drop-shadow(-5px 10px 15px rgba(0,0,0,0.4));
 }
 
-/* El Pokémon ENEMIGO (Derecha) ya suele mirar a la IZQUIERDA por defecto */
-.enemy-side .sprite-container img {
-    transform: scaleX(1); /* Lo dejamos normal */
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
+/* Localizamos el contenedor de la DERECHA (Enemigo) y nos aseguramos de que NO se gire */
+#enemy-battle-img img {
+    transform: scaleX(1) !important;
+    filter: drop-shadow(5px 10px 15px rgba(0,0,0,0.4));
 }
-
 .player-side {
     transform: translateY(20px); /* Un poco más abajo */
 }
