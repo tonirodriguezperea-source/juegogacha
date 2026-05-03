@@ -1,19 +1,16 @@
-/** * GACHA SYSTEM 2.0  - Optimizado */
-
-// Cargamos datos al inicio
-let monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
-let ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 10;
+/** * GACHA SYSTEM 2.0 - Optimizado y Sincronizado */
 
 window.invocar = function(saga) {
-    // 1. Sincronizar tickets desde el almacenamiento real
+    // 1. Sincronizar datos reales antes de empezar
+    // Usamos las variables globales que ya existen en logic.js para no crear duplicados
     ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
 
     if (ticketsNormales <= 0) {
-        alert("¡No tienes tickets normales! Consigue más en batalla.");
+        alert("¡No tienes tickets! Consigue más en la tienda o en batalla.");
         return;
     }
 
-    // 2. FILTRO ULTRA-REFORZADO
+    // 2. FILTRO DE SAGA
     const busquedaLimpia = saga.toLowerCase().replace(/\s/g, ""); 
 
     const poolSaga = DB.filter(p => {
@@ -22,7 +19,6 @@ window.invocar = function(saga) {
     });
     
     if (poolSaga.length === 0) {
-        console.error("DEBUG GACHA: Buscaste:", busquedaLimpia);
         alert("No se han encontrado personajes de: " + saga);
         return;
     }
@@ -44,91 +40,72 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const objeto = document.getElementById('objeto-invocacion');
     const resultado = document.getElementById('resultado-invocacion');
     
-    // Gasto de ticket inmediato
+    // Gasto de ticket
     ticketsNormales--;
-    guardarEconomia();
+    guardar(); // Usamos la función guardar() de logic.js que ya guarda todo
     actualizarHUD(); 
     
-    // Configurar vista inicial
     overlay.style.display = 'flex';
     resultado.style.display = 'none';
     objeto.style.display = 'flex';
     
-    // Selección de imagen (Usando links estables)
+    // Imagen de la cápsula/pokeball según la saga
     const esPkmn = saga.toLowerCase().includes('pokemon');
     const imgAnimacion = esPkmn 
         ? "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" 
-        : "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg";
+        : "https://upload.wikimedia.org/wikipedia/commons/b/b5/Dragon_Ball_Sphere.png"; // Imagen de esfera para DBZ
 
-    objeto.innerHTML = `<img src="${imgAnimacion}" width="150" class="objeto-vibrando">`;
+    objeto.innerHTML = `<img src="${imgAnimacion}" width="120" class="objeto-vibrando" style="filter: drop-shadow(0 0 10px gold);">`;
 
-    // Fase 1: Vibración y Explosión
+    // Fase 1: Animación
     setTimeout(() => {
-        const img = objeto.querySelector('img');
-        if (img) img.className = "objeto-explotando";
+        objeto.innerHTML = `<img src="${imgAnimacion}" width="120" class="objeto-explotando">`;
         
         // Fase 2: Mostrar Resultado
         setTimeout(() => {
             objeto.style.display = 'none';
             resultado.style.display = 'block';
             
+            // Lógica de copias (Máximo 10)
             const copias = inventario.filter(p => p.id === personaje.id).length;
             
             if (copias >= 10) {
-                const premios = { comun: 10, raro: 50, epico: 200, legendario: 1000 };
-                const valor = premios[personaje.rareza] || 10;
-                monedas += valor;
-                guardarEconomia();
+                const premios = { comun: 100, raro: 250, epico: 600, legendario: 1500 };
+                const valor = premios[personaje.rareza] || 100;
+                monedas += valor; // Sumamos a la variable global
                 
                 resultado.innerHTML = `
-                    <div class="recompensa-monedas">
+                    <div style="text-align:center;">
                         ${obtenerImagenHTML(personaje, "sprite-revelado")}
-                        <p style="color:#ff4444; font-weight:bold; font-size: 1.2rem;">¡MÁXIMO NIVEL ALCANZADO!</p>
-                        <h3 style="color:#ffcc00; text-shadow: 0 0 10px rgba(255,204,0,0.5);">+💰 ${valor} Monedas</h3>
+                        <h3 style="color:#ff4444; margin-top:10px;">¡LIMITE ALCANZADO!</h3>
+                        <p style="color:white;">Ya tienes 10 copias. Recompensa de consolación:</p>
+                        <h2 style="color:#eab308;">+💰 ${valor} Monedas</h2>
                     </div>`;
             } else {
-                const nuevo = { ...personaje, uid: "UID-" + Date.now(), lvl: 1 };
+                // Añadir al inventario real
+                const nuevo = { ...personaje, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
                 inventario.push(nuevo);
-                if (typeof guardar === 'function') guardar(); 
                 
                 resultado.innerHTML = `
-                    <div class="nuevo-personaje" style="text-align:center;">
-                        ${obtenerImagenHTML(personaje, "sprite-revelado")}
-                        <h3 style="color: #94a3b8; margin:0;">¡HAS OBTENIDO A!</h3>
-                        <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2.2rem; margin: 10px 0;">${personaje.nombre}</h2>
-                        <span style="background:${RAREZAS[personaje.rareza]}; color:black; padding: 5px 15px; border-radius: 20px; font-weight:bold;">
-                            ${personaje.rareza.toUpperCase()}
-                        </span>
+                    <div style="text-align:center;">
+                        <div style="transform: scale(1.5); margin-bottom: 20px;">${obtenerImagenHTML(personaje)}</div>
+                        <h3 style="color: #94a3b8; margin:0;">¡NUEVO HÉROE!</h3>
+                        <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2rem; margin: 10px 0;">${personaje.nombre}</h2>
+                        <div style="background:${RAREZAS[personaje.rareza]}; color:black; display:inline-block; padding: 5px 15px; border-radius: 20px; font-weight:bold; text-transform:uppercase; font-size:0.8rem;">
+                            ${personaje.rareza}
+                        </div>
                     </div>`;
             }
             
-            resultado.innerHTML += `<br><button onclick="cerrarGacha()" class="nav-btn" style="margin-top:20px; cursor:pointer;">CONTINUAR</button>`;
-            actualizarHUD();
-        }, 600);
+            resultado.innerHTML += `<br><button onclick="cerrarGacha()" style="margin-top:20px; padding:10px 25px; background:#4ade80; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">LISTO</button>`;
+            
+            guardar(); // Guardamos el nuevo personaje o las monedas
+            actualizarHUD(); // Refrescamos el contador de la pantalla
+        }, 800);
     }, 1500);
 }
 
 window.cerrarGacha = function() {
     document.getElementById('gacha-animacion').style.display = 'none';
-    if (typeof renderLobby === 'function') renderLobby();
-};
-
-function guardarEconomia() {
-    localStorage.setItem("gq_monedas", monedas);
-    localStorage.setItem("gq_tk_normal", ticketsNormales);
-}
-
-window.actualizarHUD = function() {
-    let tks = localStorage.getItem("gq_tk_normal") || 0;
-    let mons = localStorage.getItem("gq_monedas") || 0;
-
-    const spanTks = document.getElementById('val-tk-normal');
-    if (spanTks) spanTks.innerText = tks;
-
-    const spanMons = document.getElementById('val-monedas');
-    if (spanMons) spanMons.innerText = mons;
-    
-    // Sincronizar variables de sesión
-    ticketsNormales = parseInt(tks);
-    monedas = parseInt(mons);
+    mostrar('equipo'); // Vamos a ver el equipo para ver el nuevo bicho
 };
