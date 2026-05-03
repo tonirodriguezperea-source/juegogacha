@@ -1,4 +1,4 @@
-// --- 1. CONFIGURACIÓN VISUAL ---
+// 1. CONFIGURACIÓN VISUAL
 window.obtenerImagenHTML = function(p, clases = "") {
     if (!p) return `<span class="sprite ${clases}">❓</span>`;
     const spriteURL = p.sprite || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.sprite : "");
@@ -14,12 +14,10 @@ window.obtenerImagenHTML = function(p, clases = "") {
     return `<span class="sprite-emoji ${clases}">${emojiFallback}</span>`;
 };
 
-// --- 2. CARGA DE DATOS Y ECONOMÍA ---
+// 2. CARGA DE DATOS Y ECONOMÍA
 var inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
 var equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
 var monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
-// IMPORTANTE: Cargamos los tickets del almacenamiento
-var ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0; 
 var tiendaDiaria = JSON.parse(localStorage.getItem("gq_tienda_diaria")) || { fecha: "", items: [] };
 
 const descripciones = {
@@ -36,45 +34,21 @@ function guardar() {
     localStorage.setItem("gq_inv", JSON.stringify(inventario));
     localStorage.setItem("gq_team", JSON.stringify(equipoUids));
     localStorage.setItem("gq_monedas", monedas);
-    localStorage.setItem("gq_tk_normal", ticketsNormales); // Guardamos tickets
     localStorage.setItem("gq_tienda_diaria", JSON.stringify(tiendaDiaria));
 }
 
 function actualizarHUD() {
-    // Actualiza Monedas
     const elMonedas = document.getElementById('cont-monedas');
     if (elMonedas) elMonedas.innerText = monedas;
-    
-    // Actualiza Tickets (esto hace que funcionen los números en la pantalla de Gacha)
-    const elTickets = document.getElementById('val-tk-normal');
-    if (elTickets) elTickets.innerText = ticketsNormales;
 }
 
-// --- 3. FUNCIONES DE JUEGO (CORREGIDO GACHA) ---
-
-// Cambiado de tirarGacha a invocar para que el HTML lo reconozca
-function invocar(saga) {
+// 3. FUNCIONES DE JUEGO
+function tirarGacha() {
     if (typeof DB === 'undefined') return console.error("Base de datos no encontrada");
     
-    // Comprobar si tiene tickets
-    if (ticketsNormales <= 0) {
-        alert("❌ No tienes tickets. ¡Clica en el botón de Regalo en el Inicio!");
-        return;
-    }
-
-    // Restar ticket y guardar
-    ticketsNormales--;
-
     const rand = Math.random() * 100;
     let rareza = rand < 2 ? "legendario" : rand < 10 ? "epico" : rand < 30 ? "raro" : "comun";
-    
-    // Filtrar por rareza y opcionalmente por saga (Pokémon o Saiyan)
     let opciones = DB.filter(p => p.rareza === rareza);
-    if (saga) {
-        let opcionesSaga = opciones.filter(p => p.saga.toLowerCase() === saga.toLowerCase());
-        if (opcionesSaga.length > 0) opciones = opcionesSaga;
-    }
-
     if (opciones.length === 0) opciones = DB.filter(p => p.rareza === "comun");
     
     const base = opciones[Math.floor(Math.random() * opciones.length)];
@@ -92,28 +66,19 @@ function invocar(saga) {
     const nuevo = { ...base, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
     inventario.push(nuevo);
     
-    // Ganancia de monedas por cada tirada
+    // Ganancia de monedas por tirada
     const bonus = Math.floor(Math.random() * 101) + 50; 
     monedas += bonus;
     
     guardar();
     actualizarHUD();
-    alert(`✨ ¡Invocado: ${nuevo.nombre}! (+${bonus} 💰) ✨`);
+    alert(`✨ ¡Has invocado a ${nuevo.nombre}! (+${bonus} 💰) ✨`);
     
-    // Actualizar todas las pantallas por si están abiertas
-    if (typeof renderLobby === 'function') renderLobby();
-    if (typeof renderEquipo === 'function') renderEquipo();
-    if (typeof renderDex === 'function') renderDex();
+    // Refrescar pantallas activas
+    renderLobby();
+    renderEquipo();
+    renderDex();
 }
-
-function regalarTickets() {
-    ticketsNormales += 10;
-    guardar();
-    actualizarHUD();
-    alert("🎁 ¡10 Tickets añadidos!");
-}
-
-// --- RESTO DE TUS FUNCIONES (SIN TOCAR NADA) ---
 
 function renderEquipo() {
     const list = document.getElementById('sagas-list');
@@ -184,7 +149,7 @@ function abrirMenuCopias(id) {
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;";
     
     let html = `
-        <div style="background:#1a1a2e;padding:25px;border-radius:20px;border:2px solid #4ade80;width:340px;color: white;max-height: 85vh;overflow-y: auto;">
+        <div style="background:#1a1a2e;padding:25px;border-radius:20px;border:2px solid #4ade80;width:340px;color: white;max-height: 85vh;overflow-y: auto;scrollbar-width: thin;scrollbar-color: #4ade80 #0f0f1b;">
             <div style="text-align:center; margin-bottom: 15px;">${obtenerImagenHTML(copias[0])}</div>
             <h3 style="text-align:center;margin-top:0;color:#4ade80;">Gestionar ${copias[0].nombre}</h3>`;
 
@@ -200,7 +165,7 @@ function abrirMenuCopias(id) {
             </div>`;
     });
 
-    html += `<button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background: #333; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer;">Regresar</button></div>`;
+    html += `<button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background: #333; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold;">Regresar</button></div>`;
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
 }
@@ -233,10 +198,10 @@ window.renderLobby = function() {
         <div class="lobby-character-card">
             <div class="lobby-sprite">${obtenerImagenHTML(p, "luchador-anim")}</div>
             <div class="lobby-info" style="text-align: center;">
-                <p style="font-weight: bold; margin: 0;">${p.nombre}</p>
-                <div style="background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid #4ade80; border-radius: 4px; display: inline-block; padding: 0px 8px; font-size: 0.75rem; margin: 4px 0;">LV. ${p.lvl || 1}</div>
+                <p style="font-weight: bold; margin: 0; font-size: 1.1rem;">${p.nombre}</p>
+                <div style="background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid #4ade80; border-radius: 4px; display: inline-block; padding: 0px 8px; font-size: 0.75rem; font-weight: bold; margin: 4px 0;">LV. ${p.lvl || 1}</div>
                 <br>
-                <small style="text-transform: uppercase;">${p.rareza}</small>
+                <small style="color: ${typeof RAREZAS !== 'undefined' ? RAREZAS[p.rareza] : '#fff'}; text-transform: uppercase;">${p.rareza}</small>
             </div>
         </div>
     `).join("");
@@ -250,34 +215,45 @@ function renderDex() {
     const porcentaje = Math.round((especiesObtenidas / totalEspecies) * 100);
     const dbOrdenada = [...DB].sort((a, b) => a.id - b.id);
     
-    let html = `<div style="grid-column: 1 / -1; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; color: white;">
+    let html = `<div class="dex-progress-wrapper" style="grid-column: 1 / -1; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: white; font-weight: bold;">
             <span>Progreso</span><span>${especiesObtenidas} / ${totalEspecies} (${porcentaje}%)</span>
         </div>
-        <div style="width: 100%; height: 10px; background: #2d2d44; border-radius: 10px; overflow: hidden;">
-            <div style="width: ${porcentaje}%; height: 100%; background: #4ade80;"></div>
+        <div style="width: 100%; height: 15px; background: #2d2d44; border-radius: 10px; overflow: hidden; border: 1px solid #444;">
+            <div style="width: ${porcentaje}%; height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); transition: width 0.5s ease;"></div>
         </div>
     </div>`;
 
     html += dbOrdenada.map(p => {
         const tiene = inventario.some(inv => inv.id === p.id);
-        return `<div class="dex-card ${tiene ? 'registrado' : 'desconocido'}" onclick="${tiene ? `mostrarInfo('${p.id}')` : ''}">
-            <div class="dex-header">#${String(p.id).padStart(3, '0')}</div>
-            <div class="dex-body">${obtenerImagenHTML(p)}</div>
-            <div class="dex-footer">${tiene ? p.nombre : '???'}</div>
+        const colorRareza = (typeof RAREZAS !== 'undefined' ? RAREZAS[p.rareza] : '#94a3b8');
+        const numeroDex = String(p.id).padStart(3, '0');
+        return `<div class="dex-card ${tiene ? 'registrado' : 'desconocido'}" style="--card-color: ${tiene ? colorRareza : '#2d2d44'}" onclick="${tiene ? `mostrarInfo('${p.id}')` : ''}">
+            <div class="dex-header"><span class="dex-number">#${numeroDex}</span><span class="dex-saga">${p.saga}</span></div>
+            <div class="dex-body"><div class="card-avatar">${obtenerImagenHTML(p)}</div></div>
+            <div class="dex-footer"><div class="dex-name">${tiene ? p.nombre : '???'}</div>${tiene ? `<div class="dex-badge" style="background: ${colorRareza}">${p.rareza}</div>` : ''}</div>
+            ${tiene ? '<div class="dex-check">✔</div>' : ''}
         </div>`;
     }).join('');
     grid.innerHTML = html;
 }
 
-// --- 4. NAVEGACIÓN Y CARGA ---
+// 4. NAVEGACIÓN Y CARGA
 function mostrar(pantalla) {
+    // 1. Ocultar todas las pantallas de forma eficiente
     const pantallas = document.querySelectorAll('.pantalla');
     pantallas.forEach(p => p.style.display = 'none');
 
+    // 2. Mostrar la pantalla seleccionada
     const pActive = document.getElementById('pantalla-' + pantalla);
-    if (pActive) pActive.style.display = 'block';
+    if (!pActive) {
+        console.warn(`La pantalla "pantalla-${pantalla}" no existe en el HTML.`);
+        return;
+    }
+    pActive.style.display = 'block';
 
+    // 3. Diccionario de renderizado (Mapeo)
+    // Esto asocia cada nombre de pantalla con su función de dibujo
     const renders = {
         'lobby': renderLobby,
         'equipo': renderEquipo,
@@ -285,10 +261,14 @@ function mostrar(pantalla) {
         'tienda': typeof renderTienda === 'function' ? renderTienda : null
     };
 
+    // 4. Ejecutar la función si existe en nuestro diccionario
     const ejecutarRender = renders[pantalla];
-    if (typeof ejecutarRender === 'function') ejecutarRender();
+    if (typeof ejecutarRender === 'function') {
+        ejecutarRender();
+    }
     
-    actualizarHUD();
+    // 5. Actualizar el HUD (monedas) siempre al cambiar de pestaña
+    if (typeof actualizarHUD === 'function') actualizarHUD();
 }
 
 function borrarPartida() {
