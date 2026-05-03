@@ -67,28 +67,13 @@ window.obtenerImagenHTML = function(p, clases = "") {
     const spriteURL = p.sprite || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.sprite : "");
     const emojiFallback = p.emoji || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.emoji : "👤");
 
-    // Lógica de giro automática:
-    // Si la clase que le pasas incluye "luchador-anim" (que es la que usas en el lobby/combate)
-    // y el bicho es un Pokémon, preparamos el estilo de giro.
-    const esPokemon = p.saga && p.saga.toLowerCase().includes('pokemon');
-    
-    // Solo aplicaremos el giro si NO estamos en la pokedex (para que allí se vean bien)
-    // y si es un pokemon.
-    const estiloEspecial = (esPokemon && clases.includes("luchador-anim")) 
-        ? "transform: scaleX(-1); display: inline-block;" 
-        : "";
-
     if (spriteURL && spriteURL.trim() !== "") {
-        return `
-            <div class="sprite-container ${clases}" style="position:relative; display:inline-block; ${estiloEspecial}">
-                <img src="${spriteURL}" class="sprite ${clases}" 
-                     style="display:block; max-width:100%;"
-                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-                <span class="sprite-emoji ${clases}" style="display:none; font-size:2rem;">${emojiFallback}</span>
-            </div>
-        `;
+        // Le ponemos un estilo base. El giro lo haremos por fuera para no fallar.
+        return `<img src="${spriteURL}" class="sprite ${clases}" style="max-width:100%; display:block; margin:auto;" 
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                <span class="sprite-emoji ${clases}" style="display:none; font-size:2rem;">${emojiFallback}</span>`;
     }
-    return `<span class="sprite-emoji ${clases}" style="font-size:2rem; ${estiloEspecial}">${emojiFallback}</span>`;
+    return `<span class="sprite-emoji ${clases}" style="font-size:2rem;">${emojiFallback}</span>`;
 };
 // ================================================================
 // 3. SISTEMA DE TIENDA DINÁMICA (ROTACIÓN DIARIA)
@@ -303,3 +288,23 @@ window.onload = () => {
     actualizarHUD();
     mostrar('lobby');
 };
+
+// Este código vigila el contenedor del jugador y gira lo que haya dentro
+const observer = new MutationObserver(() => {
+    const contenedorJugador = document.getElementById('player-battle-img');
+    if (contenedorJugador) {
+        const img = contenedorJugador.querySelector('img');
+        if (img) {
+            img.style.transform = "scaleX(-1)";
+            img.style.filter = "drop-shadow(-5px 10px 10px rgba(0,0,0,0.3))";
+        }
+    }
+});
+
+// Iniciamos la vigilancia cuando cargue la página
+window.addEventListener('load', () => {
+    const target = document.getElementById('player-battle-img');
+    if (target) {
+        observer.observe(target, { childList: true });
+    }
+});
