@@ -11,8 +11,14 @@
         <button class="nav-btn" onclick="mostrar('lobby')">🏠 Inicio</button>
         <button class="nav-btn" onclick="mostrar('equipo')">🛡️ Equipo</button>
         <button class="nav-btn" onclick="mostrar('pokedex')">📖 Dex</button>
+        <button class="nav-btn" onclick="mostrar('tienda')" style="border-color: #eab308; color: #eab308;">💰 Tienda</button>
         <button class="nav-btn gacha-btn" onclick="mostrar('gacha')">✨ Invocar</button>
     </nav>
+
+<div class="user-stats-bar" style="background: #1a1a2e; padding: 10px; display: flex; justify-content: center; gap: 20px; border-bottom: 1px solid #333;">
+    <span style="color: #eab308; font-weight: bold;">💰 Monedas: <span id="cont-monedas">0</span></span>
+    <span style="color: #f59e0b; font-weight: bold;">🎟️ Tickets: <span id="val-tk-normal-hud">0</span></span>
+</div>
 
     <div class="viewport">
         <div id="pantalla-lobby" class="pantalla">
@@ -75,6 +81,12 @@ function regalarTickets() {
             <div id="dex-grid" class="grid"></div>
         </div>
     </div>
+    
+<div id="pantalla-tienda" class="pantalla" style="display:none;">
+    <h2 style="text-align:center; color:#eab308; margin: 20px 0;">💰 TIENDA DE OBJETOS</h2>
+    <div id="tienda-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; padding: 20px;">
+        </div>
+</div>
     
     <div id="pantalla-gacha" class="pantalla" style="display:none;">
     <div class="gacha-header">
@@ -153,26 +165,6 @@ function regalarTickets() {
     <script src="gacha.js"></script>
     <script src="combate.js"></script>
     <script>
-        function mostrar(id) {
-    // Escondemos TODO incluyendo el gacha y la batalla
-    document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
-    document.getElementById('battle-screen').style.display = 'none';
-    document.getElementById('pantalla-gacha').style.display = 'none'; // Aseguramos que se esconda
-    
-    // Mostramos la pantalla correcta
-    const target = document.getElementById('pantalla-' + id);
-    if(target) target.style.display = 'block';
-    
-    // Ejecutamos los renders necesarios
-    if(id === 'equipo') renderEquipo();
-    if(id === 'lobby') renderLobby();
-    if(id === 'pokedex') renderDex();
-    
-    // NUEVO: Si entramos al gacha, actualizamos los números de los tickets
-    if(id === 'gacha' && typeof actualizarHUD === 'function') {
-        actualizarHUD();
-    }
-}
     </script>
 </body>
 </html>

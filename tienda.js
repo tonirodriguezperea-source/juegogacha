@@ -1,39 +1,42 @@
-// --- LÓGICA DE LA TIENDA ---
+// ==========================================
+// tienda.js - GESTIÓN DE LA TIENDA DIARIA
+// ==========================================
 
-// Precios por rareza
-const PRECIOS = {
+// 1. Precios actualizados por rareza
+const PRECIOS_TIENDA = {
     "comun": 500,
     "raro": 1500,
     "epico": 5000,
     "legendario": 15000
 };
 
+// 2. Rotación de productos cada 24h
 function actualizarTiendaSiEsNecesario() {
     const hoy = new Date().toLocaleDateString();
     
-    // Si la fecha guardada es distinta a hoy, generamos nuevos items
-    if (tiendaDiaria.fecha !== hoy) {
-        // Mezclamos la DB y agarramos 6 personajes al azar
-        const seleccion = [...DB]
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 6)
-            .map(p => ({
-                ...p,
-                precio: PRECIOS[p.rareza] || 1000 // Precio según rareza
-            }));
+    // Usamos stockTienda (variable global en logic.js)
+    if (ultimaFechaTienda !== hoy) {
+        if (typeof DB !== 'undefined' && DB.length > 0) {
+            const seleccion = [...DB]
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 6);
 
-        tiendaDiaria = { fecha: hoy, items: seleccion };
-        guardar(); // Esta función vive en tu script.js principal
+            stockTienda = seleccion; 
+            ultimaFechaTienda = hoy;
+            guardar(); // Guarda en localStorage
+            console.log("🏪 Tienda actualizada para hoy: " + hoy);
+        }
     }
 }
 
+// 3. Renderizado en el HTML
 function renderTienda() {
     const grid = document.getElementById('tienda-grid');
     if (!grid) return;
 
     actualizarTiendaSiEsNecesario();
 
-    // Encabezado con monedas
+    // Encabezado con monedas del jugador
     let html = `
         <div class="tienda-header" style="grid-column: 1/-1; background: #1a1a2e; padding: 20px; border-radius: 15px; border: 2px solid #eab308; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -45,32 +48,44 @@ function renderTienda() {
     `;
 
     // Cartas de personajes
-    tiendaDiaria.items.forEach((p, index) => {
+    stockTienda.forEach((p) => {
+        const copiasActuales = inventario.filter(inv => inv.id === p.id).length;
+        const precio = PRECIOS_TIENDA[p.rareza] || 1000;
+        const colorRareza = (typeof RAREZAS !== 'undefined') ? RAREZAS[p.rareza] : "#fff";
+        const estaLleno = copiasActuales >= 10;
+
         html += `
-            <div class="card-tienda" style="background: #1a1a2e; border: 1px solid #333; padding: 15px; border-radius: 15px; text-align: center; transition: transform 0.2s;">
+            <div class="card-tienda" style="background: #1a1a2e; border: 1px solid ${estaLleno ? '#333' : colorRareza}; padding: 15px; border-radius: 15px; text-align: center; opacity: ${estaLleno ? '0.7' : '1'}">
                 <div style="font-size: 0.8rem; color: #94a3b8; text-align: right;">#${p.id}</div>
                 <div style="height: 100px; display: flex; align-items: center; justify-content: center;">
                     ${obtenerImagenHTML(p)}
                 </div>
                 <h3 style="margin: 10px 0 5px 0; color: white;">${p.nombre}</h3>
-                <div style="color: #eab308; font-weight: bold; margin-bottom: 12px; font-size: 1.1rem;">${p.precio} 💰</div>
-                <button onclick="comprarPersonaje(${index})" 
-                    style="width: 100%; background: #eab308; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #1a1a2e;">
-                    COMPRAR
-                </button>
+                <div style="font-size: 0.7rem; color: ${colorRareza}; font-weight: bold; margin-bottom: 5px;">${p.rareza.toUpperCase()}</div>
+                <div style="color: #666; font-size: 0.8rem; margin-bottom: 10px;">Posees: ${copiasActuales}/10</div>
+                
+                <div style="color: #eab308; font-weight: bold; margin-bottom: 12px; font-size: 1.1rem;">${precio} 💰</div>
+                
+                ${estaLleno ? 
+                    `<button disabled style="width: 100%; background: #333; color: #777; border: none; padding: 10px; border-radius: 8px; cursor: not-allowed; font-weight: bold;">MÁXIMO</button>` :
+                    `<button onclick="comprarPersonajeTienda('${p.id}', ${precio})" 
+                        style="width: 100%; background: #eab308; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #1a1a2e;">
+                        COMPRAR
+                    </button>`
+                }
             </div>
         `;
     });
 
-    // Sección de Tickets
+    // Sección de Ticket Gacha
     html += `
         <div style="grid-column: 1/-1; background: linear-gradient(90deg, #1a1a2e, #16213e); border: 2px dashed #4ade80; padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
             <div>
                 <h3 style="margin:0; color: white;">Pack de Tickets Gacha</h3>
-                <p style="margin:5px 0 0 0; color: #94a3b8;">Consigue una tirada extra ahora mismo</p>
+                <p style="margin:5px 0 0 0; color: #94a3b8;">Canjea monedas por una tirada extra</p>
             </div>
-            <button onclick="comprarTicket()" style="background: #4ade80; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #0f172a;">
-                CANJEAR x 200 💰
+            <button onclick="comprarTicketTienda()" style="background: #4ade80; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #0f172a;">
+                CANJEAR x 500 💰
             </button>
         </div>
     `;
@@ -78,29 +93,39 @@ function renderTienda() {
     grid.innerHTML = html;
 }
 
-function comprarPersonaje(index) {
-    const item = tiendaDiaria.items[index];
-    
-    if (monedas >= item.precio) {
-        monedas -= item.precio;
-        // Creamos la copia para el inventario
-        const nuevo = { ...item, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
+// 4. Lógica de Compra de Personaje
+function comprarPersonajeTienda(id, precio) {
+    const pBase = DB.find(p => p.id == id);
+    const copias = inventario.filter(inv => inv.id == id).length;
+
+    if (copias >= 10) {
+        alert("⚠️ Ya tienes 10 copias de este héroe.");
+        return;
+    }
+
+    if (monedas >= precio) {
+        monedas -= precio;
+        const nuevo = { ...pBase, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
         inventario.push(nuevo);
         guardar();
-        alert(`¡🎉 ${item.nombre} se ha unido a tu colección!`);
-        renderTienda(); // Refresca para actualizar monedas
+        actualizarHUD(); // Actualiza los contadores de arriba
+        renderTienda(); // Refresca la tienda
+        alert(`¡🎉 ${pBase.nombre} comprado con éxito!`);
     } else {
         alert("❌ No tienes suficientes monedas.");
     }
 }
 
-function comprarTicket() {
-    if (monedas >= 200) {
-        monedas -= 200;
+// 5. Lógica de Compra de Ticket
+function comprarTicketTienda() {
+    if (monedas >= 500) {
+        monedas -= 500;
+        ticketsNormales++; // Suma a la variable global
         guardar();
-        alert("✅ ¡Ticket comprado! (Aquí puedes añadir lógica para sumar tiradas)");
+        actualizarHUD();
         renderTienda();
+        alert("✅ ¡Has comprado 1 Ticket Gacha!");
     } else {
-        alert("❌ Te faltan monedas para el ticket.");
+        alert("❌ No tienes monedas suficientes (500 💰).");
     }
 }

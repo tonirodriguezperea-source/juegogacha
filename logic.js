@@ -1,26 +1,22 @@
-// 1. Configuración Visual (UNIFICADA Y CORREGIDA)
-window.obtenerImagenHTML = function(p, clases = "") {
-    if (!p) return `<span class="sprite ${clases}">❓</span>`;
-
-    // Buscamos el sprite en el objeto o en la DB original por si acaso
-    const spriteURL = p.sprite || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.sprite : "");
-    const emojiFallback = p.emoji || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.emoji : "👤");
-
-    if (spriteURL && spriteURL.trim() !== "") {
-        return `
-            <img src="${spriteURL}" class="sprite ${clases}" 
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-            <span class="sprite-emoji ${clases}" style="display:none;">${emojiFallback}</span>
-        `;
-    }
-    
-    return `<span class="sprite-emoji ${clases}">${emojiFallback}</span>`;
-};
-
-// 2. Carga inicial de datos
+// ================================================================
+// 1. VARIABLES GLOBALES Y PERSISTENCIA (SISTEMA DE GUARDADO)
+// ================================================================
 var inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
 var equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
+var monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
+var ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
+var stockTienda = JSON.parse(localStorage.getItem("gq_stock_tienda")) || [];
+var ultimaFechaTienda = localStorage.getItem("gq_fecha_tienda") || "";
 
+// Precios estándar por rareza (para usar en toda la app)
+const PRECIOS_RAREZA = {
+    "comun": 1000,
+    "raro": 2500,
+    "epico": 6000,
+    "legendario": 15000
+};
+
+// Descripciones de la Pokédex
 const descripciones = {
     "1": "Bulbasaur es un Pokémon tipo planta. Lleva una semilla en su lomo que crece con él.",
     "2": "Ivysaur es un Pokémon tipo planta. Lleva una semilla con la que duerme, paraliza y envenena.",
@@ -34,52 +30,160 @@ const descripciones = {
 function guardar() {
     localStorage.setItem("gq_inv", JSON.stringify(inventario));
     localStorage.setItem("gq_team", JSON.stringify(equipoUids));
+    localStorage.setItem("gq_monedas", monedas);
+    localStorage.setItem("gq_tk_normal", ticketsNormales);
+    localStorage.setItem("gq_stock_tienda", JSON.stringify(stockTienda));
+    localStorage.setItem("gq_fecha_tienda", ultimaFechaTienda);
+    console.log("💾 Progreso guardado automáticamente.");
 }
 
-// 3. Funciones de Juego
-function tirarGacha() {
-    if (typeof DB === 'undefined') return console.error("Base de datos no encontrada");
-    
-    const rand = Math.random() * 100;
-    let rareza = rand < 2 ? "legendario" : rand < 10 ? "epico" : rand < 30 ? "raro" : "comun";
-    let opciones = DB.filter(p => p.rareza === rareza);
-    if (opciones.length === 0) opciones = DB.filter(p => p.rareza === "comun");
-    
-    const base = opciones[Math.floor(Math.random() * opciones.length)];
+function actualizarHUD() {
+    const elMonedas = document.getElementById('cont-monedas');
+    const elTickets = document.getElementById('val-tk-normal');
+    if (elMonedas) elMonedas.innerText = monedas;
+    if (elTickets) elTickets.innerText = ticketsNormales;
+}
 
-    // --- NUEVA REGLA: LÍMITE DE 10 COPIAS ---
-    const copiasActuales = inventario.filter(p => p.id === base.id).length;
+// ================================================================
+// 2. MOTOR VISUAL (RENDERIZADO DE SPRITES Y EMOJIS)
+// ================================================================
+window.obtenerImagenHTML = function(p, clases = "") {
+    if (!p) return `<span class="sprite ${clases}">❓</span>`;
     
-    if (copiasActuales >= 10) {
-        alert(`¡Ya tienes 10 copias de ${base.nombre}! No puedes acumular más.`);
-        // Aquí podrías añadir algo como: moneditas += 100; (si tuvieras dinero en el juego)
-        return; 
+    const spriteURL = p.sprite || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.sprite : "");
+    const emojiFallback = p.emoji || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.emoji : "👤");
+
+    if (spriteURL && spriteURL.trim() !== "") {
+        return `
+            <div class="sprite-container ${clases}" style="position:relative; display:inline-block;">
+                <img src="${spriteURL}" class="sprite ${clases}" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                <span class="sprite-emoji ${clases}" style="display:none; font-size:2rem;">${emojiFallback}</span>
+            </div>
+        `;
     }
-    // ----------------------------------------
+    return `<span class="sprite-emoji ${clases}" style="font-size:2rem;">${emojiFallback}</span>`;
+};
 
-    const nuevo = { ...base, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
-    inventario.push(nuevo);
-    guardar();
-    
-    alert(`✨ ¡Has invocado a ${nuevo.nombre}! ✨`);
-    
-    // Actualizar pantallas si están abiertas
-    if (document.getElementById('pantalla-equipo').style.display !== 'none') renderEquipo();
-    if (document.getElementById('pantalla-lobby').style.display !== 'none') renderLobby();
-    if (document.getElementById('pantalla-pokedex').style.display !== 'none') renderDex();
+// ================================================================
+// 3. SISTEMA DE TIENDA DINÁMICA (ROTACIÓN DIARIA)
+// ================================================================
+function comprobarRotacionTienda() {
+    const hoy = new Date().toLocaleDateString();
+    if (ultimaFechaTienda !== hoy) {
+        if (typeof DB !== 'undefined' && DB.length > 0) {
+            // Mezclar y seleccionar 6 bichos aleatorios
+            let mezclados = [...DB].sort(() => 0.5 - Math.random());
+            stockTienda = mezclados.slice(0, 6);
+            ultimaFechaTienda = hoy;
+            guardar();
+            console.log("🏪 Tienda rotada con éxito para el día: " + hoy);
+        }
+    }
 }
 
+function renderTienda() {
+    const grid = document.getElementById('tienda-grid');
+    if (!grid) return;
+    comprobarRotacionTienda();
+    
+    let html = "";
+
+    // ARTÍCULO FIJO: Ticket de Invocación
+    html += `
+        <div class="item-tienda fijo" style="background:#1e1e2e; padding:20px; border-radius:15px; border:2px solid #f59e0b; text-align:center;">
+            <div style="font-size:3rem; margin-bottom:10px;">🎟️</div>
+            <h4 style="color:white; margin:5px 0;">Ticket Gacha</h4>
+            <p style="color:#aaa; font-size:0.8rem;">Úsalo para invocar héroes</p>
+            <button onclick="comprarTicket()" style="background:#f59e0b; color:black; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%; margin-top:15px; transition:0.3s;">
+                500 💰
+            </button>
+        </div>
+    `;
+
+    // ARTÍCULOS ROTATIVOS: 6 Bichos
+    stockTienda.forEach(p => {
+        const copias = inventario.filter(inv => inv.id === p.id).length;
+        const estaLleno = copias >= 10;
+        const precio = PRECIOS_RAREZA[p.rareza] || 1000;
+        const color = RAREZAS[p.rareza] || '#4ade80';
+
+        html += `
+            <div class="item-tienda" style="background:#1a1a2e; padding:20px; border-radius:15px; border:2px solid ${estaLleno ? '#333' : color}; text-align:center; opacity: ${estaLleno ? '0.6' : '1'}; transition: 0.3s;">
+                <div style="margin-bottom:15px; transform: scale(1.2);">${obtenerImagenHTML(p)}</div>
+                <h4 style="color:white; margin:5px 0; font-size:1.1rem;">${p.nombre}</h4>
+                <p style="color:${color}; font-size:0.75rem; font-weight:bold; text-transform:uppercase;">${p.rareza}</p>
+                <p style="color:#666; font-size:0.8rem; margin:10px 0;">Posees: ${copias}/10</p>
+                
+                ${estaLleno ? 
+                    `<button disabled style="background:#333; color:#777; border:none; padding:12px; border-radius:8px; width:100%; cursor:not-allowed; font-weight:bold;">COMPLETADO</button>` :
+                    `<button onclick="comprarBicho('${p.id}', ${precio})" style="background:${color}; color:black; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:bold; width:100%; transition:0.3s;">
+                        ${precio} 💰
+                    </button>`
+                }
+            </div>
+        `;
+    });
+    grid.innerHTML = html;
+}
+
+// ================================================================
+// 4. FUNCIONES DE COMPRA Y TRANSACCIÓN
+// ================================================================
+function comprarTicket() {
+    if (monedas >= 500) {
+        monedas -= 500;
+        ticketsNormales += 1;
+        guardar();
+        actualizarHUD();
+        renderTienda();
+        alert("🎟️ ¡Has obtenido 1 Ticket de Invocación!");
+    } else {
+        alert("❌ Monedas insuficientes. ¡Sigue luchando!");
+    }
+}
+
+function comprarBicho(id, precio) {
+    const copias = inventario.filter(inv => inv.id == id).length;
+    if (copias >= 10) return alert("⚠️ Ya tienes el máximo de copias (10/10).");
+
+    if (monedas >= precio) {
+        const bichoBase = DB.find(p => p.id == id);
+        if (!bichoBase) return;
+
+        monedas -= precio;
+        const nuevoBicho = { 
+            ...bichoBase, 
+            uid: "UID-" + Date.now() + "-" + Math.floor(Math.random()*1000), 
+            lvl: 1 
+        };
+        inventario.push(nuevoBicho);
+        
+        guardar();
+        actualizarHUD();
+        renderTienda();
+        alert(`✅ ¡${bichoBase.nombre} se ha unido a tu colección!`);
+    } else {
+        alert("❌ No tienes suficientes monedas para este héroe.");
+    }
+}
+
+// ================================================================
+// 5. GESTIÓN DE EQUIPO Y MENÚ DE COPIAS
+// ================================================================
 function renderEquipo() {
     const list = document.getElementById('sagas-list');
     const filtro = document.getElementById('busqueda-equipo')?.value.toLowerCase() || "";
     if (!list) return;
     list.innerHTML = '';
+
     const especies = {};
     inventario.forEach(p => {
         if (!especies[p.id]) especies[p.id] = { ...p, cantidad: 0, copias: [] };
         especies[p.id].cantidad++;
         especies[p.id].copias.push(p);
     });
+
     const sagas = {};
     Object.values(especies).forEach(p => {
         if (p.nombre.toLowerCase().includes(filtro)) {
@@ -87,21 +191,24 @@ function renderEquipo() {
             sagas[p.saga].push(p);
         }
     });
+
     for (const s in sagas) {
         const sec = document.createElement('div');
         sec.className = 'saga-section';
-        sec.innerHTML = `<h3 class="saga-title">${s}</h3><div class="grid"></div>`;
+        sec.innerHTML = `<h3 class="saga-title" style="color:#4ade80; border-bottom:1px solid #333; padding-bottom:5px; margin-top:20px;">${s}</h3><div class="grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:15px; margin-top:10px;"></div>`;
         const grid = sec.querySelector('.grid');
+        
         sagas[s].forEach(p => {
             const enEquipo = p.copias.some(c => equipoUids.includes(c.uid));
             grid.innerHTML += `
-                <div class="card-stack">
-                    ${p.cantidad > 1 ? `<div class="stack-count">x${p.cantidad}</div>` : ''}
+                <div class="card-stack" style="position:relative;">
+                    ${p.cantidad > 1 ? `<div class="stack-count" style="position:absolute; top:-5px; right:-5px; background:#4ade80; color:black; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:bold; z-index:2;">${p.cantidad}</div>` : ''}
                     <div class="card ${enEquipo ? 'active-team' : ''}" 
+                         style="background:#1a1a2e; border:1px solid ${enEquipo ? '#4ade80' : '#333'}; padding:10px; border-radius:12px; text-align:center; cursor:pointer;"
                          onclick="abrirMenuCopias('${p.id}')" 
                          onmouseenter="mostrarInfo('${p.id}')">
                         <div class="card-avatar">${obtenerImagenHTML(p)}</div>
-                        <div class="card-name">${p.nombre}</div>
+                        <div class="card-name" style="color:white; font-size:0.8rem; margin-top:5px;">${p.nombre}</div>
                     </div>
                 </div>`;
         });
@@ -109,66 +216,40 @@ function renderEquipo() {
     }
 }
 
-function mostrarInfo(id) {
-    const p = DB.find(x => x.id == id);
-    if (!p) return;
-    const elements = {
-        photo: document.getElementById('info-photo'),
-        name: document.getElementById('info-name'),
-        desc: document.getElementById('info-desc'),
-        dex: document.getElementById('info-dex'),
-        tipo: document.getElementById('info-tipo'),
-        saga: document.getElementById('info-saga')
-    };
-    if (elements.photo) elements.photo.innerHTML = obtenerImagenHTML(p);
-    if (elements.name) elements.name.innerText = p.nombre;
-    if (elements.desc) elements.desc.innerText = descripciones[p.id] || "Héroe listo para la batalla.";
-    if (elements.dex) elements.dex.innerText = p.id;
-    if (elements.tipo) elements.tipo.innerText = p.tipo.toUpperCase();
-    if (elements.saga) elements.saga.innerText = p.saga;
-}
-
 function abrirMenuCopias(id) {
     const copias = inventario.filter(p => p.id == id);
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
+    overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10000;display:flex;justify-content:center;align-items:center; backdrop-filter:blur(5px);";
     
-    // El fondo oscuro se mantiene igual
-    overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;";
-    
-    // Añadimos max-height y overflow al contenedor blanco/azul
     let html = `
-        <div style="
-            background:#1a1a2e;
-            padding:25px;
-            border-radius:20px;
-            border:2px solid #4ade80;
-            width:340px; 
-            color: white;
-            max-height: 85vh;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #4ade80 #0f0f1b;
-        ">
-            <div style="text-align:center; margin-bottom: 15px;">${obtenerImagenHTML(copias[0])}</div>
-            <h3 style="text-align:center;margin-top:0;color:#4ade80;">Gestionar ${copias[0].nombre}</h3>`;
+        <div style="background:#1a1a2e; padding:30px; border-radius:25px; border:2px solid #4ade80; width:350px; color: white; max-height: 80vh; overflow-y: auto;">
+            <div style="text-align:center; margin-bottom: 20px;">
+                ${obtenerImagenHTML(copias[0])}
+                <h2 style="color:#4ade80; margin:10px 0;">${copias[0].nombre}</h2>
+                <p style="color:#666; font-size:0.9rem;">Selecciona una copia para tu equipo</p>
+            </div>
+    `;
 
-    copias.forEach(c => {
+    copias.forEach((c, index) => {
         const enEq = equipoUids.includes(c.uid);
         html += `
-            <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0;padding:12px;background:#0f0f1b;border-radius:10px;border:1px solid #333;">
-                <span style="font-weight:bold;">NV.${c.lvl} ${enEq ? '⭐' : ''}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:15px; background:#0f0f1b; border-radius:12px; border:1px solid ${enEq ? '#4ade80' : '#333'};">
+                <div>
+                    <span style="display:block; font-weight:bold;">Copia #${index + 1}</span>
+                    <span style="font-size:0.8rem; color:#4ade80;">NV. ${c.lvl || 1}</span>
+                </div>
                 <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
-                        style="padding:5px 15px; cursor:pointer; background:transparent; color:${enEq ? '#ef4444' : '#4ade80'}; border: 1px solid ${enEq ? '#ef4444' : '#4ade80'}; border-radius: 5px;">
-                    ${enEq ? 'Quitar' : 'Elegir'}
+                        style="padding:8px 16px; cursor:pointer; background:${enEq ? '#ef4444' : '#4ade80'}; color:black; border:none; border-radius:8px; font-weight:bold;">
+                    ${enEq ? 'RETIRAR' : 'ELEGIR'}
                 </button>
             </div>`;
     });
 
     html += `
             <button onclick="document.getElementById('overlay-copias').remove()" 
-                    style="width:100%; margin-top:15px; background: #333; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold;">
-                Regresar
+                    style="width:100%; margin-top:20px; background: #333; color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight:bold;">
+                CERRAR
             </button>
         </div>`;
 
@@ -184,7 +265,7 @@ function toggleEquipo(uid) {
         if (equipoUids.length < 3) {
             equipoUids.push(uid);
         } else {
-            alert("⚠️ Tu equipo ya tiene 3 héroes. Quita uno primero.");
+            alert("⚠️ Máximo 3 héroes en el equipo.");
         }
     }
     guardar();
@@ -192,128 +273,99 @@ function toggleEquipo(uid) {
     renderLobby();
 }
 
-window.renderLobby = function() {
-    const contenedor = document.getElementById('hero-display');
-    if (!contenedor) return;
-    
-    const equipo = inventario.filter(p => equipoUids.includes(p.uid));
-    
-    if (equipo.length === 0) {
-        contenedor.innerHTML = "<p style='color: #94a3b8;'>Equipo vacío. Selecciona héroes en la pestaña EQUIPO.</p>";
-        return;
-    }
-
-    contenedor.innerHTML = equipo.map(p => `
-        <div class="lobby-character-card" style="position: relative;">
-            <div class="lobby-sprite">${obtenerImagenHTML(p, "luchador-anim")}</div>
-            
-            <div class="lobby-info" style="text-align: center;">
-                <p style="font-weight: bold; margin: 0; font-size: 1.1rem;">${p.nombre}</p>
-                
-                <div style="
-                    background: rgba(74, 222, 128, 0.2); 
-                    color: #4ade80; 
-                    border: 1px solid #4ade80; 
-                    border-radius: 4px; 
-                    display: inline-block; 
-                    padding: 0px 8px; 
-                    font-size: 0.75rem; 
-                    font-weight: bold; 
-                    margin: 4px 0;
-                ">
-                    LV. ${p.lvl || 1}
-                </div>
-
-                <br>
-
-                <small style="
-                    color: ${typeof RAREZAS !== 'undefined' ? RAREZAS[p.rareza] : '#fff'};
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    font-size: 0.7rem;
-                ">
-                    ${p.rareza}
-                </small>
-            </div>
-        </div>
-    `).join("");
-
-    console.log("Lobby renderizado con éxito");
-};
-
+// ================================================================
+// 6. POKÉDEX, LOBBY Y NAVEGACIÓN
+// ================================================================
 function renderDex() {
     const grid = document.getElementById('dex-grid');
     if (!grid) return;
-
-    // 1. CÁLCULO DE PROGRESO
-    const totalEspecies = DB.length;
-    // Contamos cuántas IDs únicas de la DB están en el inventario
-    const especiesObtenidas = DB.filter(p => 
-        inventario.some(inv => inv.id === p.id)
-    ).length;
     
+    const totalEspecies = DB.length;
+    const especiesObtenidas = DB.filter(p => inventario.some(inv => inv.id === p.id)).length;
     const porcentaje = Math.round((especiesObtenidas / totalEspecies) * 100);
 
-    // 2. ORDENAR DB
-    const dbOrdenada = [...DB].sort((a, b) => a.id - b.id);
-
-    // 3. CREAR BARRA DE PROGRESO (HTML)
-    const htmlProgreso = `
-        <div class="dex-progress-wrapper" style="grid-column: 1 / -1; margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: white; font-weight: bold;">
-                <span>Progreso de Colección</span>
+    let html = `
+        <div class="dex-progress-wrapper" style="grid-column: 1 / -1; margin-bottom: 25px; background:#1a1a2e; padding:15px; border-radius:15px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: white; font-weight:bold;">
+                <span>PROGRESO DE COLECCIÓN</span>
                 <span>${especiesObtenidas} / ${totalEspecies} (${porcentaje}%)</span>
             </div>
-            <div style="width: 100%; height: 15px; background: #2d2d44; border-radius: 10px; overflow: hidden; border: 1px solid #444;">
-                <div style="width: ${porcentaje}%; height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); transition: width 0.5s ease;"></div>
+            <div style="width: 100%; height: 12px; background: #0f0f1b; border-radius: 10px; overflow: hidden; border:1px solid #333;">
+                <div style="width: ${porcentaje}%; height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); transition: 1s width;"></div>
             </div>
         </div>
     `;
 
-    // 4. GENERAR CARTAS
-    const htmlCards = dbOrdenada.map(p => {
+    DB.sort((a,b) => a.id - b.id).forEach(p => {
         const tiene = inventario.some(inv => inv.id === p.id);
-        const colorRareza = RAREZAS[p.rareza] || '#94a3b8';
-        const numeroDex = String(p.id).padStart(3, '0');
-
-        return `
+        const color = RAREZAS[p.rareza] || '#94a3b8';
+        
+        html += `
             <div class="dex-card ${tiene ? 'registrado' : 'desconocido'}" 
-                 style="--card-color: ${tiene ? colorRareza : '#2d2d44'}"
+                 style="background:#1a1a2e; border:2px solid ${tiene ? color : '#333'}; border-radius:15px; padding:15px; text-align:center; position:relative; cursor:pointer;" 
                  onclick="${tiene ? `mostrarInfo('${p.id}')` : ''}">
-                
-                <div class="dex-header">
-                    <span class="dex-number">#${numeroDex}</span>
-                    <span class="dex-saga">${p.saga}</span>
-                </div>
-
-                <div class="dex-body">
-                    <div class="card-avatar">
-                        ${obtenerImagenHTML(p)}
-                    </div>
-                </div>
-
+                <div style="position:absolute; top:5px; left:10px; color:#666; font-size:0.7rem;">#${p.id}</div>
+                <div class="dex-body" style="margin:10px 0; filter: ${tiene ? 'none' : 'brightness(0) invert(0.2)'}">${obtenerImagenHTML(p)}</div>
                 <div class="dex-footer">
-                    <div class="dex-name">${tiene ? p.nombre : '???'}</div>
-                    ${tiene ? `<div class="dex-badge" style="background: ${colorRareza}">${p.rareza}</div>` : ''}
+                    <div style="color:${tiene ? 'white' : '#444'}; font-weight:bold; font-size:0.8rem;">${tiene ? p.nombre : '???'}</div>
                 </div>
-
-                ${tiene ? '<div class="dex-check">✔</div>' : ''}
+                ${tiene ? '<div style="position:absolute; bottom:5px; right:10px; color:#4ade80; font-size:0.8rem;">✔</div>' : ''}
             </div>`;
-    }).join('');
-
-    // 5. RENDERIZAR TODO
-    // Insertamos la barra de progreso y luego las cartas
-    grid.innerHTML = htmlProgreso + htmlCards;
+    });
+    grid.innerHTML = html;
 }
 
-function borrarPartida() {
-    if (confirm("⚠️ ¿BORRAR TODO?")) {
-        localStorage.clear();
-        location.reload();
+window.renderLobby = function() {
+    const contenedor = document.getElementById('hero-display');
+    if (!contenedor) return;
+    const equipo = inventario.filter(p => equipoUids.includes(p.uid));
+    
+    if (equipo.length === 0) {
+        contenedor.innerHTML = "<p style='color:#666;'>Tu equipo está vacío. Ve a la pestaña EQUIPO.</p>";
+        return;
     }
+
+    contenedor.innerHTML = equipo.map(p => `
+        <div class="lobby-character-card" style="margin:0 20px; text-align:center;">
+            <div class="lobby-sprite">${obtenerImagenHTML(p, "luchador-anim")}</div>
+            <div class="lobby-info" style="background:rgba(0,0,0,0.5); padding:10px; border-radius:10px; margin-top:10px;">
+                <p style="color:white; font-weight:bold; margin:0;">${p.nombre}</p>
+                <div style="color:#4ade80; font-size:0.8rem;">LV. ${p.lvl || 1}</div>
+                <small style="color:${RAREZAS[p.rareza]}; font-size:0.6rem; text-transform:uppercase;">${p.rareza}</small>
+            </div>
+        </div>`).join("");
+};
+
+function mostrar(pantalla) {
+    const pantallas = document.querySelectorAll('.pantalla');
+    pantallas.forEach(p => p.style.display = 'none');
+    
+    const pActive = document.getElementById('pantalla-' + pantalla);
+    if (pActive) pActive.style.display = 'block';
+
+    if (pantalla === 'tienda') renderTienda();
+    if (pantalla === 'lobby') renderLobby();
+    if (pantalla === 'equipo') renderEquipo();
+    if (pantalla === 'pokedex') renderDex();
+    
+    actualizarHUD();
 }
 
+function mostrarInfo(id) {
+    const p = DB.find(x => x.id == id);
+    if (!p) return;
+    document.getElementById('info-photo').innerHTML = obtenerImagenHTML(p);
+    document.getElementById('info-name').innerText = p.nombre;
+    document.getElementById('info-desc').innerText = descripciones[p.id] || "Héroe listo para la batalla.";
+    document.getElementById('info-dex').innerText = p.id;
+    document.getElementById('info-tipo').innerText = p.tipo.toUpperCase();
+    document.getElementById('info-saga').innerText = p.saga;
+}
+
+// ================================================================
+// 7. INICIO DE LA APLICACIÓN
+// ================================================================
 window.onload = () => {
-    actualizarHUD(); // Esto forzará a que los "10" se cambien por el valor real guardado
+    actualizarHUD();
     mostrar('lobby');
 };
