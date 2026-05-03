@@ -612,3 +612,8 @@ nav {
     opacity: 0;
     transition: transform 0.5s ease-in, opacity 0.3s;
 }
+
+.sprite-revelado img, .info-photo img, .grid-item img {
+    image-rendering: pixelated; /* Para Chrome/Edge */
+    image-rendering: crisp-edges; /* Para Firefox */
+}
