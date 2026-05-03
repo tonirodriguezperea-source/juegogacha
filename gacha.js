@@ -40,80 +40,83 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const objeto = document.getElementById('objeto-invocacion');
     const resultado = document.getElementById('resultado-invocacion');
     
+    // Gasto de ticket y guardado
     ticketsNormales--;
     guardar(); 
     actualizarHUD(); 
     
+    // Configuración visual
     overlay.style.display = 'flex';
     resultado.style.display = 'none';
     objeto.style.display = 'flex';
     
-    const esPkmn = saga.toLowerCase().includes('pokemon');
-    
-    // URLs DEFINITIVAS Y ESTABLES (PNGs transparentes)
-    const imgPoke = "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg";
-    const imgDBZ = "https://www.pngarts.com/files/11/Dragon-Ball-Z-Orb-PNG-Image-Background.png"; 
-
-    const urlElegida = esPkmn ? imgPoke : imgDBZ;
-
-    // Insertamos la imagen con un diseño más sólido
+    // --- LA ESTRELLA DEL DESEO ---
+    // Usamos un div con el emoji y un brillo (glow) dorado
     objeto.innerHTML = `
-        <div class="objeto-vibrando" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;">
-            <img src="${urlElegida}" 
-                 id="img-gacha-temp"
-                 style="width: 120px; height: auto; filter: drop-shadow(0 0 15px rgba(255,215,0,0.7));"
-                 onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:100px\'>✨</span>';">
+        <div id="estrella-deseo" class="objeto-vibrando" style="
+            font-size: 100px; 
+            filter: drop-shadow(0 0 20px #f59e0b); 
+            cursor: default;
+            user-select: none;">
+            ⭐
         </div>`;
 
-    // PEQUEÑO TRUCO: Esperamos 100ms para asegurar que el navegador "ve" la imagen antes de animar
+    // Fase 1: La estrella vibra (espera del deseo)
     setTimeout(() => {
-        const img = document.getElementById('img-gacha-temp');
-        if(img) img.classList.add('objeto-vibrando');
-
+        const estrella = document.getElementById('estrella-deseo');
+        
+        // Fase 2: ¡La estrella explota en luz!
+        if (estrella) {
+            estrella.style.transition = "all 0.5s ease-out";
+            estrella.style.transform = "scale(2.5)";
+            estrella.style.filter = "brightness(2) blur(5px)";
+            estrella.style.opacity = "0";
+        }
+        
         setTimeout(() => {
-            // Fase de explosión
-            if(img) img.className = "objeto-explotando";
+            objeto.style.display = 'none';
+            resultado.style.display = 'block';
             
-            setTimeout(() => {
-                objeto.style.display = 'none';
-                resultado.style.display = 'block';
+            // Lógica de inventario / copias
+            const copias = inventario.filter(p => p.id === personaje.id).length;
+            
+            if (copias >= 10) {
+                const premios = { comun: 100, raro: 250, epico: 600, legendario: 1500 };
+                const valor = premios[personaje.rareza] || 100;
+                monedas += valor;
                 
-                const copias = inventario.filter(p => p.id === personaje.id).length;
+                resultado.innerHTML = `
+                    <div style="text-align:center;">
+                        ${obtenerImagenHTML(personaje, "sprite-revelado")}
+                        <h3 style="color:#ff4444; margin-top:10px;">DESEO REPETIDO</h3>
+                        <p style="color:#94a3b8;">Límite de 10 copias alcanzado.</p>
+                        <h2 style="color:#eab308;">+💰 ${valor} Monedas</h2>
+                    </div>`;
+            } else {
+                const nuevo = { ...personaje, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
+                inventario.push(nuevo);
                 
-                if (copias >= 10) {
-                    const premios = { comun: 100, raro: 250, epico: 600, legendario: 1500 };
-                    const valor = premios[personaje.rareza] || 100;
-                    monedas += valor;
-                    
-                    resultado.innerHTML = `
-                        <div style="text-align:center;">
+                resultado.innerHTML = `
+                    <div style="text-align:center;">
+                        <div style="transform: scale(1.8); margin-bottom: 30px;">
                             ${obtenerImagenHTML(personaje, "sprite-revelado")}
-                            <h3 style="color:#ff4444; margin-top:10px;">¡MÁXIMO NIVEL!</h3>
-                            <p style="color:white;">Ya tienes 10 copias.</p>
-                            <h2 style="color:#eab308;">+💰 ${valor} Monedas</h2>
-                        </div>`;
-                } else {
-                    const nuevo = { ...personaje, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
-                    inventario.push(nuevo);
-                    
-                    resultado.innerHTML = `
-                        <div style="text-align:center;">
-                            <div style="transform: scale(1.8); margin-bottom: 30px;">${obtenerImagenHTML(personaje)}</div>
-                            <h3 style="color: #94a3b8; margin:0; letter-spacing: 2px;">¡HAS OBTENIDO A!</h3>
-                            <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2.5rem; margin: 15px 0; text-shadow: 0 0 10px rgba(0,0,0,0.5);">${personaje.nombre}</h2>
-                            <div style="background:${RAREZAS[personaje.rareza]}; color:black; display:inline-block; padding: 8px 20px; border-radius: 30px; font-weight:bold; text-transform:uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                                ${personaje.rareza}
-                            </div>
-                        </div>`;
-                }
-                
-                resultado.innerHTML += `<br><button onclick="cerrarGacha()" style="margin-top:30px; padding:12px 35px; background:linear-gradient(180deg, #4ade80, #22c55e); border:none; border-radius:12px; cursor:pointer; font-weight:bold; color: white; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">CONTINUAR</button>`;
-                
-                guardar();
-                actualizarHUD();
-            }, 700);
-        }, 1500);
-    }, 50);
+                        </div>
+                        <h3 style="color: #94a3b8; margin:0; letter-spacing: 3px;">¡DESEO CONCEDIDO!</h3>
+                        <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2.5rem; margin: 15px 0; text-shadow: 0 0 15px rgba(255,255,255,0.3);">
+                            ${personaje.nombre}
+                        </h2>
+                        <div style="background:${RAREZAS[personaje.rareza]}; color:black; display:inline-block; padding: 8px 25px; border-radius: 30px; font-weight:bold; text-transform:uppercase;">
+                            ${personaje.rareza}
+                        </div>
+                    </div>`;
+            }
+            
+            resultado.innerHTML += `<br><button onclick="cerrarGacha()" class="nav-btn" style="margin-top:30px; background:#f59e0b; color:black; border:none; padding:12px 40px; border-radius:10px; font-weight:bold; cursor:pointer;">CONTINUAR</button>`;
+            
+            guardar();
+            actualizarHUD();
+        }, 600); // Tiempo de la "explosión"
+    }, 1800); // Tiempo que está la estrella vibrando
 }
 
 window.cerrarGacha = function() {

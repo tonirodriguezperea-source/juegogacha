@@ -38,10 +38,24 @@ function guardar() {
 }
 
 function actualizarHUD() {
-    const elMonedas = document.getElementById('cont-monedas');
-    const elTickets = document.getElementById('val-tk-normal');
-    if (elMonedas) elMonedas.innerText = monedas;
-    if (elTickets) elTickets.innerText = ticketsNormales;
+    // 1. Recuperamos los valores reales de las variables
+    // Asegúrate de que estas variables se llamen así en tu logic.js
+    const tks = ticketsNormales || 0;
+    const mons = monedas || 0;
+
+    // 2. Actualizamos TODOS los posibles IDs que existan en el HTML
+    const idsTickets = ['val-tk-normal', 'val-tk-normal-hud', 'cont-tickets'];
+    const idsMonedas = ['cont-monedas', 'val-monedas', 'tienda-monedas'];
+
+    idsTickets.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = tks;
+    });
+
+    idsMonedas.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = mons;
+    });
 }
 
 // ================================================================
