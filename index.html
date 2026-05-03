@@ -63,23 +63,29 @@
         </div>
 
         <div id="pantalla-gacha" class="pantalla" style="display:none;">
-            <div class="gacha-header">
-                <h2 style="color:#f59e0b; text-align:center; padding-top:20px;">INVOCACIONES</h2>
-                <div style="text-align:center; margin-bottom:20px;">
-                    <span style="background:#333; padding:10px; border-radius:10px;">🎟️ Tickets: <span id="val-tk-normal">0</span></span>
-                </div>
-            </div>
-            <div class="banners-container" style="display:flex; justify-content:center; gap:20px; padding:20px;">
-                <div class="banner-card" style="background:#2d2d44; padding:20px; border-radius:15px; border:2px solid #ef4444; text-align:center; width:200px;">
-                    <h3>Pokémon</h3>
-                    <button onclick="invocar('Pokémon')" style="background:#ef4444; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; width:100%;">Tirar Ticket</button>
-                </div>
-                <div class="banner-card" style="background:#2d2d44; padding:20px; border-radius:15px; border:2px solid #f59e0b; text-align:center; width:200px;">
-                    <h3>Saiyan</h3>
-                    <button onclick="invocar('dragonball')" style="background:#f59e0b; color:black; border:none; padding:10px; border-radius:5px; cursor:pointer; width:100%;">Tirar Ticket</button>
-                </div>
-            </div>
+    <div class="gacha-header">
+        <h2 style="color:#f59e0b; text-align:center; padding-top:20px;">INVOCACIONES</h2>
+        <div style="text-align:center; margin-bottom:20px;">
+            <span style="background:#333; padding:10px; border-radius:10px;">
+                🎟️ Tickets: <span id="val-tk-normal">0</span>
+            </span>
         </div>
+    </div>
+
+    <div class="banners-container" style="display:flex; justify-content:center; gap:20px; padding:20px;">
+        <div class="banner-card" style="background:#2d2d44; padding:20px; border-radius:15px; border:2px solid #ef4444; text-align:center; width:200px;">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" width="80" alt="Pokemon">
+            <h3>Pokémon</h3>
+            <button onclick="invocar('Pokémon')" style="background:#ef4444; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; width:100%;">Tirar Ticket</button>
+        </div>
+
+        <div class="banner-card" style="background:#2d2d44; padding:20px; border-radius:15px; border:2px solid #f59e0b; text-align:center; width:200px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Dragon_Ball_Star.png" width="80" alt="Saiyan">
+            <h3>Saiyan</h3>
+            <button onclick="invocar('dragonball')" style="background:#f59e0b; color:black; border:none; padding:10px; border-radius:5px; cursor:pointer; width:100%;">Tirar Ticket</button>
+        </div>
+    </div>
+</div>
     </div>
 
     <div id="battle-screen" style="display:none;">
