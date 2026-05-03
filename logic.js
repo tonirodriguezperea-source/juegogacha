@@ -245,14 +245,35 @@ function renderDex() {
     const grid = document.getElementById('dex-grid');
     if (!grid) return;
 
-    // Ordenamos la DB por ID para que la Dex vaya en orden numérico
+    // 1. CÁLCULO DE PROGRESO
+    const totalEspecies = DB.length;
+    // Contamos cuántas IDs únicas de la DB están en el inventario
+    const especiesObtenidas = DB.filter(p => 
+        inventario.some(inv => inv.id === p.id)
+    ).length;
+    
+    const porcentaje = Math.round((especiesObtenidas / totalEspecies) * 100);
+
+    // 2. ORDENAR DB
     const dbOrdenada = [...DB].sort((a, b) => a.id - b.id);
 
-    grid.innerHTML = dbOrdenada.map(p => {
+    // 3. CREAR BARRA DE PROGRESO (HTML)
+    const htmlProgreso = `
+        <div class="dex-progress-wrapper" style="grid-column: 1 / -1; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: white; font-weight: bold;">
+                <span>Progreso de Colección</span>
+                <span>${especiesObtenidas} / ${totalEspecies} (${porcentaje}%)</span>
+            </div>
+            <div style="width: 100%; height: 15px; background: #2d2d44; border-radius: 10px; overflow: hidden; border: 1px solid #444;">
+                <div style="width: ${porcentaje}%; height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); transition: width 0.5s ease;"></div>
+            </div>
+        </div>
+    `;
+
+    // 4. GENERAR CARTAS
+    const htmlCards = dbOrdenada.map(p => {
         const tiene = inventario.some(inv => inv.id === p.id);
         const colorRareza = RAREZAS[p.rareza] || '#94a3b8';
-        
-        // Formateamos el número a 3 cifras (ej: 001)
         const numeroDex = String(p.id).padStart(3, '0');
 
         return `
@@ -279,6 +300,10 @@ function renderDex() {
                 ${tiene ? '<div class="dex-check">✔</div>' : ''}
             </div>`;
     }).join('');
+
+    // 5. RENDERIZAR TODO
+    // Insertamos la barra de progreso y luego las cartas
+    grid.innerHTML = htmlProgreso + htmlCards;
 }
 
 function borrarPartida() {
