@@ -240,14 +240,35 @@ function renderDex() {
 
 // 4. NAVEGACIÓN Y CARGA
 function mostrar(pantalla) {
-    document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
+    // 1. Ocultar todas las pantallas de forma eficiente
+    const pantallas = document.querySelectorAll('.pantalla');
+    pantallas.forEach(p => p.style.display = 'none');
+
+    // 2. Mostrar la pantalla seleccionada
     const pActive = document.getElementById('pantalla-' + pantalla);
-    if (pActive) pActive.style.display = 'block';
+    if (!pActive) {
+        console.warn(`La pantalla "pantalla-${pantalla}" no existe en el HTML.`);
+        return;
+    }
+    pActive.style.display = 'block';
+
+    // 3. Diccionario de renderizado (Mapeo)
+    // Esto asocia cada nombre de pantalla con su función de dibujo
+    const renders = {
+        'lobby': renderLobby,
+        'equipo': renderEquipo,
+        'pokedex': renderDex,
+        'tienda': typeof renderTienda === 'function' ? renderTienda : null
+    };
+
+    // 4. Ejecutar la función si existe en nuestro diccionario
+    const ejecutarRender = renders[pantalla];
+    if (typeof ejecutarRender === 'function') {
+        ejecutarRender();
+    }
     
-    if (pantalla === 'lobby') renderLobby();
-    if (pantalla === 'equipo') renderEquipo();
-    if (pantalla === 'pokedex') renderDex();
-    if (pantalla === 'tienda' && typeof renderTienda === 'function') renderTienda();
+    // 5. Actualizar el HUD (monedas) siempre al cambiar de pestaña
+    if (typeof actualizarHUD === 'function') actualizarHUD();
 }
 
 function borrarPartida() {
