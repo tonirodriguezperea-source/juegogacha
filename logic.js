@@ -409,3 +409,21 @@ function comprarSkin(id) {
         alert("⚠️ No tienes suficientes Fragmentos Estelares.");
     }
 }
+
+function testShards() {
+    // 1. Sumamos 50 a la variable global
+    fragmentosEstelares += 50;
+    
+    // 2. Guardamos en el localStorage
+    guardar();
+    
+    // 3. Refrescamos el HUD para ver el cambio al instante
+    actualizarHUD();
+    
+    // 4. Si estás en la tienda, refrescamos los botones para que se activen
+    if (typeof renderTiendaSkins === "function") {
+        renderTiendaSkins();
+    }
+
+    console.log("✨ DEBUG: Ahora tienes " + fragmentosEstelares + " fragmentos.");
+}
