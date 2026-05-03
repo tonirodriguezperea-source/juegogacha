@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gacha Quest | Full Game</title>
+    <title>Gacha Quest | Hub Principal</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,22 +19,46 @@
         <div id="pantalla-lobby" class="pantalla">
             <div class="lobby-container">
                 <div class="main-stage">
-                    <div id="hero-display" class="hero-display"></div>
+                    <div id="hero-display" class="hero-display">
+                        </div>
                     <button class="btn-play" onclick="iniciarBatalla()">¡A LUCHAR!</button>
                 </div>
+                <div id="pantalla-tienda" class="pantalla" style="display:none;">
+    <div class="container">
+        <div id="tienda-grid" style="
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+            gap: 20px; 
+            padding: 20px;
+        ">
+            </div>
+    </div>
+</div>
                 <aside class="news-sidebar">
                     <h3>📰 NOTICIAS</h3>
-                    <div class="news-item">💰 ¡Monedas: <span id="cont-monedas">0</span>!</div>
                     <div class="news-item"><b>Evento:</b> ¡Probabilidad x2 en Legendarios!</div>
-                    <button class="nav-btn" style="width:100%; margin-top:20px; border-color:#ef4444; color:#ef4444;" onclick="borrarPartida()">🗑️ Borrar Partida</button>
-                    <button onclick="regalarTickets()" style="background:#4ade80; color:black; padding:10px; border-radius:5px; margin-top:10px; width:100%;">🎁 Tickets Gratis</button>
-                </aside>
-            </div>
-        </div>
+                    <div class="news-item"><b>Tip:</b> Usa el tipo Agua contra el Fuego.</div>
+                    <div class="news-item"><b>Update:</b> ¡Nuevos héroes añadidos!</div>
+                    
+                    <button class="nav-btn" 
+                            style="width: 100%; margin-top: 20px; border-color: #ef4444; color: #ef4444;" 
+                            onclick="borrarPartida()">
+                        🗑️ Borrar Partida
+                    </button>
 
-        <div id="pantalla-tienda" class="pantalla" style="display:none;">
-            <div class="container">
-                <div id="tienda-grid"></div>
+                    <button onclick="regalarTickets()" style="background: #4ade80; color: black; padding: 10px; border-radius: 5px;">
+    🎁 Reclamar Tickets Gratis
+</button>
+
+<script>
+function regalarTickets() {
+    let actuales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
+    localStorage.setItem("gq_tk_normal", actuales + 10);
+    actualizarHUD();
+    alert("¡Has recibido 10 tickets de regalo!");
+}
+</script>
+                </aside>
             </div>
         </div>
 
@@ -61,48 +85,74 @@
             <h2 class="section-title">Colección</h2>
             <div id="dex-grid" class="grid"></div>
         </div>
-
-        <div id="pantalla-gacha" class="pantalla" style="display:none;">
-            <div class="gacha-header">
-                <h2 style="color: #f59e0b; text-align: center; margin-top: 20px;">TIENDA DE INVOCACIONES</h2>
-                <div class="tickets-display" style="text-align: center; margin-bottom: 20px;">
-                    <span style="background: #333; padding: 10px; border-radius: 10px; margin: 5px; color: white;">
-                        🎟️ Tickets: <span id="val-tk-normal">0</span>
-                    </span>
-                </div>
-            </div>
-
-            <div class="banners-container" style="display: flex; justify-content: center; gap: 20px; padding: 20px;">
-                <div class="banner-card" style="background: #2d2d44; padding: 20px; border-radius: 15px; border: 2px solid #ef4444; text-align: center; width: 220px;">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" width="80" style="margin-bottom: 10px;">
-                    <h3>Pokémon</h3>
-                    <button onclick="invocar('Pokémon')" style="background: #ef4444; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">Tirar Ticket</button>
-                </div>
-
-                <div class="banner-card" style="background: #2d2d44; padding: 20px; border-radius: 15px; border: 2px solid #f59e0b; text-align: center; width: 220px;">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Dragon_Ball_Star.png" width="80" style="margin-bottom: 10px;">
-                    <h3>Saiyan</h3>
-                    <button onclick="invocar('dragonball')" style="background: #f59e0b; color: black; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;">Tirar Ticket</button>
-                </div>
-            </div>
+    </div>
+    <div id="pantalla-tienda" class="pantalla" style="display:none;">
+    <div class="container">
+        <div id="tienda-grid"></div>
+    </div>
+</div>
+    <div id="pantalla-gacha" class="pantalla" style="display:none;">
+    <div class="gacha-header">
+        <h2 style="color: #f59e0b; text-align: center; margin-top: 20px;">TIENDA DE INVOCACIONES</h2>
+        <div class="tickets-display" style="text-align: center; margin-bottom: 20px;">
+            <span style="background: #333; padding: 10px; border-radius: 10px; margin: 5px;">
+                🎟️ Tickets: <span id="val-tk-normal">0</span>
+            </span>
         </div>
-    </div> <div id="battle-screen" style="display:none;">
+    </div>
+
+    <div class="banners-container" style="display: flex; justify-content: center; gap: 20px; padding: 20px;">
+        <div class="banner-card" style="background: #2d2d44; padding: 20px; border-radius: 15px; border: 2px solid #ef4444; text-align: center; width: 200px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" width="80">
+            <h3>Pokémon</h3>
+            <button onclick="invocar('Pokémon')" style="background: #ef4444; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%;">Tirar Ticket</button>
+        </div>
+
+        <div class="banner-card" style="background: #2d2d44; padding: 20px; border-radius: 15px; border: 2px solid #f59e0b; text-align: center; width: 200px;">
+            <img src="https://w7.pngwing.com/pngs/925/968/png-transparent-dragon-ball-thumbnail.png" width="80">
+            <h3>Saiyan</h3>
+            <button onclick="invocar('dragonball')" style="background: #f59e0b; color: black; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%;">Tirar Ticket</button>
+        </div>
+    </div>
+</div>
+
+<div id="gacha-animacion" class="gacha-overlay" style="display:none;">
+    <div class="anim-container">
+        <div id="objeto-invocacion"></div>
+        <div id="resultado-invocacion" style="display:none;"></div>
+    </div>
+</div>
+
+<div id="gacha-animacion" class="gacha-overlay" style="display:none;">
+    <div class="anim-container">
+        <div id="objeto-invocacion"></div>
+        <div id="resultado-invocacion" style="display:none;"></div>
+    </div>
+</div>
+
+    <div id="battle-screen" style="display:none;">
         <div class="battle-arena">
             <div class="fighter">
                 <div class="hp-wrapper"><div id="player-hp-bar" class="hp-fill"></div></div>
-                <div id="player-battle-img"></div>
+                <div id="player-battle-img">
+                    </div>
                 <h3 id="player-battle-name">Jugador</h3>
                 <div id="player-energy" class="energy-container"></div> 
             </div>
+
             <div class="vs-badge">VS</div>
+
             <div class="fighter">
                 <div class="hp-wrapper"><div id="enemy-hp-bar" class="hp-fill"></div></div>
-                <div id="enemy-battle-img"></div>
+                <div id="enemy-battle-img">
+                    </div>
                 <h3 id="enemy-battle-name">Rival</h3>
                 <div id="enemy-energy" class="energy-container"></div> 
             </div>
         </div>
+
         <div id="battle-log"></div>
+
         <div class="actions-grid">
             <button class="btn-action" onclick="playerMove('recargar')">🔋 Cargar</button>
             <button id="btn-ataque" class="btn-action" onclick="playerMove('ataque')">⚔️ Ataque (1)</button>
@@ -113,55 +163,32 @@
         </div>
     </div>
 
-    <div id="gacha-animacion" class="gacha-overlay" style="display:none;">
-        <div class="anim-container">
-            <div id="objeto-invocacion"></div>
-            <div id="resultado-invocacion" style="display:none;"></div>
-        </div>
-    </div>
-
     <script src="database.js"></script>
     <script src="logic.js"></script>
     <script src="tienda.js"></script>
     <script src="gacha.js"></script>
     <script src="combate.js"></script>
-
     <script>
         function mostrar(id) {
-            // Ocultamos todas las capas con clase .pantalla
-            document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
-            
-            // Ocultamos la pantalla de batalla por separado ya que no suele tener la clase .pantalla
-            if(document.getElementById('battle-screen')) {
-                document.getElementById('battle-screen').style.display = 'none';
-            }
-
-            // Mostramos la que toca
-            const target = document.getElementById('pantalla-' + id);
-            if(target) {
-                target.style.display = 'block';
-            }
-
-            // Renders específicos
-            if(id === 'lobby') renderLobby();
-            if(id === 'equipo') renderEquipo();
-            if(id === 'pokedex') renderDex();
-            if(id === 'tienda' && typeof renderTienda === 'function') renderTienda();
-            
-            // Actualizar monedas y tickets siempre
-            if(typeof actualizarHUD === 'function') actualizarHUD();
-        }
-
-        function regalarTickets() {
-            let actuales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
-            localStorage.setItem("gq_tk_normal", actuales + 10);
-            if(typeof actualizarHUD === 'function') actualizarHUD();
-            alert("¡Has recibido 10 tickets!");
-        }
-
-        window.onload = () => { 
-            if(typeof actualizarHUD === 'function') actualizarHUD(); 
-        };
+    // Escondemos TODO incluyendo el gacha y la batalla
+    document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
+    document.getElementById('battle-screen').style.display = 'none';
+    document.getElementById('pantalla-gacha').style.display = 'none'; // Aseguramos que se esconda
+    
+    // Mostramos la pantalla correcta
+    const target = document.getElementById('pantalla-' + id);
+    if(target) target.style.display = 'block';
+    
+    // Ejecutamos los renders necesarios
+    if(id === 'equipo') renderEquipo();
+    if(id === 'lobby') renderLobby();
+    if(id === 'pokedex') renderDex();
+    
+    // NUEVO: Si entramos al gacha, actualizamos los números de los tickets
+    if(id === 'gacha' && typeof actualizarHUD === 'function') {
+        actualizarHUD();
+    }
+}
     </script>
 </body>
 </html>
