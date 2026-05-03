@@ -195,6 +195,7 @@ function toggleEquipo(uid) {
 window.renderLobby = function() {
     const contenedor = document.getElementById('hero-display');
     if (!contenedor) return;
+    
     const equipo = inventario.filter(p => equipoUids.includes(p.uid));
     
     if (equipo.length === 0) {
@@ -203,16 +204,41 @@ window.renderLobby = function() {
     }
 
     contenedor.innerHTML = equipo.map(p => `
-        <div class="lobby-character-card">
+        <div class="lobby-character-card" style="position: relative;">
             <div class="lobby-sprite">${obtenerImagenHTML(p, "luchador-anim")}</div>
-            <div class="lobby-info">
-                <p style="font-weight: bold; margin: 5px 0;">${p.nombre}</p>
-                <small style="color: ${typeof RAREZAS !== 'undefined' ? RAREZAS[p.rareza] : '#fff'}">${p.rareza.toUpperCase()}</small>
+            
+            <div class="lobby-info" style="text-align: center;">
+                <p style="font-weight: bold; margin: 0; font-size: 1.1rem;">${p.nombre}</p>
+                
+                <div style="
+                    background: rgba(74, 222, 128, 0.2); 
+                    color: #4ade80; 
+                    border: 1px solid #4ade80; 
+                    border-radius: 4px; 
+                    display: inline-block; 
+                    padding: 0px 8px; 
+                    font-size: 0.75rem; 
+                    font-weight: bold; 
+                    margin: 4px 0;
+                ">
+                    LV. ${p.lvl || 1}
+                </div>
+
+                <br>
+
+                <small style="
+                    color: ${typeof RAREZAS !== 'undefined' ? RAREZAS[p.rareza] : '#fff'};
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    font-size: 0.7rem;
+                ">
+                    ${p.rareza}
+                </small>
             </div>
         </div>
     `).join("");
 
-    console.log("Lobby renderizado con éxito"); // Esto te confirmará en la consola que ha terminado
+    console.log("Lobby renderizado con éxito");
 };
 
 function renderDex() {
