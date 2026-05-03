@@ -18,6 +18,10 @@
 <div class="user-stats-bar" style="background: #1a1a2e; padding: 10px; display: flex; justify-content: center; gap: 20px; border-bottom: 1px solid #333;">
     <span style="color: #eab308; font-weight: bold;">💰 Monedas: <span id="cont-monedas">0</span></span>
     <span style="color: #f59e0b; font-weight: bold;">🎟️ Tickets: <span id="val-tk-normal-hud">0</span></span>
+    <div class="hud-item" style="background: rgba(139, 92, 246, 0.2); border: 1px solid #8b5cf6;">
+    <span class="hud-icon">✨ Puntos Estelares:</span>
+    <span id="val-shards-hud" class="hud-value">0</span>
+</div>
 </div>
 
     <div class="viewport">
@@ -86,8 +90,14 @@ function regalarTickets() {
     <h2 style="text-align:center; color:#eab308; margin: 20px 0;">💰 TIENDA DE OBJETOS</h2>
     <div id="tienda-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; padding: 20px;">
         </div>
+        <div id="tienda-skins-container" style="margin-top:40px; padding-bottom:40px;">
+    <h3 style="color:#8b5cf6; text-align:center; font-family: sans-serif;">✨ BOUTIQUE SHINY ✨</h3>
+    <p style="color:#666; text-align:center; font-size:0.8rem; margin-bottom:20px;">Nuevas apariencias cada día</p>
+    <div id="tienda-skins-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:15px;">
+        </div>
 </div>
-    
+</div>
+
     <div id="pantalla-gacha" class="pantalla" style="display:none;">
     <div class="gacha-header">
         <h2 style="color: #f59e0b; text-align: center; margin-top: 20px;">TIENDA DE INVOCACIONES</h2>

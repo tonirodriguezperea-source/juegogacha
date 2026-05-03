@@ -7,6 +7,10 @@ var monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
 var ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
 var stockTienda = JSON.parse(localStorage.getItem("gq_stock_tienda")) || [];
 var ultimaFechaTienda = localStorage.getItem("gq_fecha_tienda") || "";
+var fragmentosEstelares = parseInt(localStorage.getItem("gq_shards")) || 0;
+var skinsPoseidas = JSON.parse(localStorage.getItem("gq_skins_owner")) || []; 
+var stockSkinsDia = JSON.parse(localStorage.getItem("gq_stock_skins")) || [];
+var ultimaFechaSkins = localStorage.getItem("gq_fecha_skins") || "";
 
 // Precios estándar por rareza (para usar en toda la app)
 const PRECIOS_RAREZA = {
@@ -14,6 +18,21 @@ const PRECIOS_RAREZA = {
     "raro": 2500,
     "epico": 6000,
     "legendario": 15000
+};
+
+const SKINS_DATA = {
+    "1": { nombre: "Bulbasaur Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/1.png", precio: 20 },
+    "4": { nombre: "Charmander Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/4.png", precio: 20 },
+    "7": { nombre: "Squirtle Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/7.png", precio: 20 },
+    "25": { nombre: "Pikachu Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/25.png", precio: 30 },
+    "150": { nombre: "Mewtwo Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/150.png", precio: 100 },
+    "6": { nombre: "Charizard Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png", precio: 60 },
+    "94": { nombre: "Gengar Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/94.png", precio: 40 },
+    "130": { nombre: "Gyarados Rojo", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/130.png", precio: 50 },
+    "3": { nombre: "Venusaur Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/3.png", precio: 35 },
+    "9": { nombre: "Blastoise Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/9.png", precio: 35 },
+    "133": { nombre: "Eevee Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/133.png", precio: 30 },
+    "143": { nombre: "Snorlax Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png", precio: 30 }
 };
 
 // Descripciones de la Pokédex
@@ -32,32 +51,32 @@ function guardar() {
     localStorage.setItem("gq_team", JSON.stringify(equipoUids));
     localStorage.setItem("gq_monedas", monedas);
     localStorage.setItem("gq_tk_normal", ticketsNormales);
+    localStorage.setItem("gq_shards", fragmentosEstelares);
+    localStorage.setItem("gq_skins_owner", JSON.stringify(skinsPoseidas));
+    localStorage.setItem("gq_stock_skins", JSON.stringify(stockSkinsDia));
+    localStorage.setItem("gq_fecha_skins", ultimaFechaSkins);
     localStorage.setItem("gq_stock_tienda", JSON.stringify(stockTienda));
     localStorage.setItem("gq_fecha_tienda", ultimaFechaTienda);
-    console.log("💾 Progreso guardado automáticamente.");
 }
 
 function actualizarHUD() {
-    // 1. Recuperamos los valores reales de las variables
-    // Asegúrate de que estas variables se llamen así en tu logic.js
     const tks = ticketsNormales || 0;
     const mons = monedas || 0;
+    const shards = fragmentosEstelares || 0; // <-- Nueva variable
 
-    // 2. Actualizamos TODOS los posibles IDs que existan en el HTML
     const idsTickets = ['val-tk-normal', 'val-tk-normal-hud', 'cont-tickets'];
     const idsMonedas = ['cont-monedas', 'val-monedas', 'tienda-monedas'];
+    const idsShards = ['val-shards', 'val-shards-hud']; // <-- Nuevos IDs para el HTML
 
-    idsTickets.forEach(id => {
+    idsTickets.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = tks; });
+    idsMonedas.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = mons; });
+    
+    // Actualizamos los nuevos contadores de Fragmentos
+    idsShards.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.innerText = tks;
-    });
-
-    idsMonedas.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerText = mons;
+        if (el) el.innerText = shards;
     });
 }
-
 // ================================================================
 // 2. MOTOR VISUAL (RENDERIZADO DE SPRITES Y EMOJIS)
 // ================================================================
@@ -139,41 +158,70 @@ function abrirMenuCopias(id) {
     const copias = inventario.filter(p => p.id == id);
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
-    overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10000;display:flex;justify-content:center;align-items:center; backdrop-filter:blur(5px);";
+    overlay.className = "modal-overlay"; // Asegúrate de tener estilos para esto o usa style inline
+    overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(4px);";
     
+    const misSkins = skinsPoseidas.filter(s => s.idPersonaje == id);
+
     let html = `
-        <div style="background:#1a1a2e; padding:30px; border-radius:25px; border:2px solid #4ade80; width:350px; color: white; max-height: 80vh; overflow-y: auto;">
+        <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #4ade80; width:340px; color: white;">
             <div style="text-align:center; margin-bottom: 20px;">
                 ${obtenerImagenHTML(copias[0])}
-                <h2 style="color:#4ade80; margin:10px 0;">${copias[0].nombre}</h2>
-                <p style="color:#666; font-size:0.9rem;">Selecciona una copia para tu equipo</p>
+                <h3 style="color:#4ade80; margin:10px 0;">${copias[0].nombre}</h3>
             </div>
-    `;
+            
+            <div style="max-height:200px; overflow-y:auto; margin-bottom:20px; padding-right:5px;">`;
 
     copias.forEach((c, index) => {
         const enEq = equipoUids.includes(c.uid);
         html += `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:15px; background:#0f0f1b; border-radius:12px; border:1px solid ${enEq ? '#4ade80' : '#333'};">
-                <div>
-                    <span style="display:block; font-weight:bold;">Copia #${index + 1}</span>
-                    <span style="font-size:0.8rem; color:#4ade80;">NV. ${c.lvl || 1}</span>
-                </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:10px; background:#0f0f1b; border-radius:10px; border:1px solid ${enEq ? '#4ade80' : '#333'};">
+                <span style="font-size:0.9rem;">Copia #${index + 1}</span>
                 <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
-                        style="padding:8px 16px; cursor:pointer; background:${enEq ? '#ef4444' : '#4ade80'}; color:black; border:none; border-radius:8px; font-weight:bold;">
-                    ${enEq ? 'RETIRAR' : 'ELEGIR'}
+                        style="padding:6px 12px; cursor:pointer; background:${enEq ? '#ef4444' : '#4ade80'}; color:black; border:none; border-radius:6px; font-weight:bold; font-size:0.8rem;">
+                    ${enEq ? 'QUITAR' : 'PONER'}
                 </button>
             </div>`;
     });
 
-    html += `
-            <button onclick="document.getElementById('overlay-copias').remove()" 
-                    style="width:100%; margin-top:20px; background: #333; color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight:bold;">
-                CERRAR
-            </button>
+    html += `</div>
+            <div style="border-top:1px solid #333; padding-top:15px;">
+                <p style="color:#8b5cf6; font-size:0.8rem; font-weight:bold; margin-bottom:10px; text-transform:uppercase;">Apariencia ✨</p>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button onclick="aplicarSkin('${id}', 'default')" style="background:#333; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.8rem;">Normal</button>`;
+    
+    misSkins.forEach(s => {
+        html += `<button onclick="aplicarSkin('${id}', '${s.nombreSkin}')" style="background:#8b5cf6; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:0.8rem;">Shiny</button>`;
+    });
+
+    html += `   </div>
+            </div>
+            <button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:20px; background:transparent; color:#666; border:none; padding:10px; cursor:pointer;">Cerrar</button>
         </div>`;
 
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
+}
+
+function aplicarSkin(idPersonaje, nombreSkin) {
+    let nuevoSprite = "";
+    if (nombreSkin === 'default') {
+        nuevoSprite = DB.find(p => p.id == idPersonaje).sprite;
+    } else {
+        nuevoSprite = SKINS_DATA[idPersonaje].sprite;
+    }
+
+    inventario.forEach(p => {
+        if (p.id == idPersonaje) {
+            p.sprite = nuevoSprite;
+            p.skinEquipada = nombreSkin;
+        }
+    });
+
+    guardar();
+    renderEquipo();
+    renderLobby();
+    if(document.getElementById('overlay-copias')) document.getElementById('overlay-copias').remove();
 }
 
 function toggleEquipo(uid) {
@@ -262,14 +310,18 @@ function mostrar(pantalla) {
     const pActive = document.getElementById('pantalla-' + pantalla);
     if (pActive) pActive.style.display = 'block';
 
-    if (pantalla === 'tienda') renderTienda();
+    // Modificamos esta parte:
+    if (pantalla === 'tienda') {
+        renderTienda();      // Dibuja los personajes normales
+        renderTiendaSkins(); // <--- AÑADIR ESTA LÍNEA (Dibuja los Shinys)
+    }
+
     if (pantalla === 'lobby') renderLobby();
     if (pantalla === 'equipo') renderEquipo();
     if (pantalla === 'pokedex') renderDex();
     
     actualizarHUD();
 }
-
 function mostrarInfo(id) {
     const p = DB.find(x => x.id == id);
     if (!p) return;
@@ -308,3 +360,52 @@ window.addEventListener('load', () => {
         observer.observe(target, { childList: true });
     }
 });
+
+function actualizarTiendaSkins() {
+    const hoy = new Date().toLocaleDateString();
+    if (ultimaFechaSkins !== hoy || stockSkinsDia.length === 0) {
+        const todasLasKeys = Object.keys(SKINS_DATA);
+        // Elegimos 12 al azar (o todas si hay menos de 12)
+        const seleccionadas = todasLasKeys.sort(() => 0.5 - Math.random()).slice(0, 12);
+        stockSkinsDia = seleccionadas.map(key => ({ idOriginal: key, ...SKINS_DATA[key] }));
+        ultimaFechaSkins = hoy;
+        guardar();
+    }
+}
+
+function renderTiendaSkins() {
+    actualizarTiendaSkins();
+    const contenedor = document.getElementById('tienda-skins-grid');
+    if (!contenedor) return;
+    contenedor.innerHTML = "";
+
+    stockSkinsDia.forEach(skin => {
+        const yaLaTiene = skinsPoseidas.some(s => s.idPersonaje == skin.idOriginal && s.nombreSkin == skin.nombre);
+        contenedor.innerHTML += `
+            <div class="card skin-card" style="background:#1a1a2e; border:2px solid #8b5cf6; padding:15px; border-radius:15px; text-align:center; transition: 0.3s;">
+                <div class="card-avatar" style="filter: drop-shadow(0 0 8px rgba(139,92,246,0.5))">
+                    <img src="${skin.sprite}" style="width:70px; height:70px; object-fit:contain;">
+                </div>
+                <div style="color:white; font-size:0.8rem; margin:10px 0; font-weight:bold;">${skin.nombre}</div>
+                <div style="color:#a78bfa; font-weight:bold; margin-bottom:10px;">✨ ${skin.precio}</div>
+                <button onclick="${yaLaTiene ? '' : `comprarSkin('${skin.idOriginal}')`}" 
+                        style="width:100%; background:${yaLaTiene ? '#333' : '#8b5cf6'}; color:white; border:none; padding:8px; border-radius:8px; cursor:pointer; font-weight:bold;">
+                    ${yaLaTiene ? 'ADQUIRIDO' : 'COMPRAR'}
+                </button>
+            </div>`;
+    });
+}
+
+function comprarSkin(id) {
+    const skin = SKINS_DATA[id];
+    if (fragmentosEstelares >= skin.precio) {
+        fragmentosEstelares -= skin.precio;
+        skinsPoseidas.push({ idPersonaje: id, nombreSkin: skin.nombre });
+        guardar();
+        actualizarHUD();
+        renderTiendaSkins();
+        alert(`✨ ¡Has desbloqueado a ${skin.nombre}! ✨`);
+    } else {
+        alert("⚠️ No tienes suficientes Fragmentos Estelares.");
+    }
+}
