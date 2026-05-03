@@ -11,7 +11,6 @@
         <button class="nav-btn" onclick="mostrar('lobby')">🏠 Inicio</button>
         <button class="nav-btn" onclick="mostrar('equipo')">🛡️ Equipo</button>
         <button class="nav-btn" onclick="mostrar('pokedex')">📖 Dex</button>
-        <button onclick="mostrar('tienda')" style="color: #eab308; font-weight: bold;">💰 Tienda</button>
         <button class="nav-btn gacha-btn" onclick="mostrar('gacha')">✨ Invocar</button>
     </nav>
 
@@ -23,17 +22,7 @@
                         </div>
                     <button class="btn-play" onclick="iniciarBatalla()">¡A LUCHAR!</button>
                 </div>
-                <div id="pantalla-tienda" class="pantalla" style="display:none;">
-    <div class="container">
-        <div id="tienda-grid" style="
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-            gap: 20px; 
-            padding: 20px;
-        ">
-            </div>
-    </div>
-</div>
+
                 <aside class="news-sidebar">
                     <h3>📰 NOTICIAS</h3>
                     <div class="news-item"><b>Evento:</b> ¡Probabilidad x2 en Legendarios!</div>
@@ -161,7 +150,6 @@ function regalarTickets() {
 
     <script src="database.js"></script>
     <script src="logic.js"></script>
-    <script src="tienda.js"></script>
     <script src="gacha.js"></script>
     <script src="combate.js"></script>
     <script>
