@@ -1,25 +1,17 @@
 // 1. Configuración Visual (CORREGIDA PARA QUE SE VEAN LOS DIBUJOS)
-window.obtenerImagenHTML = function(p, clasesAdicionales = "") {
+window.obtenerImagenHTML = function(p, clases = "") {
     if (!p) return "";
 
-    // 1. Prioridad: Imagen/Sprite
-    // Si tienes p.img, intentamos cargarla. 
-    // He añadido un console.log para que veas en la consola qué ruta está intentando leer.
-    if (p.img) {
-        console.log(`Cargando sprite de ${p.nombre}: ${p.img}`);
-        return `<img src="${p.img}" 
-                     class="sprite ${clasesAdicionales}" 
-                     alt="${p.nombre}" 
-                     onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=Error+Ruta';">`;
+    // Usamos p.sprite porque así está en tu database.js
+    if (p.sprite && p.sprite !== "") {
+        return `
+            <img src="${p.sprite}" class="sprite ${clases}" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+            <span class="sprite-emoji ${clases}" style="display:none;">${p.emoji || "❓"}</span>
+        `;
     }
-
-    // 2. Si no hay imagen, usamos el emoji como plan B
-    if (p.emoji) {
-        return `<span class="sprite-emoji ${clasesAdicionales}">${p.emoji}</span>`;
-    }
-
-    // 3. Si no hay nada de nada, ponemos el nombre para no dejarlo vacío
-    return `<span class="sprite-error">${p.nombre}</span>`;
+    // Si no hay sprite, tiramos del emoji
+    return `<span class="sprite-emoji ${clases}">${p.emoji || "❓"}</span>`;
 };
 // 2. Carga inicial de datos (TU CÓDIGO ORIGINAL)
 let inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
@@ -160,19 +152,21 @@ window.renderLobby = function() {
     const contenedor = document.getElementById('hero-display');
     if (!contenedor) return;
     
-    // Verificamos qué hay en el equipo
+    // Obtenemos los objetos reales de la DB basándonos en tu equipoUids
     const equipo = inventario.filter(p => equipoUids.includes(p.uid));
-    console.log("Equipo detectado para Lobby:", equipo);
-
+    
     if (equipo.length === 0) {
-        contenedor.innerHTML = "<p style='color:white'>Equipo vacío. Ve a la pestaña EQUIPO.</p>";
+        contenedor.innerHTML = "<p style='color: #94a3b8;'>Equipo vacío. Selecciona héroes en la pestaña EQUIPO.</p>";
         return;
     }
 
     contenedor.innerHTML = equipo.map(p => `
         <div class="lobby-character-card">
             <div class="lobby-sprite">${obtenerImagenHTML(p, "luchador-anim")}</div>
-            <p>${p.nombre}</p>
+            <div class="lobby-info">
+                <p style="font-weight: bold; margin: 5px 0;">${p.nombre}</p>
+                <small style="color: ${RAREZAS[p.rareza] || '#fff'}">${p.rareza.toUpperCase()}</small>
+            </div>
         </div>
     `).join("");
 };
