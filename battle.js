@@ -1,4 +1,4 @@
-// Definición de tipos y multiplicadores
+// Definición de tipos y multiplicadores (TU TABLA)
 const TABLA_TIPOS = {
     "fuego": { fuerte: "planta", debil: "agua" },
     "agua": { fuerte: "fuego", debil: "planta" },
@@ -20,13 +20,13 @@ window.battleState = {
     enemyDefending: false
 };
 
-// FUNCIÓN PRINCIPAL: Inicia el combate
+// FUNCIÓN PRINCIPAL: Inicia el combate (CORREGIDA PARA EL NUEVO INDEX)
 window.iniciarBatalla = function() {
     console.log("Iniciando motor de combate...");
     
     // Filtramos el equipo actual del inventario
     const equipo = inventario.filter(p => equipoUids.includes(p.uid));
-    if (equipo.length === 0) return alert("¡Tu equipo está vacío!");
+    if (equipo.length === 0) return alert("¡Tu equipo está vacío! Selecciona héroes en la sección EQUIPO.");
 
     battleState.playerTeam = equipo;
     battleState.enemyTeam = generarRivales(equipo);
@@ -35,7 +35,10 @@ window.iniciarBatalla = function() {
 
     prepararLuchadores();
     
+    // Ocultar lobby y mostrar combate
+    document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
     document.getElementById('battle-screen').style.display = 'flex';
+    
     actualizarInterfazBatalla();
     escribirLog("⚔️ ¡Comienza el combate!");
 };
@@ -93,6 +96,7 @@ function checkEstado() {
         if (battleState.enemyIdx < battleState.enemyTeam.length) {
             battleState.enemy = { ...battleState.enemyTeam[battleState.enemyIdx] };
             escribirLog("¡Rival derrotado! Entra el siguiente.");
+            actualizarInterfazBatalla();
         } else {
             alert("¡VICTORIA!");
             return finalizar(true);
@@ -102,6 +106,7 @@ function checkEstado() {
         if (battleState.playerIdx < battleState.playerTeam.length) {
             prepararLuchadores();
             escribirLog("¡Tu héroe cayó! Sale el relevo.");
+            actualizarInterfazBatalla();
         } else {
             alert("Has sido derrotado...");
             return finalizar(false);
@@ -110,12 +115,13 @@ function checkEstado() {
         battleState.turn = 'enemy';
         setTimeout(turnoIA, 1000);
     }
-    actualizarInterfazBatalla();
 }
 
 function turnoIA() {
     const e = battleState.enemy;
     const p = battleState.player;
+    if (!e || !p) return;
+
     let accion = e.energy >= 2 ? 'fuerte' : (e.energy >= 1 ? 'ataque' : 'recargar');
 
     if (accion === 'recargar') {
@@ -124,14 +130,16 @@ function turnoIA() {
     } else {
         const mult = calcularMult(e.tipo, p.tipo);
         let dmg = Math.floor(((accion === 'fuerte' ? 35 : 15) + (e.lvl * 2)) * mult);
-        if (battleState.isDefending) dmg = Math.floor(dmg / 2);
+        if (battleState.isDefending) {
+            dmg = Math.floor(dmg / 2);
+            battleState.isDefending = false; 
+        }
         
         p.hp -= dmg;
         e.energy -= (accion === 'fuerte' ? 2 : 1);
         escribirLog(`${e.nombre} golpea (${dmg} daño).`);
     }
     
-    battleState.isDefending = false;
     battleState.turn = 'player';
     actualizarInterfazBatalla();
     if (p.hp <= 0) checkEstado();
@@ -155,28 +163,32 @@ function actualizarInterfazBatalla() {
     document.getElementById('player-hp-bar').style.width = Math.max(0, (p.hp/p.maxHp)*100) + "%";
     document.getElementById('enemy-hp-bar').style.width = Math.max(0, (e.hp/e.maxHp)*100) + "%";
     
-    // ARREGLO DE IMÁGENES: Aplicamos las clases correctas para giro y animación
+    // IMÁGENES: Aplicamos las clases para que se vean grandes y giradas
     document.getElementById('player-battle-img').innerHTML = obtenerImagenHTML(p, "sprite-jugador luchador-anim");
     document.getElementById('enemy-battle-img').innerHTML = obtenerImagenHTML(e, "sprite-rival luchador-anim");
     
     document.getElementById('player-battle-name').innerText = `${p.nombre} (LV.${p.lvl})`;
     document.getElementById('enemy-battle-name').innerText = `${e.nombre} (LV.${e.lvl})`;
     
-    // Energía
+    // Energía (bolitas)
     const pEn = document.getElementById('player-energy');
-    pEn.innerHTML = "";
-    for(let i=0; i<3; i++) {
-        pEn.innerHTML += `<div class="dot ${i < p.energy ? 'active' : ''}"></div>`;
+    if (pEn) {
+        pEn.innerHTML = "";
+        for(let i=0; i<3; i++) {
+            pEn.innerHTML += `<div class="dot ${i < p.energy ? 'active' : ''}"></div>`;
+        }
     }
     
-    // Bloquear botones si no hay energía o no es tu turno
-    document.getElementById('btn-ataque').disabled = p.energy < 1 || battleState.turn === 'enemy';
-    document.getElementById('btn-fuerte').disabled = p.energy < 2 || battleState.turn === 'enemy';
+    // Bloquear botones
+    const btnAtq = document.getElementById('btn-ataque');
+    const btnFrt = document.getElementById('btn-fuerte');
+    if(btnAtq) btnAtq.disabled = p.energy < 1 || battleState.turn === 'enemy';
+    if(btnFrt) btnFrt.disabled = p.energy < 2 || battleState.turn === 'enemy';
 }
 
 function escribirLog(msg) {
     const log = document.getElementById('battle-log');
-    log.innerHTML = `<div>> ${msg}</div>` + log.innerHTML;
+    if (log) log.innerHTML = `<div>> ${msg}</div>` + log.innerHTML;
 }
 
 function finalizar(win) {
@@ -197,5 +209,6 @@ window.cambiarBicho = function() {
     prepararLuchadores();
     battleState.turn = 'enemy';
     actualizarInterfazBatalla();
+    escribirLog("🔄 ¡Cambio de héroe!");
     setTimeout(turnoIA, 1000);
 };

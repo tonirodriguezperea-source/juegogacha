@@ -46,7 +46,84 @@ nav {
 /* LAYOUT PRINCIPAL */
 .viewport { padding: 20px; max-width: 1200px; margin: 0 auto; }
 
-/* EQUIPO Y SAGAS */
+/* --- MEJORA LOBBY (DISEÑO SOLICITADO) --- */
+.lobby-container {
+    display: grid;
+    grid-template-columns: 1fr 300px; /* Centro grande, Noticias lateral */
+    gap: 30px;
+    padding: 20px;
+    align-items: start;
+}
+
+.main-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.05) 0%, transparent 70%);
+    padding: 40px;
+    border-radius: 30px;
+}
+
+.hero-display {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-end; /* Para que parezca que pisan el suelo */
+    min-height: 250px;
+    margin-bottom: 40px;
+}
+
+/* Personajes en el HUB */
+.lobby-hero {
+    width: auto;
+    height: auto;
+}
+
+.lobby-hero img {
+    width: 180px !important; /* DIBUJOS EN GRANDE */
+    height: auto;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+    animation: flotarLobby 4s ease-in-out infinite;
+}
+
+@keyframes flotarLobby {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.btn-play {
+    background: linear-gradient(45deg, #f59e0b, #ef4444);
+    color: white;
+    border: none;
+    padding: 20px 60px;
+    font-size: 1.8rem;
+    font-weight: 900;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.3);
+    transition: transform 0.2s;
+}
+
+.btn-play:hover { transform: scale(1.05); }
+
+/* Noticias Lateral */
+.news-sidebar {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.news-item {
+    background: var(--bg-dark);
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    border-left: 3px solid var(--accent);
+}
+
+/* --- RESTO DE TU CÓDIGO (EQUIPO Y DEX) --- */
 .equipo-layout {
     display: grid;
     grid-template-columns: 1fr 350px;
@@ -67,12 +144,6 @@ nav {
     padding: 20px 0;
 }
 
-/* CARTAS Y REPETIDOS */
-.card-stack {
-    position: relative;
-    display: inline-block;
-}
-
 .card {
     background: var(--bg-panel);
     border: 1px solid var(--border);
@@ -91,22 +162,10 @@ nav {
     margin-bottom: 5px;
 }
 
+.card-avatar img { width: 50px; height: auto; } /* Dibujos pequeños en cartas */
+
 .card.active-team { border: 2px solid var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
 
-.stack-count {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--accent);
-    color: black;
-    padding: 2px 6px;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    z-index: 10;
-}
-
-/* PANEL INFO DERECHA */
 .info-panel {
     background: var(--bg-panel);
     border: 2px solid var(--border);
@@ -125,7 +184,9 @@ nav {
     margin-bottom: 15px; 
 }
 
-/* PANTALLA DE BATALLA */
+.info-photo img { width: 100px; height: auto; }
+
+/* --- PANTALLA DE BATALLA --- */
 #battle-screen {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -146,55 +207,44 @@ nav {
     margin-bottom: 40px; 
 }
 
-/* SPRITES EN COMBATE */
 #player-battle-img, #enemy-battle-img {
-    width: 180px; 
-    height: 180px;
+    width: 220px; /* MÁS GRANDE EN COMBATE */
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Clase base para imágenes */
 .sprite-render {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    image-rendering: pixelated;
+    image-rendering: auto; /* Mejor calidad para dibujos */
 }
 
-/* El jugador mira a la derecha */
 .sprite-jugador {
     transform: scaleX(-1); 
     filter: drop-shadow(-5px 5px 10px rgba(0,0,0,0.5));
 }
 
-/* El rival mira a la izquierda (normal) */
 .sprite-rival {
     filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.5));
 }
 
-/* Animación de respiración */
-.luchador-anim {
-    animation: flotar 3s ease-in-out infinite;
-}
-
+/* Animaciones de combate */
+.luchador-anim { animation: flotar 3s ease-in-out infinite; }
 @keyframes flotar {
-    0%, 100% { transform: translateY(0) scaleX(-1); } /* El jugador mantiene el giro */
+    0%, 100% { transform: translateY(0) scaleX(-1); }
     50% { transform: translateY(-10px) scaleX(-1); }
 }
 
-/* Animación específica para el rival (sin giro) */
-#enemy-battle-img .luchador-anim {
-    animation: flotarRival 3s ease-in-out infinite;
-}
-
+#enemy-battle-img .luchador-anim { animation: flotarRival 3s ease-in-out infinite; }
 @keyframes flotarRival {
     0%, 100% { transform: translateY(0) scaleX(1); }
     50% { transform: translateY(-10px) scaleX(1); }
 }
 
-/* LOG Y HUD */
+/* HUD Y LOG */
 #battle-log {
     width: 90%; 
     max-width: 600px; 
@@ -206,7 +256,6 @@ nav {
     color: var(--text-dim); 
     margin-bottom: 20px;
     border-radius: 10px;
-    font-size: 0.9rem;
 }
 
 .hp-wrapper {
@@ -226,21 +275,6 @@ nav {
     transition: width 0.5s ease-in-out;
 }
 
-/* LOBBY */
-.hero-display {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.lobby-hero {
-    width: 100px;
-    height: 100px;
-    filter: drop-shadow(0 0 10px var(--accent));
-}
-
-/* BOTONES ACCIÓN */
 .actions-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
