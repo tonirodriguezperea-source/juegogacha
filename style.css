@@ -683,26 +683,46 @@ nav {
     transform: translateY(-20px); /* Un poco más arriba */
 }
 
-/* Ajuste para las cartas del inventario */
 .card {
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Empuja el nombre hacia abajo */
     align-items: center;
-    padding: 10px;
-    height: 120px; /* Asegura un alto mínimo para que no se pisen */
+    justify-content: space-between; /* Empuja el texto al fondo */
+    padding: 12px 5px;
+    height: 110px; /* Un pelín más de aire */
+    position: relative;
+}
+
+.card-avatar {
+    flex-grow: 1; /* Hace que el área de la imagen use todo el espacio disponible */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .card-avatar img {
-    max-height: 60px; /* Limitamos el tamaño del sprite para que no pise el texto */
+    /* Aquí está el truco: */
+    max-height: 75px; /* Subimos de 60 a 75 o incluso 80 */
+    max-width: 85%;   /* Para que no toquen los bordes laterales */
     width: auto;
+    height: auto;
     object-fit: contain;
-    margin-bottom: 5px;
+    image-rendering: pixelated; /* Para que los sprites se vean nítidos, no borrosos */
 }
 
 .card-name {
-    font-size: 0.8rem;
-    white-space: nowrap; /* Evita que el nombre se parta en dos */
-    overflow: hidden;
-    text-overflow: ellipsis; /* Si el nombre es muy largo, pone "..." */
+    margin-top: 5px;
+    font-size: 0.75rem;
+    color: #cbd5e1;
+    text-align: center;
+    width: 100%;
+}
+
+#info-img {
+    width: 120px; /* Tamaño más grande para el panel de detalles */
+    height: 120px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
 }
