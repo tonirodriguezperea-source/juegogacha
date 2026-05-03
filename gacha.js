@@ -57,8 +57,8 @@ function ejecutarAnimacionGacha(saga, personaje) {
     // Selección de imagen (Usando links estables)
     const esPkmn = saga.toLowerCase().includes('pokemon');
     const imgAnimacion = esPkmn 
-        ? "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" 
-        : "https://i.imgur.com/7vYfO8S.png";
+        ? "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" 
+        : "https://w7.pngwing.com/pngs/925/968/png-transparent-dragon-ball-thumbnail.png";
 
     objeto.innerHTML = `<img src="${imgAnimacion}" width="150" class="objeto-vibrando">`;
 
