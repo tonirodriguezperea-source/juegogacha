@@ -371,3 +371,28 @@ nav {
 .sprite-jugador {
     transform: scaleX(-1);
 }
+/* Aseguramos que las imágenes no tengan tamaño 0 */
+.sprite {
+    width: 120px !important;
+    height: 120px !important;
+    display: block !important;
+    object-fit: contain;
+    margin: 0 auto;
+}
+
+/* El contenedor del rival NO debe estar girado, el del jugador SÍ */
+.sprite-jugador {
+    transform: scaleX(-1); /* Gira al tuyo para que mire a la derecha */
+}
+
+.sprite-rival {
+    transform: scaleX(1); /* El rival mira normal (a la izquierda) */
+}
+
+/* Para el Lobby */
+.lobby-sprite {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 120px;
+}

@@ -111,7 +111,10 @@
             if(id === 'lobby') renderLobby();
             if(id === 'pokedex') renderDex();
         }
-        window.onload = () => mostrar('lobby');
+       window.onload = () => {
+    mostrar('lobby');
+    if (typeof renderLobby === 'function') renderLobby();
+};
     </script>
 </body>
 </html>

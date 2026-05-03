@@ -1,20 +1,26 @@
 // 1. Configuración Visual (CORREGIDA PARA QUE SE VEAN LOS DIBUJOS)
-window.obtenerImagenHTML = function(p, clases = "") {
+window.obtenerImagenHTML = function(p, clasesAdicionales = "") {
     if (!p) return "";
 
-    // Si el personaje tiene una ruta de imagen definida
+    // 1. Prioridad: Imagen/Sprite
+    // Si tienes p.img, intentamos cargarla. 
+    // He añadido un console.log para que veas en la consola qué ruta está intentando leer.
     if (p.img) {
+        console.log(`Cargando sprite de ${p.nombre}: ${p.img}`);
         return `<img src="${p.img}" 
-                     class="sprite ${clases}" 
+                     class="sprite ${clasesAdicionales}" 
                      alt="${p.nombre}" 
-                     onerror="this.style.display='none'; this.nextSibling.style.display='block';">
-                <span class="sprite-emoji ${clases}" style="display:none;">${p.emoji || "❓"}</span>`;
-    } 
-    
-    // Si no tiene imagen en la base de datos, tira de emoji
-    return `<span class="sprite-emoji ${clases}">${p.emoji || "❓"}</span>`;
-};
+                     onerror="this.onerror=null; this.src='https://via.placeholder.com/150?text=Error+Ruta';">`;
+    }
 
+    // 2. Si no hay imagen, usamos el emoji como plan B
+    if (p.emoji) {
+        return `<span class="sprite-emoji ${clasesAdicionales}">${p.emoji}</span>`;
+    }
+
+    // 3. Si no hay nada de nada, ponemos el nombre para no dejarlo vacío
+    return `<span class="sprite-error">${p.nombre}</span>`;
+};
 // 2. Carga inicial de datos (TU CÓDIGO ORIGINAL)
 let inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
 let equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
