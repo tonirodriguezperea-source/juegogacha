@@ -61,24 +61,29 @@ function actualizarHUD() {
 // ================================================================
 // 2. MOTOR VISUAL (RENDERIZADO DE SPRITES Y EMOJIS)
 // ================================================================
-window.obtenerImagenHTML = function(p, clases = "") {
+window.obtenerImagenHTML = function(p, clases = "", lado = "") {
     if (!p) return `<span class="sprite ${clases}">❓</span>`;
     
     const spriteURL = p.sprite || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.sprite : "");
     const emojiFallback = p.emoji || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.emoji : "👤");
 
+    // Determinamos si hay que girar la imagen (Solo para el jugador)
+    // Si es saga Pokemon y es el lado del jugador, giramos.
+    const esPokemon = p.saga && p.saga.toLowerCase().includes('pokemon');
+    const estiloGiro = (lado === "jugador" && esPokemon) ? "transform: scaleX(-1);" : "";
+
     if (spriteURL && spriteURL.trim() !== "") {
         return `
-            <div class="sprite-container ${clases}" style="position:relative; display:inline-block;">
+            <div class="sprite-container ${clases}" style="position:relative; display:inline-block; ${estiloGiro}">
                 <img src="${spriteURL}" class="sprite ${clases}" 
+                     style="display:block; max-width:100%;"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
                 <span class="sprite-emoji ${clases}" style="display:none; font-size:2rem;">${emojiFallback}</span>
             </div>
         `;
     }
-    return `<span class="sprite-emoji ${clases}" style="font-size:2rem;">${emojiFallback}</span>`;
+    return `<span class="sprite-emoji ${clases}" style="font-size:2rem; ${estiloGiro}">${emojiFallback}</span>`;
 };
-
 // ================================================================
 // 3. SISTEMA DE TIENDA DINÁMICA (ROTACIÓN DIARIA)
 // ================================================================
