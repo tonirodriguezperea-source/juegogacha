@@ -23,11 +23,12 @@ var equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
 
 const descripciones = {
     "1": "Bulbasaur es un Pokémon tipo planta. Lleva una semilla en su lomo que crece con él.",
+    "2": "Ivysaur es un Pokémon tipo planta. Lleva una semilla con la que duerme, paraliza y envenena.",
     "4": "Charmander prefiere los lugares cálidos. La llama de su cola indica su salud.",
     "7": "Squirtle se protege con su caparazón y dispara chorros de agua a presión.",
-    "152": "Son Goku, el guerrero legendario que protege la Tierra con su fuerza infinita.",
-    "153": "Vegeta, el príncipe de los saiyans. Su orgullo es tan grande como su poder.",
-    "154": "Gohan, hijo de Goku. Posee un potencial oculto que despierta en momentos críticos."
+    "1200": "Son Goku, el guerrero legendario que protege la Tierra con su fuerza infinita.",
+    "1201": "Vegeta, el príncipe de los saiyans. Su orgullo es tan grande como su poder.",
+    "1201": "Gohan, hijo de Goku. Posee un potencial oculto que despierta en momentos críticos."
 };
 
 function guardar() {
