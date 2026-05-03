@@ -676,3 +676,11 @@ nav {
     transform: scaleX(1); /* Lo dejamos normal */
     filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
 }
+
+.player-side {
+    transform: translateY(20px); /* Un poco más abajo */
+}
+
+.enemy-side {
+    transform: translateY(-20px); /* Un poco más arriba */
+}
