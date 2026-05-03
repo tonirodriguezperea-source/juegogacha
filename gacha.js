@@ -5,29 +5,24 @@ let monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
 let ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 10;
 
 window.invocar = function(saga) {
-    // 1. Sincronizar tickets
+    // 1. Sincronizar tickets desde el almacenamiento real
     ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
 
     if (ticketsNormales <= 0) {
-        alert("¡No tienes tickets normales!");
+        alert("¡No tienes tickets normales! Consigue más en batalla.");
         return;
     }
 
     // 2. FILTRO ULTRA-REFORZADO
-    // Convertimos todo a minúsculas y quitamos TODOS los espacios para comparar
     const busquedaLimpia = saga.toLowerCase().replace(/\s/g, ""); 
 
     const poolSaga = DB.filter(p => {
-        // Hacemos lo mismo con el nombre de la saga en la base de datos
         const sagaDBLimpia = p.saga.toLowerCase().replace(/\s/g, "");
         return sagaDBLimpia.includes(busquedaLimpia);
     });
     
-    // Si sigue fallando, esto nos dirá qué está pasando en la consola (F12)
     if (poolSaga.length === 0) {
-        console.error("DEBUG GACHA:");
-        console.log("Buscaste:", busquedaLimpia);
-        console.log("Sagas disponibles en tu DB:", [...new Set(DB.map(p => p.saga))]);
+        console.error("DEBUG GACHA: Buscaste:", busquedaLimpia);
         alert("No se han encontrado personajes de: " + saga);
         return;
     }
@@ -49,34 +44,34 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const objeto = document.getElementById('objeto-invocacion');
     const resultado = document.getElementById('resultado-invocacion');
     
-    // Gasto de ticket
+    // Gasto de ticket inmediato
     ticketsNormales--;
     guardarEconomia();
-    actualizarHUD(); // Actualizamos inmediatamente el contador
+    actualizarHUD(); 
     
+    // Configurar vista inicial
     overlay.style.display = 'flex';
     resultado.style.display = 'none';
+    objeto.style.display = 'flex';
     
-    // Selección de imagen de invocación
+    // Selección de imagen (Usando links estables)
     const esPkmn = saga.toLowerCase().includes('pokemon');
+    const imgAnimacion = esPkmn 
+        ? "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" 
+        : "https://i.imgur.com/7vYfO8S.png";
 
-// Usamos enlaces directos y seguros
-const imgAnimacion = esPkmn 
-    ? "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" 
-    : "https://www.pngplay.com/wp-content/uploads/12/Dragon-Ball-Star-PNG-Free-File-Download.png";
+    objeto.innerHTML = `<img src="${imgAnimacion}" width="150" class="objeto-vibrando">`;
 
-// Asegúrate de que el div 'objeto-invocacion' reciba el HTML
-objeto.innerHTML = `<img src="${imgAnimacion}" width="120" class="objeto-vibrando">`;
-    // Animación de salida
+    // Fase 1: Vibración y Explosión
     setTimeout(() => {
-        objeto.className = "objeto-explotando";
+        const img = objeto.querySelector('img');
+        if (img) img.className = "objeto-explotando";
         
+        // Fase 2: Mostrar Resultado
         setTimeout(() => {
-            objeto.className = ""; 
-            objeto.innerHTML = "";
+            objeto.style.display = 'none';
             resultado.style.display = 'block';
             
-            // Lógica de coleccionista (Máximo 10 copias)
             const copias = inventario.filter(p => p.id === personaje.id).length;
             
             if (copias >= 10) {
@@ -92,22 +87,22 @@ objeto.innerHTML = `<img src="${imgAnimacion}" width="120" class="objeto-vibrand
                         <h3 style="color:#ffcc00; text-shadow: 0 0 10px rgba(255,204,0,0.5);">+💰 ${valor} Monedas</h3>
                     </div>`;
             } else {
-                const nuevo = { ...personaje, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
+                const nuevo = { ...personaje, uid: "UID-" + Date.now(), lvl: 1 };
                 inventario.push(nuevo);
                 if (typeof guardar === 'function') guardar(); 
                 
                 resultado.innerHTML = `
-                    <div class="nuevo-personaje">
+                    <div class="nuevo-personaje" style="text-align:center;">
                         ${obtenerImagenHTML(personaje, "sprite-revelado")}
                         <h3 style="color: #94a3b8; margin:0;">¡HAS OBTENIDO A!</h3>
-                        <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2rem; margin: 5px 0;">${personaje.nombre}</h2>
-                        <span class="dex-badge" style="background:${RAREZAS[personaje.rareza]}; color:black; padding: 5px 15px; border-radius: 20px; font-weight:bold;">
+                        <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2.2rem; margin: 10px 0;">${personaje.nombre}</h2>
+                        <span style="background:${RAREZAS[personaje.rareza]}; color:black; padding: 5px 15px; border-radius: 20px; font-weight:bold;">
                             ${personaje.rareza.toUpperCase()}
                         </span>
                     </div>`;
             }
             
-            resultado.innerHTML += `<br><button onclick="cerrarGacha()" class="btn-play" style="margin-top:20px;">CONTINUAR</button>`;
+            resultado.innerHTML += `<br><button onclick="cerrarGacha()" class="nav-btn" style="margin-top:20px; cursor:pointer;">CONTINUAR</button>`;
             actualizarHUD();
         }, 600);
     }, 1500);
@@ -124,23 +119,16 @@ function guardarEconomia() {
 }
 
 window.actualizarHUD = function() {
-    // Leemos el valor real del almacenamiento
     let tks = localStorage.getItem("gq_tk_normal") || 0;
     let mons = localStorage.getItem("gq_monedas") || 0;
 
-    // Actualizamos el texto en el HTML
     const spanTks = document.getElementById('val-tk-normal');
     if (spanTks) spanTks.innerText = tks;
 
     const spanMons = document.getElementById('val-monedas');
     if (spanMons) spanMons.innerText = mons;
     
-    // Actualizamos las variables globales para que el código no use valores viejos
+    // Sincronizar variables de sesión
     ticketsNormales = parseInt(tks);
     monedas = parseInt(mons);
 };
-    
-    const elMonedas = document.getElementById('val-monedas'); 
-    if (elMonedas) {
-        elMonedas.innerText = monedas;
-    }
