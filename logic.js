@@ -1,6 +1,8 @@
-// --- 1. CONFIGURACIÓN VISUAL ---
+// 1. Configuración Visual (UNIFICADA Y CORREGIDA)
 window.obtenerImagenHTML = function(p, clases = "") {
     if (!p) return `<span class="sprite ${clases}">❓</span>`;
+
+    // Buscamos el sprite en el objeto o en la DB original por si acaso
     const spriteURL = p.sprite || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.sprite : "");
     const emojiFallback = p.emoji || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.emoji : "👤");
 
@@ -11,15 +13,13 @@ window.obtenerImagenHTML = function(p, clases = "") {
             <span class="sprite-emoji ${clases}" style="display:none;">${emojiFallback}</span>
         `;
     }
+    
     return `<span class="sprite-emoji ${clases}">${emojiFallback}</span>`;
 };
 
-// --- 2. CARGA DE DATOS Y ECONOMÍA ---
+// 2. Carga inicial de datos
 var inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
 var equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
-var monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
-var ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0; // Variable para tickets
-var tiendaDiaria = JSON.parse(localStorage.getItem("gq_tienda_diaria")) || { fecha: "", items: [] };
 
 const descripciones = {
     "1": "Bulbasaur es un Pokémon tipo planta. Lleva una semilla en su lomo que crece con él.",
@@ -34,116 +34,52 @@ const descripciones = {
 function guardar() {
     localStorage.setItem("gq_inv", JSON.stringify(inventario));
     localStorage.setItem("gq_team", JSON.stringify(equipoUids));
-    localStorage.setItem("gq_monedas", monedas);
-    localStorage.setItem("gq_tk_normal", ticketsNormales);
-    localStorage.setItem("gq_tienda_diaria", JSON.stringify(tiendaDiaria));
 }
 
-function actualizarHUD() {
-    const elMonedas = document.getElementById('cont-monedas');
-    if (elMonedas) elMonedas.innerText = monedas;
-    
-    const elTickets = document.getElementById('val-tk-normal');
-    if (elTickets) elTickets.innerText = ticketsNormales;
-}
-
-// --- 3. FUNCIONES DE JUEGO (GACHA CORREGIDO) ---
-
-function invocar(sagaTarget) {
+// 3. Funciones de Juego
+function tirarGacha() {
     if (typeof DB === 'undefined') return console.error("Base de datos no encontrada");
     
-    if (ticketsNormales <= 0) {
-        alert("¡No tienes tickets! Reclama los gratuitos en el inicio.");
-        return;
-    }
-
-    // 1. Filtrar por SAGA primero para evitar mezclas
-    let poolSaga = DB.filter(p => p.saga.toLowerCase() === sagaTarget.toLowerCase());
-    if (poolSaga.length === 0) poolSaga = DB; // Fallback si no hay nada
-
-    // 2. Determinar rareza
     const rand = Math.random() * 100;
     let rareza = rand < 2 ? "legendario" : rand < 10 ? "epico" : rand < 30 ? "raro" : "comun";
-    
-    // 3. Filtrar pool de saga por esa rareza
-    let opciones = poolSaga.filter(p => p.rareza === rareza);
-    if (opciones.length === 0) opciones = poolSaga.filter(p => p.rareza === "comun");
+    let opciones = DB.filter(p => p.rareza === rareza);
+    if (opciones.length === 0) opciones = DB.filter(p => p.rareza === "comun");
     
     const base = opciones[Math.floor(Math.random() * opciones.length)];
 
-    // Gastar ticket
-    ticketsNormales--;
-
-    // Límite de 10 copias (tu lógica original)
+    // --- NUEVA REGLA: LÍMITE DE 10 COPIAS ---
     const copiasActuales = inventario.filter(p => p.id === base.id).length;
+    
     if (copiasActuales >= 10) {
-        alert(`¡Ya tienes 10 copias de ${base.nombre}!`);
-        monedas += 100; 
-        guardar();
-        actualizarHUD();
+        alert(`¡Ya tienes 10 copias de ${base.nombre}! No puedes acumular más.`);
+        // Aquí podrías añadir algo como: moneditas += 100; (si tuvieras dinero en el juego)
         return; 
     }
+    // ----------------------------------------
 
-    // PROCESO DE INVOCACIÓN (ANIMACIÓN)
-    const overlay = document.getElementById('gacha-animacion');
-    const objAnim = document.getElementById('objeto-invocacion');
-    const resAnim = document.getElementById('resultado-invocacion');
-
-    if (overlay) {
-        overlay.style.display = 'flex';
-        objAnim.innerHTML = "✨"; // Efecto simple
-        resAnim.style.display = 'none';
-
-        setTimeout(() => {
-            const nuevo = { ...base, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
-            inventario.push(nuevo);
-            
-            const bonus = Math.floor(Math.random() * 101) + 50; 
-            monedas += bonus;
-            
-            guardar();
-            actualizarHUD();
-
-            // Mostrar resultado en la animación
-            resAnim.innerHTML = `
-                <div class="ganador-gacha">
-                    ${obtenerImagenHTML(nuevo)}
-                    <h2>¡${nuevo.nombre}!</h2>
-                    <p>+${bonus} 💰</p>
-                    <button onclick="document.getElementById('gacha-animacion').style.display='none'">CONTINUAR</button>
-                </div>
-            `;
-            resAnim.style.display = 'block';
-            
-            renderLobby();
-            renderEquipo();
-            renderDex();
-        }, 1500);
-    }
-}
-
-function regalarTickets() {
-    ticketsNormales += 10;
+    const nuevo = { ...base, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
+    inventario.push(nuevo);
     guardar();
-    actualizarHUD();
-    alert("🎁 ¡Has recibido 10 tickets!");
+    
+    alert(`✨ ¡Has invocado a ${nuevo.nombre}! ✨`);
+    
+    // Actualizar pantallas si están abiertas
+    if (document.getElementById('pantalla-equipo').style.display !== 'none') renderEquipo();
+    if (document.getElementById('pantalla-lobby').style.display !== 'none') renderLobby();
+    if (document.getElementById('pantalla-pokedex').style.display !== 'none') renderDex();
 }
-
-// --- RESTO DE FUNCIONES (Siguen intactas) ---
 
 function renderEquipo() {
     const list = document.getElementById('sagas-list');
     const filtro = document.getElementById('busqueda-equipo')?.value.toLowerCase() || "";
     if (!list) return;
     list.innerHTML = '';
-
     const especies = {};
     inventario.forEach(p => {
         if (!especies[p.id]) especies[p.id] = { ...p, cantidad: 0, copias: [] };
         especies[p.id].cantidad++;
         especies[p.id].copias.push(p);
     });
-
     const sagas = {};
     Object.values(especies).forEach(p => {
         if (p.nombre.toLowerCase().includes(filtro)) {
@@ -151,7 +87,6 @@ function renderEquipo() {
             sagas[p.saga].push(p);
         }
     });
-
     for (const s in sagas) {
         const sec = document.createElement('div');
         sec.className = 'saga-section';
@@ -189,7 +124,7 @@ function mostrarInfo(id) {
     if (elements.name) elements.name.innerText = p.nombre;
     if (elements.desc) elements.desc.innerText = descripciones[p.id] || "Héroe listo para la batalla.";
     if (elements.dex) elements.dex.innerText = p.id;
-    if (elements.tipo) elements.tipo.innerText = p.tipo ? p.tipo.toUpperCase() : "???";
+    if (elements.tipo) elements.tipo.innerText = p.tipo.toUpperCase();
     if (elements.saga) elements.saga.innerText = p.saga;
 }
 
@@ -197,10 +132,24 @@ function abrirMenuCopias(id) {
     const copias = inventario.filter(p => p.id == id);
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
+    
+    // El fondo oscuro se mantiene igual
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;";
     
+    // Añadimos max-height y overflow al contenedor blanco/azul
     let html = `
-        <div style="background:#1a1a2e;padding:25px;border-radius:20px;border:2px solid #4ade80;width:340px;color: white;max-height: 85vh;overflow-y: auto;">
+        <div style="
+            background:#1a1a2e;
+            padding:25px;
+            border-radius:20px;
+            border:2px solid #4ade80;
+            width:340px; 
+            color: white;
+            max-height: 85vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #4ade80 #0f0f1b;
+        ">
             <div style="text-align:center; margin-bottom: 15px;">${obtenerImagenHTML(copias[0])}</div>
             <h3 style="text-align:center;margin-top:0;color:#4ade80;">Gestionar ${copias[0].nombre}</h3>`;
 
@@ -216,7 +165,13 @@ function abrirMenuCopias(id) {
             </div>`;
     });
 
-    html += `<button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background: #333; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold;">Regresar</button></div>`;
+    html += `
+            <button onclick="document.getElementById('overlay-copias').remove()" 
+                    style="width:100%; margin-top:15px; background: #333; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold;">
+                Regresar
+            </button>
+        </div>`;
+
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
 }
@@ -229,7 +184,7 @@ function toggleEquipo(uid) {
         if (equipoUids.length < 3) {
             equipoUids.push(uid);
         } else {
-            alert("⚠️ Tu equipo ya tiene 3 héroes.");
+            alert("⚠️ Tu equipo ya tiene 3 héroes. Quita uno primero.");
         }
     }
     guardar();
@@ -240,70 +195,115 @@ function toggleEquipo(uid) {
 window.renderLobby = function() {
     const contenedor = document.getElementById('hero-display');
     if (!contenedor) return;
+    
     const equipo = inventario.filter(p => equipoUids.includes(p.uid));
+    
     if (equipo.length === 0) {
-        contenedor.innerHTML = "<p style='color: #94a3b8;'>Equipo vacío.</p>";
+        contenedor.innerHTML = "<p style='color: #94a3b8;'>Equipo vacío. Selecciona héroes en la pestaña EQUIPO.</p>";
         return;
     }
+
     contenedor.innerHTML = equipo.map(p => `
-        <div class="lobby-character-card">
+        <div class="lobby-character-card" style="position: relative;">
             <div class="lobby-sprite">${obtenerImagenHTML(p, "luchador-anim")}</div>
+            
             <div class="lobby-info" style="text-align: center;">
                 <p style="font-weight: bold; margin: 0; font-size: 1.1rem;">${p.nombre}</p>
-                <div style="background: rgba(74, 222, 128, 0.2); color: #4ade80; border: 1px solid #4ade80; border-radius: 4px; display: inline-block; padding: 0px 8px; font-size: 0.75rem; font-weight: bold; margin: 4px 0;">LV. ${p.lvl || 1}</div>
+                
+                <div style="
+                    background: rgba(74, 222, 128, 0.2); 
+                    color: #4ade80; 
+                    border: 1px solid #4ade80; 
+                    border-radius: 4px; 
+                    display: inline-block; 
+                    padding: 0px 8px; 
+                    font-size: 0.75rem; 
+                    font-weight: bold; 
+                    margin: 4px 0;
+                ">
+                    LV. ${p.lvl || 1}
+                </div>
+
                 <br>
-                <small style="text-transform: uppercase;">${p.rareza}</small>
+
+                <small style="
+                    color: ${typeof RAREZAS !== 'undefined' ? RAREZAS[p.rareza] : '#fff'};
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                    font-size: 0.7rem;
+                ">
+                    ${p.rareza}
+                </small>
             </div>
         </div>
     `).join("");
+
+    console.log("Lobby renderizado con éxito");
 };
 
 function renderDex() {
     const grid = document.getElementById('dex-grid');
     if (!grid) return;
+
+    // 1. CÁLCULO DE PROGRESO
     const totalEspecies = DB.length;
-    const especiesObtenidas = DB.filter(p => inventario.some(inv => inv.id === p.id)).length;
-    const porcentaje = Math.round((especiesObtenidas / totalEspecies) * 100);
-    const dbOrdenada = [...DB].sort((a, b) => a.id - b.id);
+    // Contamos cuántas IDs únicas de la DB están en el inventario
+    const especiesObtenidas = DB.filter(p => 
+        inventario.some(inv => inv.id === p.id)
+    ).length;
     
-    let html = `<div class="dex-progress-wrapper" style="grid-column: 1 / -1; margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: white; font-weight: bold;">
-            <span>Progreso</span><span>${especiesObtenidas} / ${totalEspecies} (${porcentaje}%)</span>
-        </div>
-        <div style="width: 100%; height: 15px; background: #2d2d44; border-radius: 10px; overflow: hidden; border: 1px solid #444;">
-            <div style="width: ${porcentaje}%; height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e);"></div>
-        </div>
-    </div>`;
+    const porcentaje = Math.round((especiesObtenidas / totalEspecies) * 100);
 
-    html += dbOrdenada.map(p => {
+    // 2. ORDENAR DB
+    const dbOrdenada = [...DB].sort((a, b) => a.id - b.id);
+
+    // 3. CREAR BARRA DE PROGRESO (HTML)
+    const htmlProgreso = `
+        <div class="dex-progress-wrapper" style="grid-column: 1 / -1; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; color: white; font-weight: bold;">
+                <span>Progreso de Colección</span>
+                <span>${especiesObtenidas} / ${totalEspecies} (${porcentaje}%)</span>
+            </div>
+            <div style="width: 100%; height: 15px; background: #2d2d44; border-radius: 10px; overflow: hidden; border: 1px solid #444;">
+                <div style="width: ${porcentaje}%; height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); transition: width 0.5s ease;"></div>
+            </div>
+        </div>
+    `;
+
+    // 4. GENERAR CARTAS
+    const htmlCards = dbOrdenada.map(p => {
         const tiene = inventario.some(inv => inv.id === p.id);
+        const colorRareza = RAREZAS[p.rareza] || '#94a3b8';
         const numeroDex = String(p.id).padStart(3, '0');
-        return `<div class="dex-card ${tiene ? 'registrado' : 'desconocido'}" onclick="${tiene ? `mostrarInfo('${p.id}')` : ''}">
-            <div class="dex-header"><span class="dex-number">#${numeroDex}</span></div>
-            <div class="dex-body"><div class="card-avatar">${obtenerImagenHTML(p)}</div></div>
-            <div class="dex-footer"><div class="dex-name">${tiene ? p.nombre : '???'}</div></div>
-        </div>`;
+
+        return `
+            <div class="dex-card ${tiene ? 'registrado' : 'desconocido'}" 
+                 style="--card-color: ${tiene ? colorRareza : '#2d2d44'}"
+                 onclick="${tiene ? `mostrarInfo('${p.id}')` : ''}">
+                
+                <div class="dex-header">
+                    <span class="dex-number">#${numeroDex}</span>
+                    <span class="dex-saga">${p.saga}</span>
+                </div>
+
+                <div class="dex-body">
+                    <div class="card-avatar">
+                        ${obtenerImagenHTML(p)}
+                    </div>
+                </div>
+
+                <div class="dex-footer">
+                    <div class="dex-name">${tiene ? p.nombre : '???'}</div>
+                    ${tiene ? `<div class="dex-badge" style="background: ${colorRareza}">${p.rareza}</div>` : ''}
+                </div>
+
+                ${tiene ? '<div class="dex-check">✔</div>' : ''}
+            </div>`;
     }).join('');
-    grid.innerHTML = html;
-}
 
-// --- 4. NAVEGACIÓN Y CARGA ---
-function mostrar(pantalla) {
-    const pantallas = document.querySelectorAll('.pantalla');
-    pantallas.forEach(p => p.style.display = 'none');
-
-    const pActive = document.getElementById('pantalla-' + pantalla);
-    if (pActive) pActive.style.display = 'block';
-
-    const renders = {
-        'lobby': renderLobby,
-        'equipo': renderEquipo,
-        'pokedex': renderDex,
-        'tienda': typeof renderTienda === 'function' ? renderTienda : null
-    };
-
-    if (renders[pantalla]) renders[pantalla]();
-    actualizarHUD();
+    // 5. RENDERIZAR TODO
+    // Insertamos la barra de progreso y luego las cartas
+    grid.innerHTML = htmlProgreso + htmlCards;
 }
 
 function borrarPartida() {
@@ -314,6 +314,6 @@ function borrarPartida() {
 }
 
 window.onload = () => {
-    actualizarHUD();
+    actualizarHUD(); // Esto forzará a que los "10" se cambien por el valor real guardado
     mostrar('lobby');
 };
