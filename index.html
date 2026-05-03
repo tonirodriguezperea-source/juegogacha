@@ -62,6 +62,37 @@
             <div id="dex-grid" class="grid"></div>
         </div>
     </div>
+    
+    <div id="pantalla-gacha" class="pantalla" style="display:none;">
+    <div class="gacha-header">
+        <h2>TIENDA DE INVOCACIONES</h2>
+        <div class="tickets-display">
+            <div class="ticket-pill">🎟️ Normal: <span id="val-tk-normal">0</span></div>
+            <div class="ticket-pill gold">🎫 Oro: <span id="val-tk-oro">0</span></div>
+        </div>
+    </div>
+
+    <div class="banners-container">
+        <div class="banner-card pokemon">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" class="banner-icon">
+            <h3>Banner Pokémon</h3>
+            <button onclick="invocar('pokemon')" class="btn-invocar">Tirar 1 Ticket</button>
+        </div>
+
+        <div class="banner-card dragonball">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Dragon_Ball_4-star.svg" class="banner-icon">
+            <h3>Banner Saiyan</h3>
+            <button onclick="invocar('dragonball')" class="btn-invocar db">Tirar 1 Ticket</button>
+        </div>
+    </div>
+</div>
+
+<div id="gacha-animacion" class="gacha-overlay" style="display:none;">
+    <div class="anim-container">
+        <div id="objeto-invocacion"></div>
+        <div id="resultado-invocacion" style="display:none;"></div>
+    </div>
+</div>
 
     <div id="battle-screen" style="display:none;">
         <div class="battle-arena">
@@ -102,20 +133,25 @@
     <script src="combate.js"></script>
     <script>
         function mostrar(id) {
-            document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
-            document.getElementById('battle-screen').style.display = 'none';
-            
-            const target = document.getElementById('pantalla-' + id);
-            if(target) target.style.display = 'block';
-            
-            if(id === 'equipo') renderEquipo();
-            if(id === 'lobby') renderLobby();
-            if(id === 'pokedex') renderDex();
-        }
-       window.onload = () => {
-    mostrar('lobby');
-    if (typeof renderLobby === 'function') renderLobby();
-};
+    // Escondemos TODO incluyendo el gacha y la batalla
+    document.querySelectorAll('.pantalla').forEach(p => p.style.display = 'none');
+    document.getElementById('battle-screen').style.display = 'none';
+    document.getElementById('pantalla-gacha').style.display = 'none'; // Aseguramos que se esconda
+    
+    // Mostramos la pantalla correcta
+    const target = document.getElementById('pantalla-' + id);
+    if(target) target.style.display = 'block';
+    
+    // Ejecutamos los renders necesarios
+    if(id === 'equipo') renderEquipo();
+    if(id === 'lobby') renderLobby();
+    if(id === 'pokedex') renderDex();
+    
+    // NUEVO: Si entramos al gacha, actualizamos los números de los tickets
+    if(id === 'gacha' && typeof actualizarHUD === 'function') {
+        actualizarHUD();
+    }
+}
     </script>
 </body>
 </html>
