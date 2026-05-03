@@ -38,15 +38,31 @@ function guardar() {
 // 3. Funciones de Juego
 function tirarGacha() {
     if (typeof DB === 'undefined') return console.error("Base de datos no encontrada");
+    
     const rand = Math.random() * 100;
     let rareza = rand < 2 ? "legendario" : rand < 10 ? "epico" : rand < 30 ? "raro" : "comun";
     let opciones = DB.filter(p => p.rareza === rareza);
     if (opciones.length === 0) opciones = DB.filter(p => p.rareza === "comun");
+    
     const base = opciones[Math.floor(Math.random() * opciones.length)];
+
+    // --- NUEVA REGLA: LÍMITE DE 10 COPIAS ---
+    const copiasActuales = inventario.filter(p => p.id === base.id).length;
+    
+    if (copiasActuales >= 10) {
+        alert(`¡Ya tienes 10 copias de ${base.nombre}! No puedes acumular más.`);
+        // Aquí podrías añadir algo como: moneditas += 100; (si tuvieras dinero en el juego)
+        return; 
+    }
+    // ----------------------------------------
+
     const nuevo = { ...base, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
     inventario.push(nuevo);
     guardar();
+    
     alert(`✨ ¡Has invocado a ${nuevo.nombre}! ✨`);
+    
+    // Actualizar pantallas si están abiertas
     if (document.getElementById('pantalla-equipo').style.display !== 'none') renderEquipo();
     if (document.getElementById('pantalla-lobby').style.display !== 'none') renderLobby();
     if (document.getElementById('pantalla-pokedex').style.display !== 'none') renderDex();
