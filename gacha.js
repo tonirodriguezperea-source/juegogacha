@@ -61,15 +61,12 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const esPkmn = saga.toLowerCase().includes('pokemon');
 
 // Usamos enlaces directos y seguros
-const esPkmn = saga.toLowerCase().includes('pokemon');
+const imgAnimacion = esPkmn 
+    ? "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" 
+    : "https://www.pngplay.com/wp-content/uploads/12/Dragon-Ball-Star-PNG-Free-File-Download.png";
 
-// Usaremos estos dos enlaces que son muy estables
-const imgBall = esPkmn 
-    ? "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" 
-    : "https://i.imgur.com/7vYfO8S.png";
-
-// Asegúrate de que la imagen se inserte así:
-objeto.innerHTML = `<img src="${imgBall}" style="width:120px; filter: drop-shadow(0 0 10px gold);" class="objeto-vibrando">`;
+// Asegúrate de que el div 'objeto-invocacion' reciba el HTML
+objeto.innerHTML = `<img src="${imgAnimacion}" width="120" class="objeto-vibrando">`;
     // Animación de salida
     setTimeout(() => {
         objeto.className = "objeto-explotando";
