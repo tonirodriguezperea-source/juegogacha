@@ -11,7 +11,7 @@
         <button class="nav-btn" onclick="mostrar('lobby')">🏠 Inicio</button>
         <button class="nav-btn" onclick="mostrar('equipo')">🛡️ Equipo</button>
         <button class="nav-btn" onclick="mostrar('pokedex')">📖 Dex</button>
-        <button class="nav-btn gacha-btn" onclick="tirarGacha()">✨ Invocar</button>
+        <button class="nav-btn gacha-btn" onclick="mostrar('gacha')">✨ Invocar</button>
     </nav>
 
     <div class="viewport">
@@ -65,25 +65,33 @@
     
     <div id="pantalla-gacha" class="pantalla" style="display:none;">
     <div class="gacha-header">
-        <h2>TIENDA DE INVOCACIONES</h2>
-        <div class="tickets-display">
-            <div class="ticket-pill">🎟️ Normal: <span id="val-tk-normal">0</span></div>
-            <div class="ticket-pill gold">🎫 Oro: <span id="val-tk-oro">0</span></div>
+        <h2 style="color: #f59e0b; text-align: center; margin-top: 20px;">TIENDA DE INVOCACIONES</h2>
+        <div class="tickets-display" style="text-align: center; margin-bottom: 20px;">
+            <span style="background: #333; padding: 10px; border-radius: 10px; margin: 5px;">
+                🎟️ Tickets: <span id="val-tk-normal">0</span>
+            </span>
         </div>
     </div>
 
-    <div class="banners-container">
-        <div class="banner-card pokemon">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" class="banner-icon">
-            <h3>Banner Pokémon</h3>
-            <button onclick="invocar('pokemon')" class="btn-invocar">Tirar 1 Ticket</button>
+    <div class="banners-container" style="display: flex; justify-content: center; gap: 20px; padding: 20px;">
+        <div class="banner-card" style="background: #2d2d44; padding: 20px; border-radius: 15px; border: 2px solid #ef4444; text-align: center; width: 200px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" width="80">
+            <h3>Pokémon</h3>
+            <button onclick="invocar('pokemon')" style="background: #ef4444; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%;">Tirar Ticket</button>
         </div>
 
-        <div class="banner-card dragonball">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Dragon_Ball_4-star.svg" class="banner-icon">
-            <h3>Banner Saiyan</h3>
-            <button onclick="invocar('dragonball')" class="btn-invocar db">Tirar 1 Ticket</button>
+        <div class="banner-card" style="background: #2d2d44; padding: 20px; border-radius: 15px; border: 2px solid #f59e0b; text-align: center; width: 200px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Dragon_Ball_4-star.svg" width="80">
+            <h3>Saiyan</h3>
+            <button onclick="invocar('dragonball')" style="background: #f59e0b; color: black; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%;">Tirar Ticket</button>
         </div>
+    </div>
+</div>
+
+<div id="gacha-animacion" class="gacha-overlay" style="display:none;">
+    <div class="anim-container">
+        <div id="objeto-invocacion"></div>
+        <div id="resultado-invocacion" style="display:none;"></div>
     </div>
 </div>
 
