@@ -32,7 +32,19 @@ const SKINS_DATA = {
     "3": { nombre: "Venusaur Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/3.png", precio: 35 },
     "9": { nombre: "Blastoise Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/9.png", precio: 35 },
     "133": { nombre: "Eevee Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/133.png", precio: 30 },
-    "143": { nombre: "Snorlax Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png", precio: 30 }
+    "143": { nombre: "Snorlax Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/143.png", precio: 30 },
+    "2": { nombre: "Ivysaur Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/2.png", precio: 25 },
+    "5": { nombre: "Charmeleon Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/5.png", precio: 25 },
+    "8": { nombre: "Wartortle Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/8.png", precio: 25 },
+    "10": { nombre: "Caterpie Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/10.png", precio: 15 },
+    "11": { nombre: "Metapod Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/11.png", precio: 15 },
+    "12": { nombre: "Butterfree Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/12.png", precio: 30 },
+    "13": { nombre: "Weedle Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/13.png", precio: 15 },
+    "14": { nombre: "Kakuna Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/14.png", precio: 15 },
+    "15": { nombre: "Beedrill Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/15.png", precio: 30 },
+    "16": { nombre: "Pidgey Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/16.png", precio: 15 },
+    "17": { nombre: "Pidgeotto Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/17.png", precio: 25 },
+    "18": { nombre: "Pidgeot Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/18.png", precio: 35 }
 };
 
 // Descripciones de la Pokédex
