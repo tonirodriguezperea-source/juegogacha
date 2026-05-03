@@ -40,69 +40,80 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const objeto = document.getElementById('objeto-invocacion');
     const resultado = document.getElementById('resultado-invocacion');
     
-    // Gasto de ticket
     ticketsNormales--;
-    guardar(); // Usamos la función guardar() de logic.js que ya guarda todo
+    guardar(); 
     actualizarHUD(); 
     
     overlay.style.display = 'flex';
     resultado.style.display = 'none';
     objeto.style.display = 'flex';
     
-    // Imagen de la cápsula/pokeball según la saga
     const esPkmn = saga.toLowerCase().includes('pokemon');
-    const imgAnimacion = esPkmn 
-        ? "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" 
-        : "https://upload.wikimedia.org/wikipedia/commons/b/b5/Dragon_Ball_Sphere.png"; // Imagen de esfera para DBZ
+    
+    // URLs DEFINITIVAS Y ESTABLES (PNGs transparentes)
+    const imgPoke = "https://www.freeiconspng.com/uploads/pokeball-png-2.png";
+    const imgDBZ = "https://www.pngarts.com/files/11/Dragon-Ball-Z-Orb-PNG-Image-Background.png"; 
 
-    objeto.innerHTML = `<img src="${imgAnimacion}" width="120" class="objeto-vibrando" style="filter: drop-shadow(0 0 10px gold);">`;
+    const urlElegida = esPkmn ? imgPoke : imgDBZ;
 
-    // Fase 1: Animación
+    // Insertamos la imagen con un diseño más sólido
+    objeto.innerHTML = `
+        <div class="objeto-vibrando" style="width: 150px; height: 150px; display: flex; align-items: center; justify-content: center;">
+            <img src="${urlElegida}" 
+                 id="img-gacha-temp"
+                 style="width: 120px; height: auto; filter: drop-shadow(0 0 15px rgba(255,215,0,0.7));"
+                 onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-size:100px\'>✨</span>';">
+        </div>`;
+
+    // PEQUEÑO TRUCO: Esperamos 100ms para asegurar que el navegador "ve" la imagen antes de animar
     setTimeout(() => {
-        objeto.innerHTML = `<img src="${imgAnimacion}" width="120" class="objeto-explotando">`;
-        
-        // Fase 2: Mostrar Resultado
+        const img = document.getElementById('img-gacha-temp');
+        if(img) img.classList.add('objeto-vibrando');
+
         setTimeout(() => {
-            objeto.style.display = 'none';
-            resultado.style.display = 'block';
+            // Fase de explosión
+            if(img) img.className = "objeto-explotando";
             
-            // Lógica de copias (Máximo 10)
-            const copias = inventario.filter(p => p.id === personaje.id).length;
-            
-            if (copias >= 10) {
-                const premios = { comun: 100, raro: 250, epico: 600, legendario: 1500 };
-                const valor = premios[personaje.rareza] || 100;
-                monedas += valor; // Sumamos a la variable global
+            setTimeout(() => {
+                objeto.style.display = 'none';
+                resultado.style.display = 'block';
                 
-                resultado.innerHTML = `
-                    <div style="text-align:center;">
-                        ${obtenerImagenHTML(personaje, "sprite-revelado")}
-                        <h3 style="color:#ff4444; margin-top:10px;">¡LIMITE ALCANZADO!</h3>
-                        <p style="color:white;">Ya tienes 10 copias. Recompensa de consolación:</p>
-                        <h2 style="color:#eab308;">+💰 ${valor} Monedas</h2>
-                    </div>`;
-            } else {
-                // Añadir al inventario real
-                const nuevo = { ...personaje, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
-                inventario.push(nuevo);
+                const copias = inventario.filter(p => p.id === personaje.id).length;
                 
-                resultado.innerHTML = `
-                    <div style="text-align:center;">
-                        <div style="transform: scale(1.5); margin-bottom: 20px;">${obtenerImagenHTML(personaje)}</div>
-                        <h3 style="color: #94a3b8; margin:0;">¡NUEVO HÉROE!</h3>
-                        <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2rem; margin: 10px 0;">${personaje.nombre}</h2>
-                        <div style="background:${RAREZAS[personaje.rareza]}; color:black; display:inline-block; padding: 5px 15px; border-radius: 20px; font-weight:bold; text-transform:uppercase; font-size:0.8rem;">
-                            ${personaje.rareza}
-                        </div>
-                    </div>`;
-            }
-            
-            resultado.innerHTML += `<br><button onclick="cerrarGacha()" style="margin-top:20px; padding:10px 25px; background:#4ade80; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">LISTO</button>`;
-            
-            guardar(); // Guardamos el nuevo personaje o las monedas
-            actualizarHUD(); // Refrescamos el contador de la pantalla
-        }, 800);
-    }, 1500);
+                if (copias >= 10) {
+                    const premios = { comun: 100, raro: 250, epico: 600, legendario: 1500 };
+                    const valor = premios[personaje.rareza] || 100;
+                    monedas += valor;
+                    
+                    resultado.innerHTML = `
+                        <div style="text-align:center;">
+                            ${obtenerImagenHTML(personaje, "sprite-revelado")}
+                            <h3 style="color:#ff4444; margin-top:10px;">¡MÁXIMO NIVEL!</h3>
+                            <p style="color:white;">Ya tienes 10 copias.</p>
+                            <h2 style="color:#eab308;">+💰 ${valor} Monedas</h2>
+                        </div>`;
+                } else {
+                    const nuevo = { ...personaje, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
+                    inventario.push(nuevo);
+                    
+                    resultado.innerHTML = `
+                        <div style="text-align:center;">
+                            <div style="transform: scale(1.8); margin-bottom: 30px;">${obtenerImagenHTML(personaje)}</div>
+                            <h3 style="color: #94a3b8; margin:0; letter-spacing: 2px;">¡HAS OBTENIDO A!</h3>
+                            <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2.5rem; margin: 15px 0; text-shadow: 0 0 10px rgba(0,0,0,0.5);">${personaje.nombre}</h2>
+                            <div style="background:${RAREZAS[personaje.rareza]}; color:black; display:inline-block; padding: 8px 20px; border-radius: 30px; font-weight:bold; text-transform:uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                                ${personaje.rareza}
+                            </div>
+                        </div>`;
+                }
+                
+                resultado.innerHTML += `<br><button onclick="cerrarGacha()" style="margin-top:30px; padding:12px 35px; background:linear-gradient(180deg, #4ade80, #22c55e); border:none; border-radius:12px; cursor:pointer; font-weight:bold; color: white; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">CONTINUAR</button>`;
+                
+                guardar();
+                actualizarHUD();
+            }, 700);
+        }, 1500);
+    }, 50);
 }
 
 window.cerrarGacha = function() {
