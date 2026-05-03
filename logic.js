@@ -2,23 +2,24 @@
 window.obtenerImagenHTML = function(p, clases = "") {
     if (!p) return `<span class="sprite ${clases}">❓</span>`;
 
-    // Usamos p.sprite porque así está en tu database.js
-    if (p.sprite && p.sprite.trim() !== "") {
+    // Buscamos el sprite en el objeto o en la DB original por si acaso
+    const spriteURL = p.sprite || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.sprite : "");
+    const emojiFallback = p.emoji || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.emoji : "👤");
+
+    if (spriteURL && spriteURL.trim() !== "") {
         return `
-            <img src="${p.sprite}" class="sprite ${clases}" 
+            <img src="${spriteURL}" class="sprite ${clases}" 
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-            <span class="sprite-emoji ${clases}" style="display:none;">${p.emoji || "❓"}</span>
+            <span class="sprite-emoji ${clases}" style="display:none;">${emojiFallback}</span>
         `;
     }
     
-    // Si no tiene sprite (como Goku o Vegeta), usamos el emoji
-    const emojiMostrar = p.emoji || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.emoji : "👤") || "👤";
-    return `<span class="sprite-emoji ${clases}">${emojiMostrar}</span>`;
+    return `<span class="sprite-emoji ${clases}">${emojiFallback}</span>`;
 };
 
 // 2. Carga inicial de datos
-let inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
-let equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
+var inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
+var equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
 
 const descripciones = {
     "1": "Bulbasaur es un Pokémon tipo planta. Lleva una semilla en su lomo que crece con él.",
@@ -169,6 +170,8 @@ window.renderLobby = function() {
             </div>
         </div>
     `).join("");
+
+    console.log("Lobby renderizado con éxito"); // Esto te confirmará en la consola que ha terminado
 };
 
 function renderDex() {
