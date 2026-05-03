@@ -2,7 +2,7 @@ const DB = [
     { id: 1, nombre: "Bulbasaur", emoji: "🍃", saga: "Pokémon", tipo: "planta", rareza: "comun", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" },
     { id: 4, nombre: "Charmander", emoji: "🔥", saga: "Pokémon", tipo: "fuego", rareza: "comun", sprite:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" },
     { id: 7, nombre: "Squirtle", emoji: "💧", saga: "Pokémon", tipo: "agua", rareza: "comun", sprite:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png" },
-    { id: 101, nombre: "Goku", emoji: "👊", saga: "Dragon Ball", tipo: "fuego", rareza: "legendario", sprite:"https://img.itch.zone/aW1nLzExMDM1NDI2LmdpZg==/original/7M7NlS.gif" },
+    { id: 101, nombre: "Goku", emoji: "👊", saga: "Dragon Ball", tipo: "fuego", rareza: "legendario", sprite:"https://i.imgur.com/7vYfO8S.png" },
     { id: 102, nombre: "Vegeta", emoji: "👑", saga: "Dragon Ball", tipo: "agua", rareza: "epico", sprite:"" },
     { id: 103, nombre: "Gohan", emoji: "🧒", saga: "Dragon Ball", tipo: "planta", rareza: "raro", sprite:"" }
 ];
