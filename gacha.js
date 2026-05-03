@@ -51,7 +51,7 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const esPkmn = saga.toLowerCase().includes('pokemon');
     
     // URLs DEFINITIVAS Y ESTABLES (PNGs transparentes)
-    const imgPoke = "https://www.freeiconspng.com/uploads/pokeball-png-2.png";
+    const imgPoke = "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg";
     const imgDBZ = "https://www.pngarts.com/files/11/Dragon-Ball-Z-Orb-PNG-Image-Background.png"; 
 
     const urlElegida = esPkmn ? imgPoke : imgDBZ;
