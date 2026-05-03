@@ -193,12 +193,39 @@ window.renderLobby = function() {
 function renderDex() {
     const grid = document.getElementById('dex-grid');
     if (!grid) return;
-    grid.innerHTML = DB.map(p => {
+
+    // Ordenamos la DB por ID para que la Dex vaya en orden numérico
+    const dbOrdenada = [...DB].sort((a, b) => a.id - b.id);
+
+    grid.innerHTML = dbOrdenada.map(p => {
         const tiene = inventario.some(inv => inv.id === p.id);
+        const colorRareza = RAREZAS[p.rareza] || '#94a3b8';
+        
+        // Formateamos el número a 3 cifras (ej: 001)
+        const numeroDex = String(p.id).padStart(3, '0');
+
         return `
-            <div class="card" style="opacity:${tiene ? 1 : 0.2}; filter:${tiene ? 'none' : 'grayscale(100%)'}">
-                <div class="card-avatar">${obtenerImagenHTML(p)}</div>
-                <div class="card-name">${tiene ? p.nombre : '???'}</div>
+            <div class="dex-card ${tiene ? 'registrado' : 'desconocido'}" 
+                 style="--card-color: ${tiene ? colorRareza : '#2d2d44'}"
+                 onclick="${tiene ? `mostrarInfo('${p.id}')` : ''}">
+                
+                <div class="dex-header">
+                    <span class="dex-number">#${numeroDex}</span>
+                    <span class="dex-saga">${p.saga}</span>
+                </div>
+
+                <div class="dex-body">
+                    <div class="card-avatar">
+                        ${obtenerImagenHTML(p)}
+                    </div>
+                </div>
+
+                <div class="dex-footer">
+                    <div class="dex-name">${tiene ? p.nombre : '???'}</div>
+                    ${tiene ? `<div class="dex-badge" style="background: ${colorRareza}">${p.rareza}</div>` : ''}
+                </div>
+
+                ${tiene ? '<div class="dex-check">✔</div>' : ''}
             </div>`;
     }).join('');
 }

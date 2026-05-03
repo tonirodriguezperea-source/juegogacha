@@ -448,3 +448,101 @@ nav {
 .luchador-anim {
     display: inline-block;
 }
+
+#dex-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.dex-card {
+    background: rgba(15, 15, 27, 0.8);
+    border: 2px solid var(--card-color);
+    border-radius: 15px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+}
+
+.dex-card.registrado:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 15px var(--card-color);
+    cursor: pointer;
+}
+
+/* Cabecera: Numero y Saga */
+.dex-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    font-size: 0.7rem;
+    font-family: monospace;
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+}
+
+.dex-number {
+    font-weight: bold;
+    color: var(--card-color);
+}
+
+/* Cuerpo: El Sprite */
+.dex-body {
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px;
+}
+
+.dex-card.desconocido .sprite {
+    filter: brightness(0) invert(0.2); /* Silueta negra */
+}
+
+/* Footer: Nombre y Rareza */
+.dex-footer {
+    padding: 10px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.dex-name {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: white;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dex-badge {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: black;
+    font-weight: bold;
+    display: inline-block;
+}
+
+/* Check de capturado */
+.dex-check {
+    position: absolute;
+    bottom: 45px;
+    right: 10px;
+    background: #4ade80;
+    color: black;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px #4ade80;
+}
