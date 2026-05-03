@@ -5,32 +5,39 @@ let monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
 let ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 10;
 
 window.invocar = function(saga) {
-    // Sincronizamos con el storage por si se ganaron tickets en otra pantalla
+    // 1. Sincronizar tickets
     ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
 
-    // CORRECCIÓN: Antes tenías 100, ahora es 0 para que funcione correctamente
     if (ticketsNormales <= 0) {
-        alert("¡No tienes tickets normales! Consigue más en batalla.");
+        alert("¡No tienes tickets normales!");
         return;
     }
 
-    // Filtrar por saga (Ignora mayúsculas y tildes básicas)
-    const poolSaga = DB.filter(p => 
-        p.saga.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .includes(saga.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
-    );
+    // 2. FILTRO ULTRA-REFORZADO
+    // Convertimos todo a minúsculas y quitamos TODOS los espacios para comparar
+    const busquedaLimpia = saga.toLowerCase().replace(/\s/g, ""); 
+
+    const poolSaga = DB.filter(p => {
+        // Hacemos lo mismo con el nombre de la saga en la base de datos
+        const sagaDBLimpia = p.saga.toLowerCase().replace(/\s/g, "");
+        return sagaDBLimpia.includes(busquedaLimpia);
+    });
     
+    // Si sigue fallando, esto nos dirá qué está pasando en la consola (F12)
     if (poolSaga.length === 0) {
-        alert("Error: No hay personajes en esta categoría.");
+        console.error("DEBUG GACHA:");
+        console.log("Buscaste:", busquedaLimpia);
+        console.log("Sagas disponibles en tu DB:", [...new Set(DB.map(p => p.saga))]);
+        alert("No se han encontrado personajes de: " + saga);
         return;
     }
 
-    // Sistema de Suerte
+    // 3. SELECCIÓN DE RAREZA
     const rand = Math.random() * 100;
     let rareza = rand < 2 ? "legendario" : rand < 10 ? "epico" : rand < 30 ? "raro" : "comun";
     
     let posibles = poolSaga.filter(p => p.rareza === rareza);
-    if (posibles.length === 0) posibles = poolSaga; // Garantía de que siempre salga algo
+    if (posibles.length === 0) posibles = poolSaga; 
     
     const bichoConseguido = posibles[Math.floor(Math.random() * posibles.length)];
 
