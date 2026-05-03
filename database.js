@@ -178,11 +178,10 @@ const DB = [
     { id: 148, nombre: "Dragonair", emoji: "🐉", saga: "Pokémon", tipo: "agua", rareza: "raro", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/148.png" },
     { id: 149, nombre: "Dragonite", emoji: "🐲", saga: "Pokémon", tipo: "agua", rareza: "epico", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/149.png" },
     { id: 150, nombre: "Mewtwo", emoji: "🧬", saga: "Pokémon", tipo: "agua", rareza: "legendario", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png" },
-    { id: 151, nombre: "Mew", emoji: "✨", saga: "Pokémon", tipo: "agua", rareza: "legendario", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/151.png" }
-
+    { id: 151, nombre: "Mew", emoji: "✨", saga: "Pokémon", tipo: "agua", rareza: "legendario", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/151.png" },
     // --- DRAGON BALL (Mantenemos los tuyos) ---
-    { id: 101, nombre: "Goku", emoji: "👊", saga: "Dragon Ball", tipo: "fuego", rareza: "legendario", sprite: "https://media.tenor.com/y_26-S_C8SIAAAAC/goku-pixel.gif" },
-    { id: 102, nombre: "Vegeta", emoji: "👑", saga: "Dragon Ball", tipo: "agua", rareza: "epico", sprite: "https://media.tenor.com/Y38G7Z4u830AAAAC/vegeta-pixel.gif" }
+    { id: 152, nombre: "Goku", emoji: "👊", saga: "Dragon Ball", tipo: "fuego", rareza: "legendario", sprite: "https://media.tenor.com/y_26-S_C8SIAAAAC/goku-pixel.gif" },
+    { id: 153, nombre: "Vegeta", emoji: "👑", saga: "Dragon Ball", tipo: "agua", rareza: "epico", sprite: "https://media.tenor.com/Y38G7Z4u830AAAAC/vegeta-pixel.gif" }
 ];
 
 const RAREZAS = { 
