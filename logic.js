@@ -61,20 +61,26 @@ function actualizarHUD() {
 // ================================================================
 // 2. MOTOR VISUAL (RENDERIZADO DE SPRITES Y EMOJIS)
 // ================================================================
-window.obtenerImagenHTML = function(p, clases = "", lado = "") {
+window.obtenerImagenHTML = function(p, clases = "") {
     if (!p) return `<span class="sprite ${clases}">❓</span>`;
     
     const spriteURL = p.sprite || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.sprite : "");
     const emojiFallback = p.emoji || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.emoji : "👤");
 
-    // Determinamos si hay que girar la imagen (Solo para el jugador)
-    // Si es saga Pokemon y es el lado del jugador, giramos.
+    // Lógica de giro automática:
+    // Si la clase que le pasas incluye "luchador-anim" (que es la que usas en el lobby/combate)
+    // y el bicho es un Pokémon, preparamos el estilo de giro.
     const esPokemon = p.saga && p.saga.toLowerCase().includes('pokemon');
-    const estiloGiro = (lado === "jugador" && esPokemon) ? "transform: scaleX(-1);" : "";
+    
+    // Solo aplicaremos el giro si NO estamos en la pokedex (para que allí se vean bien)
+    // y si es un pokemon.
+    const estiloEspecial = (esPokemon && clases.includes("luchador-anim")) 
+        ? "transform: scaleX(-1); display: inline-block;" 
+        : "";
 
     if (spriteURL && spriteURL.trim() !== "") {
         return `
-            <div class="sprite-container ${clases}" style="position:relative; display:inline-block; ${estiloGiro}">
+            <div class="sprite-container ${clases}" style="position:relative; display:inline-block; ${estiloEspecial}">
                 <img src="${spriteURL}" class="sprite ${clases}" 
                      style="display:block; max-width:100%;"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
@@ -82,7 +88,7 @@ window.obtenerImagenHTML = function(p, clases = "", lado = "") {
             </div>
         `;
     }
-    return `<span class="sprite-emoji ${clases}" style="font-size:2rem; ${estiloGiro}">${emojiFallback}</span>`;
+    return `<span class="sprite-emoji ${clases}" style="font-size:2rem; ${estiloEspecial}">${emojiFallback}</span>`;
 };
 // ================================================================
 // 3. SISTEMA DE TIENDA DINÁMICA (ROTACIÓN DIARIA)
