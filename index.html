@@ -34,6 +34,19 @@
                             onclick="borrarPartida()">
                         🗑️ Borrar Partida
                     </button>
+
+                    <button onclick="regalarTickets()" style="background: #4ade80; color: black; padding: 10px; border-radius: 5px;">
+    🎁 Reclamar Tickets Gratis
+</button>
+
+<script>
+function regalarTickets() {
+    let actuales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
+    localStorage.setItem("gq_tk_normal", actuales + 10);
+    actualizarHUD();
+    alert("¡Has recibido 10 tickets de regalo!");
+}
+</script>
                 </aside>
             </div>
         </div>

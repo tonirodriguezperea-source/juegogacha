@@ -236,3 +236,8 @@ function borrarPartida() {
         location.reload();
     }
 }
+
+window.onload = () => {
+    actualizarHUD(); // Esto forzará a que los "10" se cambien por el valor real guardado
+    mostrar('lobby');
+};

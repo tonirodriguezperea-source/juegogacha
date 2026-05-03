@@ -122,10 +122,21 @@ function guardarEconomia() {
 }
 
 window.actualizarHUD = function() {
-    const elTickets = document.getElementById('val-tk-normal');
-    if (elTickets) {
-        elTickets.innerText = ticketsNormales;
-    }
+    // Leemos el valor real del almacenamiento
+    let tks = localStorage.getItem("gq_tk_normal") || 0;
+    let mons = localStorage.getItem("gq_monedas") || 0;
+
+    // Actualizamos el texto en el HTML
+    const spanTks = document.getElementById('val-tk-normal');
+    if (spanTks) spanTks.innerText = tks;
+
+    const spanMons = document.getElementById('val-monedas');
+    if (spanMons) spanMons.innerText = mons;
+    
+    // Actualizamos las variables globales para que el código no use valores viejos
+    ticketsNormales = parseInt(tks);
+    monedas = parseInt(mons);
+};
     
     const elMonedas = document.getElementById('val-monedas'); 
     if (elMonedas) {
