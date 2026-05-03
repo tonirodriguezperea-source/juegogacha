@@ -167,11 +167,8 @@ function actualizarInterfazBatalla() {
     document.getElementById('player-hp-bar').style.width = Math.max(0, (p.hp/p.maxHp)*100) + "%";
     document.getElementById('enemy-hp-bar').style.width = Math.max(0, (e.hp/e.maxHp)*100) + "%";
     
-    // Para el personaje del JUGADOR (añadimos "jugador" al final)
-document.getElementById('player-battle-img').innerHTML = obtenerImagenHTML(miPokemonActual, "luchador-anim", "jugador");
-
-// Para el personaje del ENEMIGO (no añadimos lado o ponemos "enemigo")
-document.getElementById('enemy-battle-img').innerHTML = obtenerImagenHTML(rivalActual, "luchador-anim", "enemigo");
+    document.getElementById('player-battle-img').innerHTML = obtenerImagenHTML(p, "sprite-jugador luchador-anim");
+    document.getElementById('enemy-battle-img').innerHTML = obtenerImagenHTML(e, "sprite-rival luchador-anim");
     
     document.getElementById('player-battle-name').innerText = `${p.nombre} (LV.${p.lvl})`;
     document.getElementById('enemy-battle-name').innerText = `${e.nombre} (LV.${e.lvl})`;
