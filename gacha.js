@@ -54,7 +54,7 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const esPokemon = saga.toLowerCase().includes('pokemon');
     const imgObjeto = esPokemon 
         ? "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" 
-        : "https://upload.wikimedia.org/wikipedia/commons/b/b7/Dragon_Ball_4-star.svg";
+        : "https://e7.pngegg.com/pngimages/913/635/png-clipart-dragonball-shenron-dragon-ball-z-supersonic-warriors-bola-de-drac-goku-dragon-ball-television-fictional-characters-thumbnail.pnghttps://upload.wikimedia.org/wikipedia/commons/b/b7/Dragon_Ball_4-star.svg";
     
     objeto.innerHTML = `<img src="${imgObjeto}" width="120" class="objeto-vibrando">`;
 
