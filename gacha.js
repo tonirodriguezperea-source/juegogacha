@@ -1,21 +1,36 @@
-/** * GACHA SYSTEM 2.0  */
+/** * GACHA SYSTEM 2.0  - Optimizado */
 
+// Cargamos datos al inicio
 let monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
 let ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 10;
 
 window.invocar = function(saga) {
-    if (ticketsNormales <= 100) {
+    // Sincronizamos con el storage por si se ganaron tickets en otra pantalla
+    ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
+
+    // CORRECCIÓN: Antes tenías 100, ahora es 0 para que funcione correctamente
+    if (ticketsNormales <= 0) {
         alert("¡No tienes tickets normales! Consigue más en batalla.");
         return;
     }
 
-    let opcionesSaga = DB.filter(p => p.saga.toLowerCase().includes(saga.toLowerCase()));
+    // Filtrar por saga (Ignora mayúsculas y tildes básicas)
+    const poolSaga = DB.filter(p => 
+        p.saga.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .includes(saga.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    );
     
+    if (poolSaga.length === 0) {
+        alert("Error: No hay personajes en esta categoría.");
+        return;
+    }
+
+    // Sistema de Suerte
     const rand = Math.random() * 100;
     let rareza = rand < 2 ? "legendario" : rand < 10 ? "epico" : rand < 30 ? "raro" : "comun";
     
-    let posibles = opcionesSaga.filter(p => p.rareza === rareza);
-    if (posibles.length === 0) posibles = opcionesSaga; 
+    let posibles = poolSaga.filter(p => p.rareza === rareza);
+    if (posibles.length === 0) posibles = poolSaga; // Garantía de que siempre salga algo
     
     const bichoConseguido = posibles[Math.floor(Math.random() * posibles.length)];
 
@@ -27,13 +42,15 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const objeto = document.getElementById('objeto-invocacion');
     const resultado = document.getElementById('resultado-invocacion');
     
+    // Gasto de ticket
     ticketsNormales--;
     guardarEconomia();
+    actualizarHUD(); // Actualizamos inmediatamente el contador
     
     overlay.style.display = 'flex';
     resultado.style.display = 'none';
     
-    // Ajuste para detectar Pokémon aunque lleve tilde
+    // Selección de imagen de invocación
     const esPokemon = saga.toLowerCase().includes('pokemon');
     const imgObjeto = esPokemon 
         ? "https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" 
@@ -41,14 +58,16 @@ function ejecutarAnimacionGacha(saga, personaje) {
     
     objeto.innerHTML = `<img src="${imgObjeto}" width="120" class="objeto-vibrando">`;
 
+    // Animación de salida
     setTimeout(() => {
         objeto.className = "objeto-explotando";
         
         setTimeout(() => {
-            objeto.className = ""; // Limpiar clases
+            objeto.className = ""; 
             objeto.innerHTML = "";
             resultado.style.display = 'block';
             
+            // Lógica de coleccionista (Máximo 10 copias)
             const copias = inventario.filter(p => p.id === personaje.id).length;
             
             if (copias >= 10) {
@@ -60,23 +79,26 @@ function ejecutarAnimacionGacha(saga, personaje) {
                 resultado.innerHTML = `
                     <div class="recompensa-monedas">
                         ${obtenerImagenHTML(personaje, "sprite-revelado")}
-                        <p style="color:#ff4444; font-weight:bold;">¡MÁXIMO ALCANZADO (10/10)!</p>
-                        <h3 style="color:#ffcc00">Compensación: +💰 ${valor} Monedas</h3>
+                        <p style="color:#ff4444; font-weight:bold; font-size: 1.2rem;">¡MÁXIMO NIVEL ALCANZADO!</p>
+                        <h3 style="color:#ffcc00; text-shadow: 0 0 10px rgba(255,204,0,0.5);">+💰 ${valor} Monedas</h3>
                     </div>`;
             } else {
-                const nuevo = { ...personaje, uid: "UID-" + Date.now(), lvl: 1 };
+                const nuevo = { ...personaje, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
                 inventario.push(nuevo);
                 if (typeof guardar === 'function') guardar(); 
                 
                 resultado.innerHTML = `
                     <div class="nuevo-personaje">
                         ${obtenerImagenHTML(personaje, "sprite-revelado")}
-                        <h2 style="color:${RAREZAS[personaje.rareza]}">¡Has obtenido a ${personaje.nombre}!</h2>
-                        <p style="letter-spacing: 2px;">${personaje.rareza.toUpperCase()}</p>
+                        <h3 style="color: #94a3b8; margin:0;">¡HAS OBTENIDO A!</h3>
+                        <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2rem; margin: 5px 0;">${personaje.nombre}</h2>
+                        <span class="dex-badge" style="background:${RAREZAS[personaje.rareza]}; color:black; padding: 5px 15px; border-radius: 20px; font-weight:bold;">
+                            ${personaje.rareza.toUpperCase()}
+                        </span>
                     </div>`;
             }
             
-            resultado.innerHTML += `<button onclick="cerrarGacha()" class="btn-cerrar-gacha">CONTINUAR</button>`;
+            resultado.innerHTML += `<br><button onclick="cerrarGacha()" class="btn-play" style="margin-top:20px;">CONTINUAR</button>`;
             actualizarHUD();
         }, 600);
     }, 1500);
@@ -92,12 +114,14 @@ function guardarEconomia() {
     localStorage.setItem("gq_tk_normal", ticketsNormales);
 }
 
-// Función para actualizar los textos en la pantalla
 window.actualizarHUD = function() {
     const elTickets = document.getElementById('val-tk-normal');
-    if (elTickets) elTickets.innerText = ticketsNormales;
+    if (elTickets) {
+        elTickets.innerText = ticketsNormales;
+    }
     
-    // Si tienes un lugar donde mostrar monedas en el gacha, añádelo aquí
     const elMonedas = document.getElementById('val-monedas'); 
-    if (elMonedas) elMonedas.innerText = monedas;
+    if (elMonedas) {
+        elMonedas.innerText = monedas;
+    }
 };
