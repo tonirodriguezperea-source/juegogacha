@@ -617,3 +617,15 @@ nav {
     image-rendering: pixelated; /* Para Chrome/Edge */
     image-rendering: crisp-edges; /* Para Firefox */
 }
+
+/* Estilo para la barra de scroll del menú de copias */
+#overlay-copias div::-webkit-scrollbar {
+    width: 8px;
+}
+#overlay-copias div::-webkit-scrollbar-thumb {
+    background: #4ade80;
+    border-radius: 10px;
+}
+#overlay-copias div::-webkit-scrollbar-track {
+    background: #0f0f1b;
+}

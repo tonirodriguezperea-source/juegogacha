@@ -28,7 +28,7 @@ const descripciones = {
     "7": "Squirtle se protege con su caparazón y dispara chorros de agua a presión.",
     "1200": "Son Goku, el guerrero legendario que protege la Tierra con su fuerza infinita.",
     "1201": "Vegeta, el príncipe de los saiyans. Su orgullo es tan grande como su poder.",
-    "1201": "Gohan, hijo de Goku. Posee un potencial oculto que despierta en momentos críticos."
+    "1202": "Gohan, hijo de Goku. Posee un potencial oculto que despierta en momentos críticos."
 };
 
 function guardar() {
@@ -132,10 +132,27 @@ function abrirMenuCopias(id) {
     const copias = inventario.filter(p => p.id == id);
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
+    
+    // El fondo oscuro se mantiene igual
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;";
-    let html = `<div style="background:#1a1a2e;padding:25px;border-radius:20px;border:2px solid #4ade80;width:320px;color: white;">
-        <div style="text-align:center; margin-bottom: 15px;">${obtenerImagenHTML(copias[0])}</div>
-        <h3 style="text-align:center;margin-top:0;color:#4ade80;">Gestionar ${copias[0].nombre}</h3>`;
+    
+    // Añadimos max-height y overflow al contenedor blanco/azul
+    let html = `
+        <div style="
+            background:#1a1a2e;
+            padding:25px;
+            border-radius:20px;
+            border:2px solid #4ade80;
+            width:340px; 
+            color: white;
+            max-height: 85vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #4ade80 #0f0f1b;
+        ">
+            <div style="text-align:center; margin-bottom: 15px;">${obtenerImagenHTML(copias[0])}</div>
+            <h3 style="text-align:center;margin-top:0;color:#4ade80;">Gestionar ${copias[0].nombre}</h3>`;
+
     copias.forEach(c => {
         const enEq = equipoUids.includes(c.uid);
         html += `
@@ -147,7 +164,14 @@ function abrirMenuCopias(id) {
                 </button>
             </div>`;
     });
-    html += `<button onclick="document.getElementById('overlay-copias').remove()" style="width:100%;margin-top:15px; background: #333; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">Regresar</button></div>`;
+
+    html += `
+            <button onclick="document.getElementById('overlay-copias').remove()" 
+                    style="width:100%; margin-top:15px; background: #333; color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold;">
+                Regresar
+            </button>
+        </div>`;
+
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
 }
