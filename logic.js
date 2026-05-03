@@ -1,19 +1,22 @@
-// 1. Configuración Visual (CORREGIDA PARA QUE SE VEAN LOS DIBUJOS)
+// 1. Configuración Visual (UNIFICADA Y CORREGIDA)
 window.obtenerImagenHTML = function(p, clases = "") {
-    if (!p) return "";
+    if (!p) return `<span class="sprite ${clases}">❓</span>`;
 
     // Usamos p.sprite porque así está en tu database.js
-    if (p.sprite && p.sprite !== "") {
+    if (p.sprite && p.sprite.trim() !== "") {
         return `
             <img src="${p.sprite}" class="sprite ${clases}" 
                  onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
             <span class="sprite-emoji ${clases}" style="display:none;">${p.emoji || "❓"}</span>
         `;
     }
-    // Si no hay sprite, tiramos del emoji
-    return `<span class="sprite-emoji ${clases}">${p.emoji || "❓"}</span>`;
+    
+    // Si no tiene sprite (como Goku o Vegeta), usamos el emoji
+    const emojiMostrar = p.emoji || (typeof DB !== 'undefined' ? DB.find(d => d.id === p.id)?.emoji : "👤") || "👤";
+    return `<span class="sprite-emoji ${clases}">${emojiMostrar}</span>`;
 };
-// 2. Carga inicial de datos (TU CÓDIGO ORIGINAL)
+
+// 2. Carga inicial de datos
 let inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
 let equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
 
@@ -147,12 +150,9 @@ function toggleEquipo(uid) {
     renderLobby();
 }
 
-// --- FUNCIÓN RENDER LOBBY MEJORADA PARA QUE SE VEAN LOS DIBUJOS ---
 window.renderLobby = function() {
     const contenedor = document.getElementById('hero-display');
     if (!contenedor) return;
-    
-    // Obtenemos los objetos reales de la DB basándonos en tu equipoUids
     const equipo = inventario.filter(p => equipoUids.includes(p.uid));
     
     if (equipo.length === 0) {
@@ -165,7 +165,7 @@ window.renderLobby = function() {
             <div class="lobby-sprite">${obtenerImagenHTML(p, "luchador-anim")}</div>
             <div class="lobby-info">
                 <p style="font-weight: bold; margin: 5px 0;">${p.nombre}</p>
-                <small style="color: ${RAREZAS[p.rareza] || '#fff'}">${p.rareza.toUpperCase()}</small>
+                <small style="color: ${typeof RAREZAS !== 'undefined' ? RAREZAS[p.rareza] : '#fff'}">${p.rareza.toUpperCase()}</small>
             </div>
         </div>
     `).join("");
@@ -190,18 +190,3 @@ function borrarPartida() {
         location.reload();
     }
 }
-
-window.obtenerImagenHTML = function(p, clases = "") {
-    if (!p) return `<span class="sprite ${clases}">❓</span>`;
-
-    // Si tiene una URL de imagen
-    if (p.img && p.img.includes('http')) {
-        return `<img src="${p.img}" class="sprite ${clases}" onerror="this.src='https://via.placeholder.com/150?text=Error'">`;
-    } 
-    
-    // Si no tiene imagen, usamos el emoji. 
-    // IMPORTANTE: Si p.emoji no existe, usamos el de la DB o uno por defecto.
-    const emojiMostrar = p.emoji || (DB.find(d => d.id === p.id)?.emoji) || "👤";
-    
-    return `<span class="sprite ${clases}" style="display: inline-block;">${emojiMostrar}</span>`;
-};
