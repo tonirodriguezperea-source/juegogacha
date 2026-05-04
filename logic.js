@@ -174,6 +174,7 @@ function abrirMenuCopias(id) {
     if (copias.length === 0) return;
 
     const baseDB = DB.find(db => parseInt(db.id) === idBusqueda);
+    // IMPORTANTE: Revisamos skinsPoseidas correctamente
     const tieneSkin = skinsPoseidas && skinsPoseidas.some(s => parseInt(s.idPersonaje) === idBusqueda);
     const skinActual = copias[0].skin || 'normal';
 
@@ -192,43 +193,55 @@ function abrirMenuCopias(id) {
                 <h2 style="color:#facc15; margin:10px 0 5px 0;">${baseDB.nombre}</h2>
                 
                 <div style="display:flex; justify-content:center; gap:10px; margin-top:15px;">
-                    <button onclick="cambiarSkinMenu(${idBusqueda}, 'normal')" style="cursor:pointer; padding:6px 12px; background:#333; color:white; border:1px solid #555; border-radius:5px;">Normal</button>
-                    ${tieneSkin ? `<button onclick="cambiarSkinMenu(${idBusqueda}, 'shiny')" style="cursor:pointer; padding:6px 12px; background:linear-gradient(to bottom, #facc15, #b48608); color:black; border:none; border-radius:5px; font-weight:bold;">Shiny ✨</button>` : ''}
+                    <button onclick="window.cambiarSkinMenu('${idBusqueda}', 'normal')" style="cursor:pointer; padding:8px 15px; background:#333; color:white; border:1px solid #555; border-radius:8px; font-size:0.8rem;">Normal</button>
+                    
+                    ${tieneSkin ? `
+                        <button onclick="window.cambiarSkinMenu('${idBusqueda}', 'shiny')" style="cursor:pointer; padding:8px 15px; background:linear-gradient(to bottom, #facc15, #b48608); color:black; border:none; border-radius:8px; font-weight:bold; font-size:0.8rem;">Shiny ✨</button>
+                    ` : ''}
                 </div>
             </div>
 
             <div style="max-height:300px; overflow-y:auto; padding-right:5px; border-top:1px solid #333; padding-top:15px;">`;
 
-    copias.sort((a,b) => (b.estrellas||0) - (a.estrellas||0)).forEach((c, idx) => {
+    // Ordenar por estrellas
+    const copiasOrdenadas = [...copias].sort((a,b) => (b.estrellas||0) - (a.estrellas||0));
+
+    copiasOrdenadas.forEach((c, idx) => {
         const enEq = equipoUids.includes(c.uid);
         const est = parseInt(c.estrellas) || 0;
         const nec = est + 1;
         const disp = copias.filter(p => p.uid !== c.uid && !equipoUids.includes(p.uid)).length;
-        const atk = c.ataque || baseDB.ataque;
-        const hp = c.vidaMax || baseDB.vidaMax;
+        
+        // Stats de seguridad para evitar undefined
+        const atk = c.ataque || (baseDB ? baseDB.ataque : 0);
+        const hp = c.vidaMax || (baseDB ? baseDB.vidaMax : 0);
 
         html += `
-            <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#444'}; border-radius:10px; padding:12px; margin-bottom:10px;">
+            <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#444'}; border-radius:12px; padding:12px; margin-bottom:10px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <span style="font-size:0.8rem; font-weight:bold;">Instancia #${idx+1} ${c.skin === 'shiny' ? '✨' : ''}</span>
-                        <div style="color:#facc15; font-size:0.9rem;">${est > 0 ? '⭐'.repeat(est) : '☆☆☆☆☆'}</div>
+                        <span style="font-size:0.85rem; font-weight:bold;">Instancia #${idx+1} ${c.skin === 'shiny' ? '✨' : ''}</span>
+                        <div style="color:#facc15; font-size:1rem; letter-spacing:2px;">
+                            ${est > 0 ? '⭐'.repeat(est) : '<span style="color:#444">☆☆☆☆☆</span>'}
+                        </div>
                     </div>
-                    <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove();" style="background:${enEq ? '#ef4444' : '#4ade80'}; color:black; border:none; padding:5px 10px; border-radius:5px; font-size:0.7rem; font-weight:bold; cursor:pointer;">
+                    <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove();" style="background:${enEq ? '#ef4444' : '#4ade80'}; color:black; border:none; padding:6px 12px; border-radius:8px; font-size:0.7rem; font-weight:bold; cursor:pointer;">
                         ${enEq ? 'QUITAR' : 'PONER'}
                     </button>
                 </div>
-                <div style="font-size:0.7rem; color:#aaa; margin:5px 0;">⚔️ ${atk} | ❤️ ${hp}</div>
+                <div style="font-size:0.75rem; color:#aaa; margin:8px 0; background:rgba(255,255,255,0.05); padding:5px; border-radius:5px;">
+                    ⚔️ ${atk} | ❤️ ${hp}
+                </div>
                 ${est < 5 ? `
-                    <button onclick="ascenderPokemon('${c.uid}')" style="width:100%; padding:8px; background:#facc15; border:none; border-radius:5px; font-weight:bold; cursor:pointer; opacity:${disp >= nec ? '1' : '0.4'}; font-size:0.75rem;">
+                    <button onclick="ascenderPokemon('${c.uid}')" style="width:100%; padding:10px; background:#facc15; border:none; border-radius:8px; font-weight:bold; cursor:pointer; opacity:${disp >= nec ? '1' : '0.4'}; font-size:0.8rem; box-shadow: 0 3px 0 #b48608;">
                         Subir a ${est+1} ⭐ (Nec. ${nec} copias)
                     </button>
-                ` : ''}
+                ` : '<div style="text-align:center; color:#facc15; font-size:0.75rem; font-weight:bold;">¡NIVEL MÁXIMO!</div>'}
             </div>`;
     });
 
     html += `</div>
-            <button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background:none; border:none; color:#777; cursor:pointer;">Cerrar</button>
+            <button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background:none; border:none; color:#777; cursor:pointer; font-size:0.9rem;">Cerrar Panel</button>
         </div>`;
 
     overlay.innerHTML = html;
