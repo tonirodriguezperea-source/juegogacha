@@ -174,8 +174,11 @@ function abrirMenuCopias(id) {
     const baseDB = DB.find(db => db.id == id);
     if (!baseDB) return;
 
-    // Tomamos la primera copia como referencia para la skin inicial del menú
-    const skinInicial = copias[0].skin || 'normal';
+    // BUSCAMOS SI EL USUARIO TIENE LA SKIN COMPRADA PARA ESTE ID
+    const tieneSkin = skinsPoseidas.some(s => s.idPersonaje == id);
+    
+    // La imagen principal debe mostrar la skin que tenga la primera copia
+    const skinActual = copias[0].skin || 'normal';
 
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
@@ -185,19 +188,23 @@ function abrirMenuCopias(id) {
         <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #facc15; width:400px; color: white; font-family: sans-serif;">
             <div style="text-align:center; margin-bottom: 20px;">
                 <div id="img-principal-contenedor" style="width:120px; height:120px; margin: 0 auto; display:flex; justify-content:center; align-items:center;">
-                    ${obtenerImagenHTML({...baseDB, skin: skinInicial})}
+                    ${obtenerImagenHTML({...baseDB, skin: skinActual})}
                 </div>
                 <h3 style="color:#facc15; margin:10px 0 5px 0; font-size:1.4rem;">${baseDB.nombre}</h3>
                 
                 <div style="margin-top:10px; display:flex; justify-content:center; gap:10px;">
                     <button onclick="cambiarSkinMenu('${id}', 'normal')" style="padding:5px 15px; border-radius:20px; border:1px solid #555; background:#333; color:white; cursor:pointer; font-size:0.7rem;">Normal</button>
-                    <button onclick="cambiarSkinMenu('${id}', 'shiny')" style="padding:5px 15px; border-radius:20px; border:1px solid #facc15; background:linear-gradient(45deg, #b48608, #facc15); color:black; cursor:pointer; font-weight:bold; font-size:0.7rem;">Shiny ✨</button>
+                    
+                    ${tieneSkin ? `
+                        <button onclick="cambiarSkinMenu('${id}', 'shiny')" style="padding:5px 15px; border-radius:20px; border:1px solid #facc15; background:linear-gradient(45deg, #b48608, #facc15); color:black; cursor:pointer; font-weight:bold; font-size:0.7rem;">Shiny ✨</button>
+                    ` : `
+                        <button style="padding:5px 15px; border-radius:20px; border:1px solid #444; background:#222; color:#666; cursor:not-allowed; font-size:0.7rem;">Bloqueado 🔒</button>
+                    `}
                 </div>
             </div>
             
             <div style="max-height:300px; overflow-y:auto; padding-right:5px; margin-top:15px;">`;
 
-    // Ordenar por estrellas
     copias.sort((a, b) => (b.estrellas || 0) - (a.estrellas || 0));
 
     copias.forEach((c, idx) => {
@@ -206,16 +213,15 @@ function abrirMenuCopias(id) {
         const necesito = estrellasNum + 1;
         const disponibles = copias.filter(p => p.uid !== c.uid && !equipoUids.includes(p.uid)).length;
         
-        // Stats: Prioridad objeto > Prioridad DB > 0
         const atk = c.ataque || baseDB.ataque || 0;
         const hp = c.vidaMax || baseDB.vidaMax || 0;
 
         html += `
-            <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#333'}; border-radius:12px; padding:15px; margin-bottom:12px; position:relative;">
+            <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#333'}; border-radius:12px; padding:15px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                     <div>
                         <div style="font-weight:bold; font-size:0.85rem; color:${enEq ? '#4ade80' : '#fff'};">
-                            Instancia #${idx + 1} ${c.skin === 'shiny' ? '<span style="color:#facc15;">(Shiny)</span>' : ''}
+                            Copia #${idx + 1} ${c.skin === 'shiny' ? '<span style="color:#facc15;">✨</span>' : ''}
                         </div>
                         <div style="color:#facc15; font-size:0.9rem; margin:4px 0;">
                             ${ estrellasNum > 0 ? '⭐'.repeat(estrellasNum) : '<span style="color:#444; font-size:0.7rem;">Sin estrellas</span>' }
@@ -238,12 +244,12 @@ function abrirMenuCopias(id) {
                         style="width:100%; margin-top:10px; padding:8px; background:#facc15; border:none; border-radius:8px; font-size:0.7rem; font-weight:bold; cursor:pointer; color:black; opacity:${disponibles >= necesito ? '1' : '0.4'}">
                         SUBIR A ${estrellasNum + 1} ⭐ (Pide ${necesito} copias)
                     </button>
-                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; margin-top:10px; font-weight:bold; padding:5px; border:1px dashed #facc15; border-radius:5px;">RANGO MÁXIMO</div>'}
+                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; margin-top:10px; font-weight:bold;">MÁXIMO</div>'}
             </div>`;
     });
 
     html += `</div>
-            <button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background:transparent; color:#666; border:none; cursor:pointer; font-size:0.85rem;">Cerrar Gestión</button>
+            <button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background:transparent; color:#666; border:none; cursor:pointer; font-size:0.85rem;">Cerrar</button>
         </div>`;
 
     overlay.innerHTML = html;
