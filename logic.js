@@ -519,37 +519,3 @@ function ascenderPokemon(uidSeleccionado) {
     abrirMenuCopias(principal.id);
     alert(`¡Ascensión lograda! ${principal.nombre} es ahora un rango ${principal.estrellas} ⭐.`);
 }
-
-// PON ESTO AL FINAL DE TODO EN LOGIC.JS
-window.cambiarSkinMenu = function(id, tipo) {
-    console.log("!!! DISPARANDO CAMBIO DE SKIN !!!", id, tipo);
-    const idN = parseInt(id);
-
-    // 1. Cambiamos la skin en el inventario
-    inventario.forEach(p => {
-        if (parseInt(p.id) === idN) {
-            p.skin = tipo;
-            // También actualizamos el sprite directamente para que se vea en el equipo/lobby
-            const base = DB.find(d => d.id == idN);
-            if(tipo === 'shiny' && SKINS_DATA[idN]) {
-                p.sprite = SKINS_DATA[idN].sprite;
-            } else if (base) {
-                p.sprite = base.sprite;
-            }
-        }
-    });
-
-    // 2. Refrescamos la imagen del menú abierto
-    const baseDB = DB.find(db => parseInt(db.id) === idN);
-    const imgCont = document.getElementById('img-contenedor-menu');
-    if (imgCont && baseDB) {
-        imgCont.innerHTML = obtenerImagenHTML({...baseDB, skin: tipo});
-    }
-
-    // 3. Guardar y refrescar todo lo visual
-    guardar();
-    renderEquipo();
-    renderLobby();
-    
-    console.log("Cambio completado.");
-};
