@@ -171,7 +171,12 @@ function abrirMenuCopias(id) {
     const copias = inventario.filter(p => p.id == id);
     if (copias.length === 0) return;
 
+    // Buscamos los datos originales en la DB para la foto y stats base
     const baseDB = DB.find(db => db.id == id);
+    
+    // Si por algún motivo no hay imagen en el objeto, usamos la de la DB
+    const rutaImagen = baseDB ? baseDB.img : 'vacio.png';
+
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(4px);";
@@ -179,29 +184,33 @@ function abrirMenuCopias(id) {
     let html = `
         <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #facc15; width:380px; color: white; font-family: sans-serif;">
             <div style="text-align:center; margin-bottom: 20px;">
-                <img src="${baseDB.img}" style="width:70px; height:70px; object-fit:contain;">
-                <h3 style="color:#facc15; margin:5px 0;">${baseDB.nombre}</h3>
+                <img src="${rutaImagen}" style="width:100px; height:100px; object-fit:contain; filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.3));">
+                <h3 style="color:#facc15; margin:10px 0;">${baseDB ? baseDB.nombre : 'Pokémon'}</h3>
                 <p style="font-size:0.75rem; color:#888;">Gestiona tus ejemplares y sube de rango</p>
             </div>
             
             <div style="max-height:320px; overflow-y:auto; padding-right:5px;">`;
 
-    // Ordenar copias para que las de más estrellas salgan arriba
+    // Ordenar: los de más estrellas arriba
     copias.sort((a, b) => (b.estrellas || 0) - (a.estrellas || 0));
 
     copias.forEach((c, idx) => {
         const enEq = equipoUids.includes(c.uid);
         const estrellas = c.estrellas || 0;
-        const necesito = estrellas + 1; // La lógica que pediste
+        const necesito = estrellas + 1;
         const disponibles = copias.filter(p => p.uid !== c.uid && !equipoUids.includes(p.uid)).length;
         
+        // Stats de respaldo por si salen 'undefined'
+        const atk = c.ataque || (baseDB ? baseDB.ataque : 0);
+        const hp = c.vidaMax || (baseDB ? baseDB.vidaMax : 0);
+
         html += `
-            <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#333'}; border-radius:12px; padding:12px; margin-bottom:12px; position:relative;">
+            <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#333'}; border-radius:12px; padding:12px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                     <div>
                         <div style="font-weight:bold; font-size:0.85rem;">Instancia #${idx + 1} ${enEq ? '<span style="color:#4ade80;">[EQUIPADO]</span>' : ''}</div>
                         <div style="color:#facc15; font-size:0.9rem; margin:2px 0;">${'⭐'.repeat(estrellas)}</div>
-                        <div style="font-size:0.7rem; color:#aaa;">⚔️ ${c.ataque || baseDB.ataque} | ❤️ ${c.vidaMax || baseDB.vidaMax}</div>
+                        <div style="font-size:0.7rem; color:#aaa;">⚔️ ${atk} | ❤️ ${hp}</div>
                     </div>
                     <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
                             style="padding:5px 10px; background:${enEq ? '#ef4444' : '#4ade80'}; border:none; border-radius:6px; font-size:0.65rem; font-weight:bold; cursor:pointer; color:black;">
@@ -214,7 +223,7 @@ function abrirMenuCopias(id) {
                         style="width:100%; margin-top:10px; padding:8px; background:#facc15; border:none; border-radius:6px; font-size:0.7rem; font-weight:bold; cursor:pointer; color:black; opacity:${disponibles >= necesito ? '1' : '0.4'}">
                         SUBIR A ${estrellas + 1} ⭐ (Pide ${necesito} copias)
                     </button>
-                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; margin-top:10px; font-weight:bold;">RANGO MÁXIMO ALCANZADO</div>'}
+                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; margin-top:10px; font-weight:bold;">RANGO MÁXIMO</div>'}
             </div>`;
     });
 
