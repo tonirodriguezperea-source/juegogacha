@@ -171,57 +171,57 @@ function abrirMenuCopias(id) {
     const copias = inventario.filter(p => p.id == id);
     if (copias.length === 0) return;
 
-    // El maestro siempre es el primero de la lista
-    const maestro = copias[0];
-    const estrellas = maestro.estrellas || 0;
-    const necesito = estrellas === 0 ? 1 : 2;
-    
-    // Copias que podemos usar para sacrificar (que no sean el maestro ni equipo)
-    const disponibles = copias.filter(p => p.uid !== maestro.uid && !equipoUids.includes(p.uid));
-
+    const baseDB = DB.find(db => db.id == id);
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(4px);";
     
     let html = `
-        <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #facc15; width:360px; color: white;">
+        <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #facc15; width:380px; color: white; font-family: sans-serif;">
             <div style="text-align:center; margin-bottom: 20px;">
-                ${obtenerImagenHTML(maestro)}
-                <h3 style="color:#facc15; margin:5px 0;">${maestro.nombre} (MAESTRO)</h3>
-                <div style="font-size:1.2rem; margin-bottom:5px;">${'⭐'.repeat(estrellas)}</div>
-                
-                <div style="background:#0f0f1b; padding:10px; border-radius:10px; font-size:0.8rem; border:1px solid #333;">
-                    <span style="color:#ff4444;">⚔️ ${maestro.ataque || '??'}</span> | 
-                    <span style="color:#4ade80;">❤️ ${maestro.vidaMax || '??'}</span>
-                </div>
-
-                ${estrellas < 5 ? `
-                    <button onclick="ascenderPokemon('${maestro.uid}')" 
-                        style="margin-top:15px; width:100%; padding:12px; background:#facc15; color:black; border:none; border-radius:10px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 0 #b48608;">
-                        SUBIR A ${estrellas + 1} ⭐
-                    </button>
-                    <p style="font-size:0.7rem; color:#aaa; margin-top:8px;">Necesitas ${necesito} copias (Tienes ${disponibles.length})</p>
-                ` : '<p style="color:#facc15; margin-top:10px;">¡RANGO MÁXIMO!</p>'}
+                <img src="${baseDB.img}" style="width:70px; height:70px; object-fit:contain;">
+                <h3 style="color:#facc15; margin:5px 0;">${baseDB.nombre}</h3>
+                <p style="font-size:0.75rem; color:#888;">Gestiona tus ejemplares y sube de rango</p>
             </div>
             
-            <div style="max-height:150px; overflow-y:auto; border-top:1px solid #333; padding-top:10px;">
-                <p style="font-size:0.75rem; color:#888; margin-bottom:10px;">Lista de Copias:</p>`;
+            <div style="max-height:320px; overflow-y:auto; padding-right:5px;">`;
+
+    // Ordenar copias para que las de más estrellas salgan arriba
+    copias.sort((a, b) => (b.estrellas || 0) - (a.estrellas || 0));
 
     copias.forEach((c, idx) => {
-        if (c.uid === maestro.uid) return; // No mostrar al maestro en la lista de abajo
         const enEq = equipoUids.includes(c.uid);
+        const estrellas = c.estrellas || 0;
+        const necesito = estrellas + 1; // La lógica que pediste
+        const disponibles = copias.filter(p => p.uid !== c.uid && !equipoUids.includes(p.uid)).length;
         
         html += `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding:8px; background:#0f0f1b; border-radius:8px; border:1px solid ${enEq ? '#4ade80' : '#222'};">
-                <span style="font-size:0.8rem;">Copia #${idx} (Niv. ${c.lvl || 1})</span>
-                <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
-                        style="padding:5px 10px; background:${enEq ? '#ef4444' : '#4ade80'}; border:none; border-radius:5px; font-size:0.7rem; font-weight:bold; cursor:pointer;">
-                    ${enEq ? 'QUITAR' : 'PONER'}
-                </button>
+            <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#333'}; border-radius:12px; padding:12px; margin-bottom:12px; position:relative;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div style="font-weight:bold; font-size:0.85rem;">Instancia #${idx + 1} ${enEq ? '<span style="color:#4ade80;">[EQUIPADO]</span>' : ''}</div>
+                        <div style="color:#facc15; font-size:0.9rem; margin:2px 0;">${'⭐'.repeat(estrellas)}</div>
+                        <div style="font-size:0.7rem; color:#aaa;">⚔️ ${c.ataque || baseDB.ataque} | ❤️ ${c.vidaMax || baseDB.vidaMax}</div>
+                    </div>
+                    <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
+                            style="padding:5px 10px; background:${enEq ? '#ef4444' : '#4ade80'}; border:none; border-radius:6px; font-size:0.65rem; font-weight:bold; cursor:pointer; color:black;">
+                        ${enEq ? 'DESEQUIPAR' : 'EQUIPAR'}
+                    </button>
+                </div>
+                
+                ${estrellas < 5 ? `
+                    <button onclick="ascenderPokemon('${c.uid}')" 
+                        style="width:100%; margin-top:10px; padding:8px; background:#facc15; border:none; border-radius:6px; font-size:0.7rem; font-weight:bold; cursor:pointer; color:black; opacity:${disponibles >= necesito ? '1' : '0.4'}">
+                        SUBIR A ${estrellas + 1} ⭐ (Pide ${necesito} copias)
+                    </button>
+                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; margin-top:10px; font-weight:bold;">RANGO MÁXIMO ALCANZADO</div>'}
             </div>`;
     });
 
-    html += `</div><button onclick="this.parentElement.parentElement.remove()" style="width:100%; margin-top:15px; background:transparent; color:#666; border:none; cursor:pointer;">Cerrar</button></div>`;
+    html += `</div>
+            <button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background:transparent; color:#666; border:none; cursor:pointer; font-size:0.85rem;">Cerrar Gestión</button>
+        </div>`;
+
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
 }
@@ -452,17 +452,21 @@ function testShards() {
     console.log("✨ DEBUG: Ahora tienes " + fragmentosEstelares + " fragmentos.");
 }
 
-function ascenderPokemon(uidPrincipal) {
-    const principal = inventario.find(p => p.uid === uidPrincipal);
+function ascenderPokemon(uidSeleccionado) {
+    const principal = inventario.find(p => p.uid === uidSeleccionado);
     if (!principal) return;
 
     const estrellasActuales = principal.estrellas || 0;
-    if (estrellasActuales >= 5) return alert("¡Máximo de estrellas alcanzado!");
+    if (estrellasActuales >= 5) {
+        alert("¡Este Pokémon ya ha alcanzado la perfección (5 estrellas)! ⭐⭐⭐⭐⭐");
+        return;
+    }
 
-    // Requisito: 1 copia para la primera estrella, 2 para las siguientes.
-    const necesarias = estrellasActuales === 0 ? 1 : 2;
+    // --- NUEVA DIFICULTAD ESCALABLE ---
+    // Si tiene 0 estrellas, pide 1. Si tiene 1, pide 2. Si tiene 2, pide 3... y así.
+    const necesarias = estrellasActuales + 1; 
 
-    // Filtramos copias que no sean el maestro y no estén en el equipo
+    // Buscamos copias del mismo ID, distinto UID y que no estén equipadas
     const disponibles = inventario.filter(p => 
         p.id === principal.id && 
         p.uid !== principal.uid && 
@@ -470,23 +474,25 @@ function ascenderPokemon(uidPrincipal) {
     );
 
     if (disponibles.length < necesarias) {
-        return alert(`Necesitas ${necesitas} copias libres para subir a ${estrellasActuales + 1} estrellas.`);
+        alert(`Dificultad de Rango: Para subir a ${estrellasActuales + 1} estrellas necesitas ${necesarias} copias extra. Solo tienes ${disponibles.length}.`);
+        return;
     }
 
-    if (!confirm(`¿Sacrificar ${necesarias} copias para mejorar al Maestro?`)) return;
+    if (!confirm(`¿Deseas sacrificar ${necesarias} copias para que ${principal.nombre} alcance las ${estrellasActuales + 1} estrellas?`)) return;
 
-    // 1. Borramos las copias
+    // 1. Eliminamos las copias sacrificadas
     for (let i = 0; i < necesarias; i++) {
-        const idx = inventario.findIndex(p => p.uid === disponibles[i].uid);
-        inventario.splice(idx, 1);
+        const indexParaBorrar = inventario.findIndex(p => p.uid === disponibles[i].uid);
+        if (indexParaBorrar !== -1) inventario.splice(indexParaBorrar, 1);
     }
 
-    // 2. Subida de estrellas y Stats (Mejora del 30%)
+    // 2. Aplicamos la mejora (Mantenemos el 30% de subida de stats)
     principal.estrellas = estrellasActuales + 1;
     
-    // Si los stats son undefined, buscamos en la DB o ponemos un valor base
-    if (!principal.ataque) principal.ataque = 50; 
-    if (!principal.vidaMax) principal.vidaMax = 500;
+    // Aseguramos stats base si fallan
+    const baseDB = DB.find(db => db.id === principal.id);
+    if (!principal.ataque) principal.ataque = baseDB ? baseDB.ataque : 50;
+    if (!principal.vidaMax) principal.vidaMax = baseDB ? baseDB.vidaMax : 500;
 
     principal.ataque = Math.round(principal.ataque * 1.3);
     principal.vidaMax = Math.round(principal.vidaMax * 1.3);
@@ -495,5 +501,5 @@ function ascenderPokemon(uidPrincipal) {
     guardar();
     document.getElementById('overlay-copias').remove();
     abrirMenuCopias(principal.id);
-    alert("¡Ascensión completada! El Maestro es más fuerte.");
+    alert(`¡Ascensión lograda! ${principal.nombre} es ahora un rango ${principal.estrellas} ⭐.`);
 }
