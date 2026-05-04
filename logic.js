@@ -171,70 +171,73 @@ function abrirMenuCopias(id) {
     const copias = inventario.filter(p => p.id == id);
     if (copias.length === 0) return;
 
+    // Buscamos los datos base para nombres, fotos y stats si fallan
     const baseDB = DB.find(db => db.id == id);
+    if (!baseDB) return;
+
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(4px);";
     
     let html = `
-        <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #facc15; width:380px; color: white; font-family: sans-serif; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+        <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #facc15; width:380px; color: white; font-family: sans-serif;">
             <div style="text-align:center; margin-bottom: 20px;">
-                <div style="width:120px; height:120px; margin: 0 auto; display:flex; justify-content:center; align-items:center;">
-                    ${obtenerImagenHTML(baseDB)} 
+                <div style="width:100px; height:100px; margin: 0 auto;">
+                    ${obtenerImagenHTML(baseDB)}
                 </div>
-                <h3 style="color:#facc15; margin:10px 0 5px 0; font-size: 1.5rem;">${baseDB ? baseDB.nombre : 'Personaje'}</h3>
-                <p style="font-size:0.75rem; color:#888; text-transform: uppercase; letter-spacing: 1px;">Panel de Evolución</p>
+                <h3 style="color:#facc15; margin:10px 0 5px 0;">${baseDB.nombre}</h3>
+                <p style="font-size:0.7rem; color:#888; text-transform:uppercase;">Panel de Evolución</p>
             </div>
             
             <div style="max-height:350px; overflow-y:auto; padding-right:5px;">`;
 
-    // Ordenamos por estrellas (más fuertes arriba)
+    // Ordenamos para que los que tengan más estrellas salgan arriba
     copias.sort((a, b) => (b.estrellas || 0) - (a.estrellas || 0));
 
     copias.forEach((c, idx) => {
         const enEq = equipoUids.includes(c.uid);
-        const estrellas = c.estrellas || 0;
-        const necesito = estrellas + 1;
+        const estrellasNum = parseInt(c.estrellas) || 0; // Forzamos que sea un número
+        const necesito = estrellasNum + 1;
         const disponibles = copias.filter(p => p.uid !== c.uid && !equipoUids.includes(p.uid)).length;
         
-        // CORRECCIÓN DE UNDEFINED: Si no tiene stat, lo saca de la DB
-        const atk = c.ataque || (baseDB ? baseDB.ataque : '--');
-        const hp = c.vidaMax || (baseDB ? baseDB.vidaMax : '--');
+        // CORRECCIÓN DEFINITIVA DE STATS:
+        const atk = c.ataque || baseDB.ataque || 0;
+        const hp = c.vidaMax || baseDB.vidaMax || 0;
 
         html += `
             <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#333'}; border-radius:12px; padding:15px; margin-bottom:12px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                     <div>
-                        <div style="font-weight:bold; font-size:0.9rem; color: ${enEq ? '#4ade80' : '#fff'};">
-                            Instancia #${idx + 1} ${enEq ? '◈' : ''}
+                        <div style="font-weight:bold; font-size:0.85rem; color:${enEq ? '#4ade80' : '#fff'};">
+                            Instancia #${idx + 1} ${enEq ? '✅' : ''}
                         </div>
-                        <div style="color:#facc15; font-size:1rem; letter-spacing:2px; margin-top:2px;">
-                            ${'⭐'.repeat(estrellas)}${'<span style="color:#333;">⭐</span>'.repeat(5 - estrellas)}
+                        <div style="color:#facc15; font-size:1rem; margin:3px 0;">
+                            ${ estrellasNum > 0 ? '⭐'.repeat(estrellasNum) : '<span style="color:#444; font-size:0.7rem;">Sin estrellas</span>' }
                         </div>
                     </div>
                     <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
-                            style="padding:8px 12px; background:${enEq ? '#ef4444' : '#4ade80'}; border:none; border-radius:8px; font-size:0.7rem; font-weight:bold; cursor:pointer; color:black; transition: 0.2s;">
+                            style="padding:6px 10px; background:${enEq ? '#ef4444' : '#4ade80'}; border:none; border-radius:6px; font-size:0.65rem; font-weight:bold; cursor:pointer; color:black;">
                         ${enEq ? 'QUITAR' : 'PONER'}
                     </button>
                 </div>
 
-                <div style="display:flex; gap:15px; font-size:0.75rem; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 5px; margin-bottom: 10px;">
-                    <span style="color:#ff4444;">⚔️ <b>${atk}</b></span>
-                    <span style="color:#4ade80;">❤️ <b>${hp}</b></span>
+                <div style="display:flex; gap:10px; font-size:0.7rem; background:rgba(255,255,255,0.05); padding:6px; border-radius:6px; margin-top:8px;">
+                    <span style="color:#ff5555;">⚔️ ${atk}</span>
+                    <span style="color:#4ade80;">❤️ ${hp}</span>
                     <span style="color:#aaa;">Niv. ${c.lvl || 1}</span>
                 </div>
                 
-                ${estrellas < 5 ? `
+                ${estrellasNum < 5 ? `
                     <button onclick="ascenderPokemon('${c.uid}')" 
-                        style="width:100%; padding:10px; background:#facc15; border:none; border-radius:8px; font-size:0.75rem; font-weight:bold; cursor:pointer; color:black; box-shadow: 0 3px 0 #b48608; opacity:${disponibles >= necesito ? '1' : '0.4'}">
-                        SUBIR A ${estrellas + 1} ⭐ (Pide ${necesito} copias)
+                        style="width:100%; margin-top:10px; padding:8px; background:#facc15; border:none; border-radius:8px; font-size:0.7rem; font-weight:bold; cursor:pointer; color:black; opacity:${disponibles >= necesito ? '1' : '0.4'}">
+                        SUBIR A ${estrellasNum + 1} ⭐ (Pide ${necesito} copias)
                     </button>
-                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; font-weight:bold; padding: 5px; border: 1px dashed #facc15; border-radius: 5px;">RANGO MÁXIMO ALCANZADO</div>'}
+                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; margin-top:10px; font-weight:bold;">¡RANGO MÁXIMO!</div>'}
             </div>`;
     });
 
     html += `</div>
-            <button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background:transparent; color:#666; border:none; padding:10px; cursor:pointer; font-size:0.8rem;">Cerrar Panel</button>
+            <button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background:transparent; color:#666; border:none; cursor:pointer; font-size:0.8rem;">Cerrar Panel</button>
         </div>`;
 
     overlay.innerHTML = html;
