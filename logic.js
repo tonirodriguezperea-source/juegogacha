@@ -168,38 +168,57 @@ function renderEquipo() {
 }
 
 function abrirMenuCopias(id) {
+    // 1. Buscamos todas las copias de este personaje
     const copias = inventario.filter(p => p.id == id);
+    if (copias.length === 0) return;
+
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
-    overlay.className = "modal-overlay"; 
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(4px);";
     
     const misSkins = skinsPoseidas.filter(s => s.idPersonaje == id);
+    const maestro = copias[0]; // Definimos al primero como el Maestro que recibirá las estrellas
 
     let html = `
-        <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #4ade80; width:340px; color: white;">
+        <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #4ade80; width:360px; color: white; font-family: sans-serif;">
             <div style="text-align:center; margin-bottom: 20px;">
-                ${obtenerImagenHTML(copias[0])}
-                <h3 style="color:#4ade80; margin:10px 0;">${copias[0].nombre}</h3>
+                ${obtenerImagenHTML(maestro)}
+                <h3 style="color:#4ade80; margin:5px 0;">${maestro.nombre}</h3>
+                <div style="color:#facc15; font-size:1.2rem; letter-spacing: 2px;">
+                    ${'⭐'.repeat(maestro.estrellas || 0)}
+                </div>
             </div>
             
-            <div style="max-height:200px; overflow-y:auto; margin-bottom:20px; padding-right:5px;">`;
+            <div style="max-height:250px; overflow-y:auto; margin-bottom:20px; padding-right:5px;">`;
 
     copias.forEach((c, index) => {
         const enEq = equipoUids.includes(c.uid);
-        // --- AQUÍ ESTÁ EL CAMBIO ---
+        const esElMaestro = (c.uid === maestro.uid);
+        
         html += `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:10px; background:#0f0f1b; border-radius:10px; border:1px solid ${enEq ? '#4ade80' : '#333'};">
                 <div style="display:flex; flex-direction:column;">
-                    <span style="font-size:0.9rem; font-weight:bold;">Copia #${index + 1}</span>
-                    <span style="color:#4ade80; font-size:0.75rem;">Nivel ${c.lvl || 1}</span> 
+                    <span style="font-size:0.85rem; font-weight:bold; color:${esElMaestro ? '#4ade80' : 'white'}">
+                        ${esElMaestro ? '👑 MAESTRO' : 'Copia #' + (index + 1)}
+                    </span>
+                    <span style="color:#aaa; font-size:0.7rem;">Nivel ${c.lvl || 1}</span> 
+                    ${c.estrellas > 0 && !esElMaestro ? `<span style="color:#facc15; font-size:0.6rem;">${'★'.repeat(c.estrellas)}</span>` : ''}
                 </div>
-                <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
-                        style="padding:6px 12px; cursor:pointer; background:${enEq ? '#ef4444' : '#4ade80'}; color:black; border:none; border-radius:6px; font-weight:bold; font-size:0.8rem;">
-                    ${enEq ? 'QUITAR' : 'PONER'}
-                </button>
+                
+                <div style="display:flex; gap:5px;">
+                    <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
+                            style="padding:6px 8px; cursor:pointer; background:${enEq ? '#ef4444' : '#4ade80'}; color:black; border:none; border-radius:6px; font-weight:bold; font-size:0.7rem;">
+                        ${enEq ? 'QUITAR' : 'PONER'}
+                    </button>
+
+                    ${(!esElMaestro && (maestro.estrellas || 0) < 5) ? `
+                        <button onclick="ascenderPokemon('${maestro.uid}', '${c.uid}')" 
+                                style="padding:6px 8px; cursor:pointer; background:#facc15; color:black; border:none; border-radius:6px; font-weight:bold; font-size:0.7rem;">
+                            SUBIR ⭐
+                        </button>
+                    ` : ''}
+                </div>
             </div>`;
-        // ---------------------------
     });
 
     html += `</div>
@@ -220,7 +239,6 @@ function abrirMenuCopias(id) {
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
 }
-
 function aplicarSkin(idPersonaje, nombreSkin) {
     let nuevoSprite = "";
     if (nombreSkin === 'default') {
@@ -446,4 +464,31 @@ function testShards() {
     }
 
     console.log("✨ DEBUG: Ahora tienes " + fragmentosEstelares + " fragmentos.");
+}
+
+function ascenderPokemon(uidPrincipal, uidSacrificio) {
+    const principal = inventario.find(p => p.uid === uidPrincipal);
+    const sacrificioIndex = inventario.findIndex(p => p.uid === uidSacrificio);
+
+    if (!principal || sacrificioIndex === -1) return;
+
+    if (!confirm("¿Quieres sacrificar esta copia para subir 1 estrella?")) return;
+
+    // 1. Subir estrella
+    principal.estrellas = (principal.estrellas || 0) + 1;
+    
+    // 2. Mejorar stats (le sumamos un 20% a lo que ya tenga)
+    principal.ataque = Math.round(principal.ataque * 1.2);
+    principal.vidaMax = Math.round(principal.vidaMax * 1.2);
+    principal.hp = principal.vidaMax;
+
+    // 3. Eliminar la copia usada
+    inventario.splice(sacrificioIndex, 1);
+
+    // 4. Guardar y refrescar pantalla
+    guardar(); 
+    document.getElementById('overlay-copias').remove();
+    abrirMenuCopias(principal.id);
+    
+    alert("¡Subida de rango con éxito! ⭐");
 }

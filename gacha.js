@@ -28,10 +28,24 @@ window.invocar = function(saga) {
     let posibles = poolSaga.filter(p => p.rareza === rareza);
     if (posibles.length === 0) posibles = poolSaga; 
     
-    const bichoConseguido = posibles[Math.floor(Math.random() * posibles.length)];
+    const bichoBase = posibles[Math.floor(Math.random() * posibles.length)];
 
-    // --- AQUÍ VA EL AVISO A LA MISIÓN ---
-    // Como ha pasado los filtros y tiene tickets, contamos la invocación
+    // --- AQUÍ CREAMOS EL OBJETO ÚNICO ---
+    const bichoConseguido = {
+        ...bichoBase, 
+        uid: Date.now() + Math.random().toString(36).substr(2, 9),
+        lvl: 1,
+        estrellas: 0 
+    };
+
+    // --- GUARDADO EN INVENTARIO Y GASTO DE TICKET ---
+    inventario.push(bichoConseguido); // <--- ¡ESTO ES LO QUE FALTABA!
+    ticketsNormales--; // Restamos el ticket usado
+    
+    // Guardamos en el almacenamiento local para que no se pierda si cierras el navegador
+    guardar(); 
+
+    // --- AVISO A LA MISIÓN ---
     avanzarMision('gacha_3', 1); 
 
     // 4. EJECUTAR ANIMACIÓN
