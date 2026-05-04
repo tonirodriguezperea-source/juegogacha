@@ -112,3 +112,15 @@ function ejecutarAnimacionGacha(saga, personaje) {
         }, 600);
     }, 1800);
 }
+
+window.cerrarGacha = function() {
+    console.log("Cerrando ventana de Gacha...");
+    const overlay = document.getElementById('gacha-animacion');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+    // Refrescamos la pantalla de equipo por si hay bichos nuevos
+    if (typeof mostrar === 'function') {
+        mostrar('equipo');
+    }
+};
