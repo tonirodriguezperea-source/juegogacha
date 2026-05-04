@@ -195,13 +195,18 @@ function escribirLog(msg) {
 
 function finalizar(win) {
     if (win) {
+        // 1. Subimos nivel a cada uno (esto sí va dentro del bucle)
         battleState.playerTeam.forEach(p => {
             let char = inventario.find(inv => inv.uid === p.uid);
             if (char) char.lvl++;
-            avanzarMision('ganar_combates', 1);
         });
+
+        // 2. SUMAMOS LA MISIÓN (FUERA del bucle, para que solo sea +1 por combate)
+        avanzarMision('ganar_combates', 1);
+
         guardar();
     }
+    
     document.getElementById('battle-screen').style.display = 'none';
     mostrar('lobby');
 }
