@@ -75,7 +75,7 @@ function renderMisiones() {
 
     misionesDiarias.forEach(m => {
         const porcentaje = (m.progreso / m.meta) * 100;
-        const icono = m.tipoPremio === "tickets" ? "🎫" : "✨";
+        const icono = m.tipoPremio === "tickets" ? "🎫" : (m.tipoPremio === "monedas" ? "💰" : "✨");
         
         html += `
             <div style="background: rgba(30, 30, 50, 0.9); border: 2px solid ${m.listo ? '#4ade80' : '#3b82f6'}; padding: 15px; border-radius: 12px; margin-bottom:12px;">
