@@ -171,12 +171,9 @@ function abrirMenuCopias(id) {
     const copias = inventario.filter(p => p.id == id);
     if (copias.length === 0) return;
 
-    // Buscamos los datos originales en la DB para la foto y stats base
+    // Buscamos los datos originales en la DB por si acaso
     const baseDB = DB.find(db => db.id == id);
     
-    // Si por algún motivo no hay imagen en el objeto, usamos la de la DB
-    const rutaImagen = baseDB ? baseDB.img : 'vacio.png';
-
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(4px);";
@@ -184,9 +181,11 @@ function abrirMenuCopias(id) {
     let html = `
         <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #facc15; width:380px; color: white; font-family: sans-serif;">
             <div style="text-align:center; margin-bottom: 20px;">
-                <img src="${rutaImagen}" style="width:100px; height:100px; object-fit:contain; filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.3));">
-                <h3 style="color:#facc15; margin:10px 0;">${baseDB ? baseDB.nombre : 'Pokémon'}</h3>
-                <p style="font-size:0.75rem; color:#888;">Gestiona tus ejemplares y sube de rango</p>
+                <div style="width:100px; height:100px; margin: 0 auto; display:flex; justify-content:center; align-items:center; filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.4));">
+                    ${obtenerImagenHTML(copias[0])}
+                </div>
+                <h3 style="color:#facc15; margin:15px 0 5px 0;">${baseDB ? baseDB.nombre : 'Personaje'}</h3>
+                <p style="font-size:0.75rem; color:#888;">Gestión de ejemplares y rangos</p>
             </div>
             
             <div style="max-height:320px; overflow-y:auto; padding-right:5px;">`;
@@ -200,35 +199,38 @@ function abrirMenuCopias(id) {
         const necesito = estrellas + 1;
         const disponibles = copias.filter(p => p.uid !== c.uid && !equipoUids.includes(p.uid)).length;
         
-        // Stats de respaldo por si salen 'undefined'
         const atk = c.ataque || (baseDB ? baseDB.ataque : 0);
         const hp = c.vidaMax || (baseDB ? baseDB.vidaMax : 0);
 
         html += `
             <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#333'}; border-radius:12px; padding:12px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <div style="font-weight:bold; font-size:0.85rem;">Instancia #${idx + 1} ${enEq ? '<span style="color:#4ade80;">[EQUIPADO]</span>' : ''}</div>
-                        <div style="color:#facc15; font-size:0.9rem; margin:2px 0;">${'⭐'.repeat(estrellas)}</div>
-                        <div style="font-size:0.7rem; color:#aaa;">⚔️ ${atk} | ❤️ ${hp}</div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                         <div style="width:40px; height:40px;">${obtenerImagenHTML(c)}</div>
+                         <div>
+                            <div style="font-weight:bold; font-size:0.85rem;">Copia #${idx + 1}</div>
+                            <div style="color:#facc15; font-size:0.85rem;">${'⭐'.repeat(estrellas)}</div>
+                         </div>
                     </div>
                     <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
                             style="padding:5px 10px; background:${enEq ? '#ef4444' : '#4ade80'}; border:none; border-radius:6px; font-size:0.65rem; font-weight:bold; cursor:pointer; color:black;">
-                        ${enEq ? 'DESEQUIPAR' : 'EQUIPAR'}
+                        ${enEq ? 'QUITAR' : 'PONER'}
                     </button>
                 </div>
+
+                <div style="font-size:0.7rem; color:#aaa; margin: 8px 0;">⚔️ ${atk} | ❤️ ${hp}</div>
                 
                 ${estrellas < 5 ? `
                     <button onclick="ascenderPokemon('${c.uid}')" 
-                        style="width:100%; margin-top:10px; padding:8px; background:#facc15; border:none; border-radius:6px; font-size:0.7rem; font-weight:bold; cursor:pointer; color:black; opacity:${disponibles >= necesito ? '1' : '0.4'}">
+                        style="width:100%; padding:8px; background:#facc15; border:none; border-radius:6px; font-size:0.7rem; font-weight:bold; cursor:pointer; color:black; opacity:${disponibles >= necesito ? '1' : '0.4'}">
                         SUBIR A ${estrellas + 1} ⭐ (Pide ${necesito} copias)
                     </button>
-                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; margin-top:10px; font-weight:bold;">RANGO MÁXIMO</div>'}
+                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; font-weight:bold;">RANGO MÁXIMO</div>'}
             </div>`;
     });
 
     html += `</div>
-            <button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background:transparent; color:#666; border:none; cursor:pointer; font-size:0.85rem;">Cerrar Gestión</button>
+            <button onclick="document.getElementById('overlay-copias').remove()" style="width:100%; margin-top:15px; background:transparent; color:#666; border:none; cursor:pointer; font-size:0.85rem;">Cerrar</button>
         </div>`;
 
     overlay.innerHTML = html;
