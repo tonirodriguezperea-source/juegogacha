@@ -1,3 +1,13 @@
+// Forzamos que la función exista desde el segundo 1
+window.cambiarSkinMenu = function(id, tipo) {
+    console.log("BOTÓN PULSADO: ID " + id + " TIPO " + tipo);
+    if(typeof ejecutarCambioReal === 'function') {
+        ejecutarCambioReal(id, tipo);
+    } else {
+        alert("Error: La lógica interna aún no ha cargado");
+    }
+};
+
 // ================================================================
 // 1. VARIABLES GLOBALES Y PERSISTENCIA (SISTEMA DE GUARDADO)
 // ================================================================
@@ -570,4 +580,36 @@ function ascenderPokemon(uidSeleccionado) {
     document.getElementById('overlay-copias').remove();
     abrirMenuCopias(principal.id);
     alert(`¡Ascensión lograda! ${principal.nombre} es ahora un rango ${principal.estrellas} ⭐.`);
+}
+
+function ejecutarCambioReal(id, tipo) {
+    const idNum = parseInt(id);
+    
+    // 1. Actualizar inventario
+    inventario.forEach(p => {
+        if (parseInt(p.id) === idNum) {
+            p.skin = tipo;
+            // Actualizar sprite
+            if (tipo === 'shiny' && typeof SKINS_DATA !== 'undefined' && SKINS_DATA[idNum]) {
+                p.sprite = SKINS_DATA[idNum].sprite;
+            } else {
+                const base = DB.find(d => parseInt(d.id) === idNum);
+                if (base) p.sprite = base.sprite;
+            }
+        }
+    });
+
+    // 2. Actualizar visualmente el menú abierto
+    const imgCont = document.getElementById('img-contenedor-menu');
+    if (imgCont) {
+        const baseDB = DB.find(db => parseInt(db.id) === idNum);
+        imgCont.innerHTML = obtenerImagenHTML({...baseDB, skin: tipo});
+    }
+
+    // 3. Guardar y refrescar
+    if(typeof guardar === 'function') guardar();
+    if(typeof renderEquipo === 'function') renderEquipo();
+    if(typeof renderLobby === 'function') renderLobby();
+    
+    console.log("Cambio de skin completado para ID:", idNum);
 }
