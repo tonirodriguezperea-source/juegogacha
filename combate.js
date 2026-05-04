@@ -46,6 +46,7 @@ window.iniciarBatalla = function() {
     
     actualizarInterfazBatalla();
     escribirLog("⚔️ ¡Comienza el combate!");
+    avanzarMision('lucha_monedas', 1)
 };
 
 function generarRivales(equipoPlayer) {
@@ -197,6 +198,7 @@ function finalizar(win) {
         battleState.playerTeam.forEach(p => {
             let char = inventario.find(inv => inv.uid === p.uid);
             if (char) char.lvl++;
+            avanzarMision('ganar_combates', 1);
         });
         guardar();
     }

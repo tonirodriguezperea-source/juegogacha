@@ -11,6 +11,11 @@ var fragmentosEstelares = parseInt(localStorage.getItem("gq_shards")) || 0;
 var skinsPoseidas = JSON.parse(localStorage.getItem("gq_skins_owner")) || []; 
 var stockSkinsDia = JSON.parse(localStorage.getItem("gq_stock_skins")) || [];
 var ultimaFechaSkins = localStorage.getItem("gq_fecha_skins") || "";
+var misionesDiarias = JSON.parse(localStorage.getItem("gq_misiones")) || [
+    { id: "login", desc: "Regalo por iniciar sesión", meta: 1, progreso: 0, listo: false, premio: 2, tipoPremio: "tickets" },
+    { id: "lucha_monedas", desc: "Luchar una vez por monedas", meta: 1, progreso: 0, listo: false, premio: 5, tipoPremio: "shards" },
+    { id: "ganar_combates", desc: "Ganar 3 combates", meta: 3, progreso: 0, listo: false, premio: 15, tipoPremio: "shards" }
+];
 
 // Precios estándar por rareza (para usar en toda la app)
 const PRECIOS_RAREZA = {
@@ -328,9 +333,11 @@ function mostrar(pantalla) {
         renderTiendaSkins(); // <--- AÑADIR ESTA LÍNEA (Dibuja los Shinys)
     }
 
+    if (pantalla === 'misiones') renderMisiones(); // Esta función vive en misiones.js
     if (pantalla === 'lobby') renderLobby();
     if (pantalla === 'equipo') renderEquipo();
     if (pantalla === 'pokedex') renderDex();
+
     
     actualizarHUD();
 }

@@ -11,6 +11,7 @@
         <button class="nav-btn" onclick="mostrar('lobby')">🏠 Inicio</button>
         <button class="nav-btn" onclick="mostrar('equipo')">🛡️ Equipo</button>
         <button class="nav-btn" onclick="mostrar('pokedex')">📖 Dex</button>
+        <button class="nav-btn" onclick="mostrar('misiones')" style="border-color: #4ade80; color: #4ade80;">📜 Misiones</button>
         <button class="nav-btn" onclick="mostrar('tienda')" style="border-color: #eab308; color: #eab308;">💰 Tienda</button>
         <button class="nav-btn gacha-btn" onclick="mostrar('gacha')">✨ Invocar</button>
     </nav>
@@ -139,6 +140,9 @@ function regalarTickets() {
     </div>
 </div>
 
+<div id="pantalla-misiones" class="pantalla" style="display:none; padding:20px;">
+    </div>
+
     <div id="battle-screen" style="display:none;">
         <div class="battle-arena">
             <div class="fighter">
@@ -173,6 +177,7 @@ function regalarTickets() {
     </div>
 
     <script src="database.js"></script>
+    <script src="misiones.js"></script>
     <script src="logic.js"></script>
     <script src="tienda.js"></script>
     <script src="gacha.js"></script>
