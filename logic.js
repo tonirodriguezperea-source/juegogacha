@@ -174,14 +174,14 @@ function abrirMenuCopias(id) {
     if (copias.length === 0) return;
 
     const baseDB = DB.find(db => parseInt(db.id) === idBusqueda);
-    // IMPORTANTE: Revisamos skinsPoseidas correctamente
     const tieneSkin = skinsPoseidas && skinsPoseidas.some(s => parseInt(s.idPersonaje) === idBusqueda);
     const skinActual = copias[0].skin || 'normal';
 
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
     overlay.className = "modal-evolucion";
-    overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:10000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(5px);";
+    // He subido el z-index a 100001 para que nada lo tape por error
+    overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100001;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(5px);";
     
     let html = `
         <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #facc15; width:380px; color: white; font-family: sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
@@ -193,17 +193,18 @@ function abrirMenuCopias(id) {
                 <h2 style="color:#facc15; margin:10px 0 5px 0;">${baseDB.nombre}</h2>
                 
                 <div style="display:flex; justify-content:center; gap:10px; margin-top:15px;">
-                    <button onclick="window.cambiarSkinMenu('${idBusqueda}', 'normal')" style="cursor:pointer; padding:8px 15px; background:#333; color:white; border:1px solid #555; border-radius:8px; font-size:0.8rem;">Normal</button>
+                    <button onclick="if(window.cambiarSkinMenu) { window.cambiarSkinMenu('${idBusqueda}', 'normal'); } else { console.error('Error: cambiarSkinMenu no encontrada'); }" 
+                            style="cursor:pointer; padding:8px 15px; background:#333; color:white; border:1px solid #555; border-radius:8px; font-size:0.8rem;">Normal</button>
                     
                     ${tieneSkin ? `
-                        <button onclick="window.cambiarSkinMenu('${idBusqueda}', 'shiny')" style="cursor:pointer; padding:8px 15px; background:linear-gradient(to bottom, #facc15, #b48608); color:black; border:none; border-radius:8px; font-weight:bold; font-size:0.8rem;">Shiny ✨</button>
+                        <button onclick="if(window.cambiarSkinMenu) { window.cambiarSkinMenu('${idBusqueda}', 'shiny'); } else { console.error('Error: cambiarSkinMenu no encontrada'); }" 
+                                style="cursor:pointer; padding:8px 15px; background:linear-gradient(to bottom, #facc15, #b48608); color:black; border:none; border-radius:8px; font-weight:bold; font-size:0.8rem;">Shiny ✨</button>
                     ` : ''}
                 </div>
             </div>
 
             <div style="max-height:300px; overflow-y:auto; padding-right:5px; border-top:1px solid #333; padding-top:15px;">`;
 
-    // Ordenar por estrellas
     const copiasOrdenadas = [...copias].sort((a,b) => (b.estrellas||0) - (a.estrellas||0));
 
     copiasOrdenadas.forEach((c, idx) => {
@@ -212,7 +213,6 @@ function abrirMenuCopias(id) {
         const nec = est + 1;
         const disp = copias.filter(p => p.uid !== c.uid && !equipoUids.includes(p.uid)).length;
         
-        // Stats de seguridad para evitar undefined
         const atk = c.ataque || (baseDB ? baseDB.ataque : 0);
         const hp = c.vidaMax || (baseDB ? baseDB.vidaMax : 0);
 
@@ -220,12 +220,13 @@ function abrirMenuCopias(id) {
             <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#444'}; border-radius:12px; padding:12px; margin-bottom:10px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <span style="font-size:0.85rem; font-weight:bold;">Instancia #${idx+1} ${c.skin === 'shiny' ? '✨' : ''}</span>
+                        <span style="font-size:0.85rem; font-weight:bold; color:white;">Instancia #${idx+1} ${c.skin === 'shiny' ? '✨' : ''}</span>
                         <div style="color:#facc15; font-size:1rem; letter-spacing:2px;">
                             ${est > 0 ? '⭐'.repeat(est) : '<span style="color:#444">☆☆☆☆☆</span>'}
                         </div>
                     </div>
-                    <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove();" style="background:${enEq ? '#ef4444' : '#4ade80'}; color:black; border:none; padding:6px 12px; border-radius:8px; font-size:0.7rem; font-weight:bold; cursor:pointer;">
+                    <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove();" 
+                            style="background:${enEq ? '#ef4444' : '#4ade80'}; color:black; border:none; padding:6px 12px; border-radius:8px; font-size:0.7rem; font-weight:bold; cursor:pointer;">
                         ${enEq ? 'QUITAR' : 'PONER'}
                     </button>
                 </div>
@@ -233,7 +234,8 @@ function abrirMenuCopias(id) {
                     ⚔️ ${atk} | ❤️ ${hp}
                 </div>
                 ${est < 5 ? `
-                    <button onclick="ascenderPokemon('${c.uid}')" style="width:100%; padding:10px; background:#facc15; border:none; border-radius:8px; font-weight:bold; cursor:pointer; opacity:${disp >= nec ? '1' : '0.4'}; font-size:0.8rem; box-shadow: 0 3px 0 #b48608;">
+                    <button onclick="ascenderPokemon('${c.uid}')" 
+                            style="width:100%; padding:10px; background:#facc15; border:none; border-radius:8px; font-weight:bold; cursor:pointer; opacity:${disp >= nec ? '1' : '0.4'}; font-size:0.8rem; color:black;">
                         Subir a ${est+1} ⭐ (Nec. ${nec} copias)
                     </button>
                 ` : '<div style="text-align:center; color:#facc15; font-size:0.75rem; font-weight:bold;">¡NIVEL MÁXIMO!</div>'}
@@ -251,31 +253,45 @@ function abrirMenuCopias(id) {
 // FUNCIÓN AUXILIAR PARA CAMBIAR LA SKIN DE TODAS LAS COPIAS Y LA IMAGEN DEL MENÚ
 window.cambiarSkinMenu = function(id, tipo) {
     console.log("Cambiando skin de ID:", id, "a tipo:", tipo);
-    
-    // Convertimos el ID a número por si acaso llega como texto
     const idNumerico = parseInt(id);
 
-    // 1. Actualizar el inventario
+    // 1. Buscamos la data de la skin para obtener el sprite nuevo
+    // Si es normal, el sprite vendrá de la DB original. Si es shiny, de SKINS_DATA.
+    const dataSkin = (tipo === 'shiny') ? SKINS_DATA[idNumerico] : DB.find(d => parseInt(d.id) === idNumerico);
+
+    if (!dataSkin) {
+        console.error("No se encontró información para la skin del ID:", idNumerico);
+        return;
+    }
+
+    // 2. Actualizar el inventario
     inventario.forEach(p => {
         if (parseInt(p.id) === idNumerico) {
-            p.skin = tipo;
+            p.skin = tipo; // Guardamos el estado ('normal' o 'shiny')
+            p.sprite = dataSkin.sprite; // ¡ESTO ES CLAVE! Actualizamos la imagen real
         }
     });
 
-    // 2. Intentar refrescar la imagen del menú si existe
-    const baseDB = DB.find(db => parseInt(db.id) === idNumerico);
+    // 3. Intentar refrescar la imagen del menú si existe
     const contenedor = document.getElementById('img-contenedor-menu');
-    
-    if (contenedor && baseDB) {
-        // Forzamos el renderizado de la nueva skin
-        contenedor.innerHTML = obtenerImagenHTML({...baseDB, skin: tipo});
+    if (contenedor) {
+        // Usamos el sprite que acabamos de elegir
+        contenedor.innerHTML = obtenerImagenHTML({
+            id: idNumerico,
+            sprite: dataSkin.sprite,
+            skin: tipo
+        });
     }
 
-    // 3. Guardar cambios
+    // 4. Guardar y refrescar todo el juego
     guardar();
     
-    // 4. Opcional: Refrescar el menú de copias para ver los cambios en la lista
-    // abrirMenuCopias(idNumerico); 
+    // Estas dos funciones son vitales para que el cambio se vea 
+    // en el Lobby y en la lista de Equipo sin recargar la página.
+    if (typeof renderEquipo === 'function') renderEquipo();
+    if (typeof renderLobby === 'function') renderLobby();
+    
+    console.log("Skin actualizada con éxito en todas las copias.");
 };
 function aplicarSkin(idPersonaje, nombreSkin) {
     let nuevoSprite = "";
