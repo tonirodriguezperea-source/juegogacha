@@ -171,7 +171,7 @@ function abrirMenuCopias(id) {
     const copias = inventario.filter(p => p.id == id);
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
-    overlay.className = "modal-overlay"; // Asegúrate de tener estilos para esto o usa style inline
+    overlay.className = "modal-overlay"; 
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(4px);";
     
     const misSkins = skinsPoseidas.filter(s => s.idPersonaje == id);
@@ -187,14 +187,19 @@ function abrirMenuCopias(id) {
 
     copias.forEach((c, index) => {
         const enEq = equipoUids.includes(c.uid);
+        // --- AQUÍ ESTÁ EL CAMBIO ---
         html += `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:10px; background:#0f0f1b; border-radius:10px; border:1px solid ${enEq ? '#4ade80' : '#333'};">
-                <span style="font-size:0.9rem;">Copia #${index + 1}</span>
+                <div style="display:flex; flex-direction:column;">
+                    <span style="font-size:0.9rem; font-weight:bold;">Copia #${index + 1}</span>
+                    <span style="color:#4ade80; font-size:0.75rem;">Nivel ${c.lvl || 1}</span> 
+                </div>
                 <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
                         style="padding:6px 12px; cursor:pointer; background:${enEq ? '#ef4444' : '#4ade80'}; color:black; border:none; border-radius:6px; font-weight:bold; font-size:0.8rem;">
                     ${enEq ? 'QUITAR' : 'PONER'}
                 </button>
             </div>`;
+        // ---------------------------
     });
 
     html += `</div>
