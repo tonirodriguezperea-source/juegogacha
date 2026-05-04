@@ -190,7 +190,6 @@ function abrirMenuCopias(id) {
     const overlay = document.createElement('div');
     overlay.id = "overlay-copias";
     overlay.className = "modal-evolucion";
-    // He subido el z-index a 100001 para que nada lo tape por error
     overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:100001;display:flex;justify-content:center;align-items:center;backdrop-filter:blur(5px);";
     
     let html = `
@@ -225,6 +224,8 @@ function abrirMenuCopias(id) {
         
         const atk = c.ataque || (baseDB ? baseDB.ataque : 0);
         const hp = c.vidaMax || (baseDB ? baseDB.vidaMax : 0);
+        // DEFINIMOS EL NIVEL AQUÍ
+        const nivel = c.lvl || 1;
 
         html += `
             <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#444'}; border-radius:12px; padding:12px; margin-bottom:10px;">
@@ -240,9 +241,11 @@ function abrirMenuCopias(id) {
                         ${enEq ? 'QUITAR' : 'PONER'}
                     </button>
                 </div>
+                
                 <div style="font-size:0.75rem; color:#aaa; margin:8px 0; background:rgba(255,255,255,0.05); padding:5px; border-radius:5px;">
-                    ⚔️ ${atk} | ❤️ ${hp}
+                    ⚔️ ${atk} | ❤️ ${hp} | <span style="color:#4ade80; font-weight:bold;">Niv. ${nivel}</span>
                 </div>
+
                 ${est < 5 ? `
                     <button onclick="ascenderPokemon('${c.uid}')" 
                             style="width:100%; padding:10px; background:#facc15; border:none; border-radius:8px; font-weight:bold; cursor:pointer; opacity:${disp >= nec ? '1' : '0.4'}; font-size:0.8rem; color:black;">
@@ -259,7 +262,6 @@ function abrirMenuCopias(id) {
     overlay.innerHTML = html;
     document.body.appendChild(overlay);
 }
-
 // FUNCIÓN AUXILIAR PARA CAMBIAR LA SKIN DE TODAS LAS COPIAS Y LA IMAGEN DEL MENÚ
 window.cambiarSkinMenu = function(id, tipo) {
     console.log("Cambiando skin de ID:", id, "a tipo:", tipo);
