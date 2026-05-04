@@ -174,10 +174,10 @@ function abrirMenuCopias(id) {
     const baseDB = DB.find(db => db.id == id);
     if (!baseDB) return;
 
-    // BUSCAMOS SI EL USUARIO TIENE LA SKIN COMPRADA PARA ESTE ID
-    const tieneSkin = skinsPoseidas.some(s => s.idPersonaje == id);
+    // Comprobamos si tienes la skin en tu lista de desbloqueados
+    const tieneSkin = skinsPoseidas && skinsPoseidas.some(s => s.idPersonaje == id);
     
-    // La imagen principal debe mostrar la skin que tenga la primera copia
+    // Miramos qué skin tiene puesta la primera copia para mostrarla
     const skinActual = copias[0].skin || 'normal';
 
     const overlay = document.createElement('div');
@@ -187,24 +187,22 @@ function abrirMenuCopias(id) {
     let html = `
         <div style="background:#1a1a2e; padding:25px; border-radius:20px; border:2px solid #facc15; width:400px; color: white; font-family: sans-serif;">
             <div style="text-align:center; margin-bottom: 20px;">
-                <div id="img-principal-contenedor" style="width:120px; height:120px; margin: 0 auto; display:flex; justify-content:center; align-items:center;">
+                <div id="img-contenedor-menu" style="width:120px; height:120px; margin: 0 auto; display:flex; justify-content:center; align-items:center;">
                     ${obtenerImagenHTML({...baseDB, skin: skinActual})}
                 </div>
                 <h3 style="color:#facc15; margin:10px 0 5px 0; font-size:1.4rem;">${baseDB.nombre}</h3>
                 
                 <div style="margin-top:10px; display:flex; justify-content:center; gap:10px;">
-                    <button onclick="cambiarSkinMenu('${id}', 'normal')" style="padding:5px 15px; border-radius:20px; border:1px solid #555; background:#333; color:white; cursor:pointer; font-size:0.7rem;">Normal</button>
-                    
-                    ${tieneSkin ? `
-                        <button onclick="cambiarSkinMenu('${id}', 'shiny')" style="padding:5px 15px; border-radius:20px; border:1px solid #facc15; background:linear-gradient(45deg, #b48608, #facc15); color:black; cursor:pointer; font-weight:bold; font-size:0.7rem;">Shiny ✨</button>
-                    ` : `
-                        <button style="padding:5px 15px; border-radius:20px; border:1px solid #444; background:#222; color:#666; cursor:not-allowed; font-size:0.7rem;">Bloqueado 🔒</button>
-                    `}
+                    <button onclick="cambiarSkinMenu('${id}', 'normal')" style="padding:6px 14px; border-radius:8px; border:1px solid #555; background:#333; color:white; cursor:pointer; font-size:0.75rem;">Normal</button>
+                    ${tieneSkin ? 
+                        `<button onclick="cambiarSkinMenu('${id}', 'shiny')" style="padding:6px 14px; border-radius:8px; border:1px solid #facc15; background:linear-gradient(45deg, #b48608, #facc15); color:black; cursor:pointer; font-weight:bold; font-size:0.75rem;">Shiny ✨</button>` 
+                        : ''}
                 </div>
             </div>
             
-            <div style="max-height:300px; overflow-y:auto; padding-right:5px; margin-top:15px;">`;
+            <div style="max-height:320px; overflow-y:auto; padding-right:5px; margin-top:15px;">`;
 
+    // Ordenamos por estrellas (más fuertes arriba)
     copias.sort((a, b) => (b.estrellas || 0) - (a.estrellas || 0));
 
     copias.forEach((c, idx) => {
@@ -213,27 +211,28 @@ function abrirMenuCopias(id) {
         const necesito = estrellasNum + 1;
         const disponibles = copias.filter(p => p.uid !== c.uid && !equipoUids.includes(p.uid)).length;
         
-        const atk = c.ataque || baseDB.ataque || 0;
-        const hp = c.vidaMax || baseDB.vidaMax || 0;
+        // Si el bicho tiene 0 o undefined, usamos los de la DB
+        const atk = c.ataque && c.ataque > 0 ? c.ataque : baseDB.ataque;
+        const hp = c.vidaMax && c.vidaMax > 0 ? c.vidaMax : baseDB.vidaMax;
 
         html += `
             <div style="background:#0f0f1b; border:1px solid ${enEq ? '#4ade80' : '#333'}; border-radius:12px; padding:15px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                     <div>
                         <div style="font-weight:bold; font-size:0.85rem; color:${enEq ? '#4ade80' : '#fff'};">
-                            Copia #${idx + 1} ${c.skin === 'shiny' ? '<span style="color:#facc15;">✨</span>' : ''}
+                            Copia #${idx + 1} ${c.skin === 'shiny' ? '✨' : ''}
                         </div>
                         <div style="color:#facc15; font-size:0.9rem; margin:4px 0;">
-                            ${ estrellasNum > 0 ? '⭐'.repeat(estrellasNum) : '<span style="color:#444; font-size:0.7rem;">Sin estrellas</span>' }
+                            ${estrellasNum > 0 ? '⭐'.repeat(estrellasNum) : '<span style="color:#444; font-size:0.7rem;">Sin estrellas</span>'}
                         </div>
                     </div>
-                    <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove()" 
-                            style="padding:6px 12px; background:${enEq ? '#ef4444' : '#4ade80'}; border:none; border-radius:6px; font-size:0.65rem; font-weight:bold; cursor:pointer; color:black;">
+                    <button onclick="toggleEquipo('${c.uid}'); document.getElementById('overlay-copias').remove();" 
+                            style="padding:6px 12px; background:${enEq ? '#ef4444' : '#4ade80'}; border:none; border-radius:6px; font-size:0.7rem; font-weight:bold; cursor:pointer; color:black;">
                         ${enEq ? 'QUITAR' : 'PONER'}
                     </button>
                 </div>
 
-                <div style="display:flex; gap:12px; font-size:0.7rem; background:rgba(255,255,255,0.05); padding:6px 10px; border-radius:6px; margin-top:8px;">
+                <div style="display:flex; gap:12px; font-size:0.75rem; background:rgba(255,255,255,0.05); padding:8px; border-radius:6px; margin-top:8px;">
                     <span style="color:#ff5555;">⚔️ <b>${atk}</b></span>
                     <span style="color:#4ade80;">❤️ <b>${hp}</b></span>
                     <span style="color:#aaa;">Niv. ${c.lvl || 1}</span>
@@ -241,10 +240,10 @@ function abrirMenuCopias(id) {
                 
                 ${estrellasNum < 5 ? `
                     <button onclick="ascenderPokemon('${c.uid}')" 
-                        style="width:100%; margin-top:10px; padding:8px; background:#facc15; border:none; border-radius:8px; font-size:0.7rem; font-weight:bold; cursor:pointer; color:black; opacity:${disponibles >= necesito ? '1' : '0.4'}">
+                        style="width:100%; margin-top:10px; padding:10px; background:#facc15; border:none; border-radius:8px; font-size:0.75rem; font-weight:bold; cursor:pointer; color:black; opacity:${disponibles >= necesito ? '1' : '0.4'}">
                         SUBIR A ${estrellasNum + 1} ⭐ (Pide ${necesito} copias)
                     </button>
-                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; margin-top:10px; font-weight:bold;">MÁXIMO</div>'}
+                ` : '<div style="text-align:center; font-size:0.7rem; color:#facc15; margin-top:10px; font-weight:bold;">¡RANGO MÁXIMO!</div>'}
             </div>`;
     });
 
@@ -257,22 +256,26 @@ function abrirMenuCopias(id) {
 }
 
 // FUNCIÓN AUXILIAR PARA CAMBIAR LA SKIN DE TODAS LAS COPIAS Y LA IMAGEN DEL MENÚ
-function cambiarSkinMenu(id, tipoSkin) {
-    // 1. Actualizamos la skin en todas las copias que tienes de ese Pokémon
+function cambiarSkinMenu(id, tipo) {
+    // 1. Actualizamos TODAS las copias de ese Pokémon en el inventario
     inventario.forEach(p => {
-        if (p.id == id) p.skin = tipoSkin;
+        if (p.id == id) {
+            p.skin = tipo;
+        }
     });
-    
-    // 2. Actualizamos la imagen grande que estás viendo
+
+    // 2. Buscamos el objeto de la base de datos para la imagen
     const baseDB = DB.find(db => db.id == id);
-    const contenedor = document.getElementById('img-principal-contenedor');
-    if (contenedor && baseDB) {
-        contenedor.innerHTML = obtenerImagenHTML({...baseDB, skin: tipoSkin});
-    }
+    const contenedor = document.getElementById('img-contenedor-menu');
     
-    // 3. Guardamos los cambios
+    // 3. Refrescamos la imagen del menú sin cerrarlo
+    if (contenedor && baseDB) {
+        contenedor.innerHTML = obtenerImagenHTML({...baseDB, skin: tipo});
+    }
+
+    // 4. Guardamos y avisamos
     guardar();
-    console.log(`Cambiadas todas las copias de ID ${id} a modo ${tipoSkin}`);
+    console.log(`Cambiado ${baseDB.nombre} a modo ${tipo}`);
 }
 function aplicarSkin(idPersonaje, nombreSkin) {
     let nuevoSprite = "";
