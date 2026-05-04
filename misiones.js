@@ -2,10 +2,10 @@
 // SISTEMA DE MISIONES (DIARIAS / FUTURAS)
 // ==========================================
 
-let misionesDiarias = JSON.parse(localStorage.getItem("gq_misiones_diarias")) || [
+let misionesDiarias = JSON.parse(localStorage.getItem("gq_misiones_diariasv2")) || [
     { id: "login", desc: "Regalo por iniciar sesión", meta: 1, progreso: 0, listo: false, premio: 2, tipoPremio: "tickets" },
-    { id: "lucha_monedas", desc: "Luchar una vez por monedas", meta: 1, progreso: 0, listo: false, premio: 5, tipoPremio: "shards" },
-    { id: "ganar_combates", desc: "Ganar 3 combates", meta: 3, progreso: 0, listo: false, premio: 15, tipoPremio: "shards" }
+    { id: "gacha_3", desc: "Tira 3 veces al Gacha", meta: 3, progreso: 0, listo: false, premio: 500, tipoPremio: "monedas" }, // Nueva misión
+    { id: "ganar_combates", desc: "Gana 3 combates completos", meta: 3, progreso: 0, listo: false, premio: 15, tipoPremio: "shards" }
 ];
 
 let fechaMisiones = localStorage.getItem("gq_fecha_misiones") || "";
@@ -39,9 +39,10 @@ function avanzarMision(id, cantidad) {
 function completarMision(m) {
     m.listo = true;
     
-    // Entrega de premios (conecta con variables de logic.js)
     if (m.tipoPremio === "tickets") {
         window.ticketsNormales += m.premio;
+    } else if (m.tipoPremio === "monedas") { // <--- AÑADIR ESTO
+        window.monedas += m.premio;
     } else {
         window.fragmentosEstelares += m.premio;
     }

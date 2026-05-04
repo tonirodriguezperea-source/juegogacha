@@ -1,8 +1,7 @@
 /** * GACHA SYSTEM 2.0 - Optimizado y Sincronizado */
 
 window.invocar = function(saga) {
-    // 1. Sincronizar datos reales antes de empezar
-    // Usamos las variables globales que ya existen en logic.js para no crear duplicados
+    // 1. Sincronizar datos reales
     ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
 
     if (ticketsNormales <= 0) {
@@ -12,7 +11,6 @@ window.invocar = function(saga) {
 
     // 2. FILTRO DE SAGA
     const busquedaLimpia = saga.toLowerCase().replace(/\s/g, ""); 
-
     const poolSaga = DB.filter(p => {
         const sagaDBLimpia = p.saga.toLowerCase().replace(/\s/g, "");
         return sagaDBLimpia.includes(busquedaLimpia);
@@ -32,9 +30,13 @@ window.invocar = function(saga) {
     
     const bichoConseguido = posibles[Math.floor(Math.random() * posibles.length)];
 
+    // --- AQUÍ VA EL AVISO A LA MISIÓN ---
+    // Como ha pasado los filtros y tiene tickets, contamos la invocación
+    avanzarMision('gacha_3', 1); 
+
+    // 4. EJECUTAR ANIMACIÓN
     ejecutarAnimacionGacha(saga, bichoConseguido);
 };
-
 function ejecutarAnimacionGacha(saga, personaje) {
     const overlay = document.getElementById('gacha-animacion');
     const objeto = document.getElementById('objeto-invocacion');
