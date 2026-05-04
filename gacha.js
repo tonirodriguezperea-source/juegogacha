@@ -1,7 +1,7 @@
-/** * GACHA SYSTEM 2.0 - Optimizado y Sincronizado */
+/** * GACHA SYSTEM 2.0 - Corregido (Sin duplicados y con límite real) */
 
 window.invocar = function(saga) {
-    // 1. Sincronizar datos reales
+    // 1. Sincronizar tickets
     ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
 
     if (ticketsNormales <= 0) {
@@ -9,7 +9,7 @@ window.invocar = function(saga) {
         return;
     }
 
-    // 2. FILTRO DE SAGA
+    // 2. Filtro de Saga
     const busquedaLimpia = saga.toLowerCase().replace(/\s/g, ""); 
     const poolSaga = DB.filter(p => {
         const sagaDBLimpia = p.saga.toLowerCase().replace(/\s/g, "");
@@ -21,7 +21,7 @@ window.invocar = function(saga) {
         return;
     }
 
-    // 3. SELECCIÓN DE RAREZA
+    // 3. Selección de Rareza
     const rand = Math.random() * 100;
     let rareza = rand < 2 ? "legendario" : rand < 10 ? "epico" : rand < 30 ? "raro" : "comun";
     
@@ -30,62 +30,35 @@ window.invocar = function(saga) {
     
     const bichoBase = posibles[Math.floor(Math.random() * posibles.length)];
 
-    // --- AQUÍ CREAMOS EL OBJETO ÚNICO ---
-    const bichoConseguido = {
-        ...bichoBase, 
-        uid: Date.now() + Math.random().toString(36).substr(2, 9),
-        lvl: 1,
-        estrellas: 0 
-    };
-
-    // --- GUARDADO EN INVENTARIO Y GASTO DE TICKET ---
-    inventario.push(bichoConseguido); // <--- ¡ESTO ES LO QUE FALTABA!
-    ticketsNormales--; // Restamos el ticket usado
+    // --- IMPORTANTE: GASTAR TICKET AQUÍ Y GUARDAR ---
+    ticketsNormales--; 
+    localStorage.setItem("gq_tk_normal", ticketsNormales);
     
-    // Guardamos en el almacenamiento local para que no se pierda si cierras el navegador
-    guardar(); 
-
-    // --- AVISO A LA MISIÓN ---
-    avanzarMision('gacha_3', 1); 
-
-    // 4. EJECUTAR ANIMACIÓN
-    ejecutarAnimacionGacha(saga, bichoConseguido);
+    // Lanzamos la animación y ella se encarga de guardar el bicho (o las monedas)
+    ejecutarAnimacionGacha(saga, bichoBase);
 };
+
 function ejecutarAnimacionGacha(saga, personaje) {
     const overlay = document.getElementById('gacha-animacion');
     const objeto = document.getElementById('objeto-invocacion');
     const resultado = document.getElementById('resultado-invocacion');
     
-    // Gasto de ticket y guardado
-    ticketsNormales--;
-    guardar(); 
     actualizarHUD(); 
     
-    // Configuración visual
     overlay.style.display = 'flex';
     resultado.style.display = 'none';
     objeto.style.display = 'flex';
     
-    // --- LA ESTRELLA DEL DESEO ---
-    // Usamos un div con el emoji y un brillo (glow) dorado
     objeto.innerHTML = `
-        <div id="estrella-deseo" class="objeto-vibrando" style="
-            font-size: 100px; 
-            filter: drop-shadow(0 0 20px #f59e0b); 
-            cursor: default;
-            user-select: none;">
+        <div id="estrella-deseo" class="objeto-vibrando" style="font-size: 100px; filter: drop-shadow(0 0 20px #f59e0b);">
             ⭐
         </div>`;
 
-    // Fase 1: La estrella vibra (espera del deseo)
     setTimeout(() => {
         const estrella = document.getElementById('estrella-deseo');
-        
-        // Fase 2: ¡La estrella explota en luz!
         if (estrella) {
             estrella.style.transition = "all 0.5s ease-out";
             estrella.style.transform = "scale(2.5)";
-            estrella.style.filter = "brightness(2) blur(5px)";
             estrella.style.opacity = "0";
         }
         
@@ -93,10 +66,11 @@ function ejecutarAnimacionGacha(saga, personaje) {
             objeto.style.display = 'none';
             resultado.style.display = 'block';
             
-            // Lógica de inventario / copias
-            const copias = inventario.filter(p => p.id === personaje.id).length;
+            // --- LÓGICA DE COPIAS (CORREGIDA) ---
+            const copias = inventario.filter(p => parseInt(p.id) === parseInt(personaje.id)).length;
             
             if (copias >= 10) {
+                // Si ya tiene 10, le damos monedas
                 const premios = { comun: 100, raro: 250, epico: 600, legendario: 1500 };
                 const valor = premios[personaje.rareza] || 100;
                 monedas += valor;
@@ -105,37 +79,36 @@ function ejecutarAnimacionGacha(saga, personaje) {
                     <div style="text-align:center;">
                         ${obtenerImagenHTML(personaje, "sprite-revelado")}
                         <h3 style="color:#ff4444; margin-top:10px;">DESEO REPETIDO</h3>
-                        <p style="color:#94a3b8;">Límite de 10 copias alcanzado.</p>
+                        <p style="color:#94a3b8;">Ya tienes 10 copias de este héroe.</p>
                         <h2 style="color:#eab308;">+💰 ${valor} Monedas</h2>
                     </div>`;
             } else {
-                const nuevo = { ...personaje, uid: "UID-" + Date.now() + Math.random(), lvl: 1 };
-                inventario.push(nuevo);
+                // Si tiene menos de 10, lo añadimos al inventario REALMENTE
+                const bichoConseguido = {
+                    ...personaje, 
+                    uid: "UID-" + Date.now() + Math.random().toString(36).substr(2, 5),
+                    lvl: 1,
+                    estrellas: 0 
+                };
+                inventario.push(bichoConseguido);
                 
                 resultado.innerHTML = `
                     <div style="text-align:center;">
                         <div style="transform: scale(1.8); margin-bottom: 30px;">
                             ${obtenerImagenHTML(personaje, "sprite-revelado")}
                         </div>
-                        <h3 style="color: #94a3b8; margin:0; letter-spacing: 3px;">¡DESEO CONCEDIDO!</h3>
-                        <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2.5rem; margin: 15px 0; text-shadow: 0 0 15px rgba(255,255,255,0.3);">
+                        <h3 style="color: #94a3b8; margin:0; letter-spacing: 3px;">¡NUEVO DESEO!</h3>
+                        <h2 style="color:${RAREZAS[personaje.rareza]}; font-size: 2.5rem; margin: 15px 0;">
                             ${personaje.nombre}
                         </h2>
-                        <div style="background:${RAREZAS[personaje.rareza]}; color:black; display:inline-block; padding: 8px 25px; border-radius: 30px; font-weight:bold; text-transform:uppercase;">
-                            ${personaje.rareza}
-                        </div>
                     </div>`;
             }
             
-            resultado.innerHTML += `<br><button onclick="cerrarGacha()" class="nav-btn" style="margin-top:30px; background:#f59e0b; color:black; border:none; padding:12px 40px; border-radius:10px; font-weight:bold; cursor:pointer;">CONTINUAR</button>`;
+            resultado.innerHTML += `<br><button onclick="cerrarGacha()" class="nav-btn" style="margin-top:30px; background:#f59e0b; color:black; padding:12px 40px; border-radius:10px; font-weight:bold; cursor:pointer;">CONTINUAR</button>`;
             
-            guardar();
+            guardar(); // Guardamos el inventario actualizado
             actualizarHUD();
-        }, 600); // Tiempo de la "explosión"
-    }, 1800); // Tiempo que está la estrella vibrando
+            avanzarMision('gacha_3', 1); 
+        }, 600);
+    }, 1800);
 }
-
-window.cerrarGacha = function() {
-    document.getElementById('gacha-animacion').style.display = 'none';
-    mostrar('equipo'); // Vamos a ver el equipo para ver el nuevo bicho
-};
