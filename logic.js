@@ -214,7 +214,7 @@ function abrirMenuCopias(id) {
 
             <div style="max-height:300px; overflow-y:auto; padding-right:5px; border-top:1px solid #333; padding-top:15px;">`;
 
-    const copiasOrdenadas = [...copias].sort((a,b) => (b.estrellas||0) - (a.estrellas||0));
+    const copiasOrdenadas = [...copias].sort((a,b) => (b.estrellas||0) - (a.ofestrellas||0));
 
     copiasOrdenadas.forEach((c, idx) => {
         const enEq = equipoUids.includes(c.uid);
@@ -224,7 +224,6 @@ function abrirMenuCopias(id) {
         
         const atk = c.ataque || (baseDB ? baseDB.ataque : 0);
         const hp = c.vidaMax || (baseDB ? baseDB.vidaMax : 0);
-        // DEFINIMOS EL NIVEL AQUÍ
         const nivel = c.lvl || 1;
 
         html += `
@@ -246,12 +245,17 @@ function abrirMenuCopias(id) {
                     ⚔️ ${atk} | ❤️ ${hp} | <span style="color:#4ade80; font-weight:bold;">Niv. ${nivel}</span>
                 </div>
 
+                <button onclick="usarCaramelo('${c.uid}')" 
+                        style="width:100%; margin-bottom:10px; background:#4ade80; color:black; border:none; padding:8px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.75rem; display:flex; align-items:center; justify-content:center; gap:5px;">
+                    🍬 DAR CARAMELO (-1)
+                </button>
+
                 ${est < 5 ? `
                     <button onclick="ascenderPokemon('${c.uid}')" 
                             style="width:100%; padding:10px; background:#facc15; border:none; border-radius:8px; font-weight:bold; cursor:pointer; opacity:${disp >= nec ? '1' : '0.4'}; font-size:0.8rem; color:black;">
                         Subir a ${est+1} ⭐ (Nec. ${nec} copias)
                     </button>
-                ` : '<div style="text-align:center; color:#facc15; font-size:0.75rem; font-weight:bold;">¡NIVEL MÁXIMO!</div>'}
+                ` : '<div style="text-align:center; color:#facc15; font-size:0.75rem; font-weight:bold;">¡RANGO MÁXIMO!</div>'}
             </div>`;
     });
 
