@@ -17,23 +17,27 @@ function actualizarTiendaSiEsNecesario() {
     if (ultimaFechaTienda !== hoy) {
         if (typeof DB !== 'undefined' && DB.length > 0) {
             
-            // FILTRO GEN 1 (Solo los que digan "Pokémon" o "Gen1")
-            const seleccion1 = [...DB]
-                .filter(p => p.saga === "Pokémon" || p.saga === "Gen1")
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 6);
+            // 1. Filtrar Saga Kanto: Buscamos "Pokémon" (como sale en tu captura)
+            let seleccion1 = [...DB].filter(p => p.saga === "Pokémon" || p.saga === "Gen1");
+            
+            // 2. Filtrar Saga Alola: Buscamos "7ma Gen"
+            let seleccion7 = [...DB].filter(p => p.saga === "7ma Gen");
 
-            // FILTRO 7ma GEN (ESTRICTO: Solo los que digan exactamente "7ma Gen")
-            const seleccion7 = [...DB]
-                .filter(p => p.saga === "7ma Gen")
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 6);
+            // --- REGLA DE SEGURIDAD ---
+            // Si la lista de 7ma Gen está vacía (porque aún no los has creado o el nombre no coincide)
+            // rellena con Pokémon aleatorios de la base de datos para que no salga vacío.
+            if (seleccion7.length === 0) {
+                console.warn("No se encontraron Pokémon de '7ma Gen', rellenando con aleatorios...");
+                seleccion7 = [...DB].sort(() => 0.5 - Math.random());
+            }
 
-            stockTienda = seleccion1; 
-            stockTienda7 = seleccion7; 
+            // Guardamos los 6 elegidos de cada una
+            stockTienda = seleccion1.sort(() => 0.5 - Math.random()).slice(0, 6);
+            stockTienda7 = seleccion7.sort(() => 0.5 - Math.random()).slice(0, 6);
+
             ultimaFechaTienda = hoy;
             guardar(); 
-            console.log("🏪 Tienda de Alola filtrada con éxito");
+            console.log("🏪 Tiendas actualizadas con éxito");
         }
     }
 }
