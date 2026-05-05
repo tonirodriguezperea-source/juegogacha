@@ -406,24 +406,36 @@ window.renderLobby = function() {
 };
 
 function mostrar(pantalla) {
+    // 1. Ocultamos todas las pantallas
     const pantallas = document.querySelectorAll('.pantalla');
     pantallas.forEach(p => p.style.display = 'none');
     
+    // 2. Buscamos la pantalla por su ID (asegúrate de que en el HTML sea 'pantalla-XXX')
     const pActive = document.getElementById('pantalla-' + pantalla);
     if (pActive) pActive.style.display = 'block';
 
-    // Modificamos esta parte:
+    // 3. Lógica específica para cada sección
     if (pantalla === 'tienda') {
-        renderTienda();      // Dibuja los personajes normales
-        renderTiendaSkins(); // <--- AÑADIR ESTA LÍNEA (Dibuja los Shinys)
+        renderTienda();      // Dibuja personajes y caramelos en la tienda
+        if (typeof renderTiendaSkins === 'function') renderTiendaSkins(); // Dibuja los Shinys
     }
 
-    if (pantalla === 'misiones') renderMisiones(); // Esta función vive en misiones.js
+    // --- NUEVA SECCIÓN PARA LA MOCHILA ---
+    if (pantalla === 'inventario-objetos') {
+        if (typeof renderMochila === 'function') {
+            renderMochila(); 
+        } else {
+            console.error("Error: La función renderMochila no existe en inventario.js");
+        }
+    }
+
+    // Resto de pantallas
+    if (pantalla === 'misiones') renderMisiones();
     if (pantalla === 'lobby') renderLobby();
     if (pantalla === 'equipo') renderEquipo();
     if (pantalla === 'pokedex') renderDex();
 
-    
+    // Siempre actualizamos el HUD (monedas, tickets...)
     actualizarHUD();
 }
 function mostrarInfo(id) {
