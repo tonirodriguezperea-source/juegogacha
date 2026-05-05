@@ -17,24 +17,18 @@ function actualizarTiendaSiEsNecesario() {
     if (ultimaFechaTienda !== hoy) {
         if (typeof DB !== 'undefined' && DB.length > 0) {
             
-            // CAMBIA ESTO: Usa "Pokémon" que es lo que sale en tu captura
-            const seleccion1 = [...DB]
-                .filter(p => p.saga === "Gen1") 
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 6);
+            // Filtramos con cuidado
+            const filtro1 = [...DB].filter(p => p.saga === "Pokémon" || p.saga === "Gen1");
+            const filtro7 = [...DB].filter(p => p.saga === "7ma Gen");
 
-            // Para la segunda tienda, asegúrate de que tus nuevos pokes 
-            // en database.js tengan exactamente saga: "7ma Gen"
-            const seleccion7 = [...DB]
-                .filter(p => p.saga === "Gen7")
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 6);
+            // Asignamos asegurándonos de que las variables existan
+            window.stockTienda = filtro1.sort(() => 0.5 - Math.random()).slice(0, 6);
+            window.stockTienda7 = filtro7.sort(() => 0.5 - Math.random()).slice(0, 6);
 
-            stockTienda = seleccion1; 
-            stockTienda7 = seleccion7; 
             ultimaFechaTienda = hoy;
-            guardar(); 
-            console.log("🏪 Tiendas sincronizadas con la base de datos");
+            
+            if (typeof guardar === 'function') guardar();
+            console.log("✅ Tiendas rotadas. Gen1:", window.stockTienda.length, " | 7ma:", window.stockTienda7.length);
         }
     }
 }
