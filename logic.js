@@ -71,6 +71,7 @@ function guardar() {
     localStorage.setItem("gq_stock_skins", JSON.stringify(stockSkinsDia));
     localStorage.setItem("gq_fecha_skins", ultimaFechaSkins);
     localStorage.setItem("gq_stock_tienda", JSON.stringify(stockTienda));
+    localStorage.setItem("gq_stock_tienda7", JSON.stringify(stockTienda7));
     localStorage.setItem("gq_fecha_tienda", ultimaFechaTienda);
 }
 
@@ -439,7 +440,7 @@ function mostrarInfo(id) {
     if (!p) return;
     document.getElementById('info-photo').innerHTML = obtenerImagenHTML(p);
     document.getElementById('info-name').innerText = p.nombre;
-    document.getElementById('info-desc').innerText = p.descripciones[p.id] || "Héroe listo para la batalla.";
+    document.getElementById('info-desc').innerText = p.descripcion;
     document.getElementById('info-dex').innerText = p.id;
     document.getElementById('info-tipo').innerText = p.tipo.toUpperCase();
     document.getElementById('info-saga').innerText = p.saga;
