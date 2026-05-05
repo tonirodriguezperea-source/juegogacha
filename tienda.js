@@ -90,6 +90,24 @@ function renderTienda() {
         </div>
     `;
 
+// --- NUEVA SECCIÓN: SUMINISTROS (CARAMELOS RAROS) ---
+    html += `
+        <div style="grid-column: 1/-1; margin-top: 30px;">
+            <h3 style="color: #eab308; border-bottom: 1px solid #333; padding-bottom: 10px;">Suministros y Objetos</h3>
+        </div>
+        
+        <div class="card-tienda" style="background: #1a1a2e; border: 1px solid #facc15; padding: 15px; border-radius: 15px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🍬</div>
+            <h3 style="margin: 0; color: white;">Caramelo Raro</h3>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin: 5px 0 10px 0;">Sube 1 nivel a cualquier Pokémon</p>
+            <div style="color: #eab308; font-weight: bold; font-size: 1.1rem; margin-bottom: 12px;">300 💰</div>
+            <button onclick="comprarCaramelo()" style="width: 100%; background: #facc15; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; color: #1a1a2e;">
+                COMPRAR
+            </button>
+            <div style="margin-top: 8px; font-size: 0.7rem; color: #4ade80;">Tienes: ${window.mochila ? window.mochila.caramelo_raro : 0}</div>
+        </div>
+    `;
+
     grid.innerHTML = html;
 }
 
@@ -127,5 +145,30 @@ function comprarTicketTienda() {
         alert("✅ ¡Has comprado 1 Ticket Gacha!");
     } else {
         alert("❌ No tienes monedas suficientes (500 💰).");
+    }
+}
+
+// Lógica para comprar Caramelos
+function comprarCaramelo() {
+    const PRECIO_CARAMELO = 300; // Puedes ajustar el precio
+
+    if (monedas >= PRECIO_CARAMELO) {
+        monedas -= PRECIO_CARAMELO;
+        
+        // Usamos la función de inventario.js que definimos antes
+        if (typeof añadirObjeto === 'function') {
+            añadirObjeto("caramelo_raro", 1);
+        } else {
+            // Backup por si aún no has creado inventario.js
+            window.mochila.caramelo_raro = (window.mochila.caramelo_raro || 0) + 1;
+            localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
+        }
+
+        guardar();
+        actualizarHUD();
+        renderTienda();
+        console.log("🍬 Caramelo Raro comprado");
+    } else {
+        alert("❌ No tienes suficientes monedas (300 💰).");
     }
 }
