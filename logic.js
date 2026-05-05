@@ -438,7 +438,7 @@ function mostrarInfo(id) {
     if (!p) return;
     document.getElementById('info-photo').innerHTML = obtenerImagenHTML(p);
     document.getElementById('info-name').innerText = p.nombre;
-    document.getElementById('info-desc').innerText = descripciones[p.id] || "Héroe listo para la batalla.";
+    document.getElementById('info-desc').innerText = p.descripciones[p.id] || "Héroe listo para la batalla.";
     document.getElementById('info-dex').innerText = p.id;
     document.getElementById('info-tipo').innerText = p.tipo.toUpperCase();
     document.getElementById('info-saga').innerText = p.saga;
