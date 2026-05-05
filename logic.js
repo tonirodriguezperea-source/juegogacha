@@ -56,7 +56,8 @@ const SKINS_DATA = {
     "15": { nombre: "Beedrill Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/15.png", precio: 30 },
     "16": { nombre: "Pidgey Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/16.png", precio: 15 },
     "17": { nombre: "Pidgeotto Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/17.png", precio: 25 },
-    "18": { nombre: "Pidgeot Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/18.png", precio: 35 }
+    "18": { nombre: "Pidgeot Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/18.png", precio: 35 },
+    "807": { nombre: "Zeraora Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/807.png", precio: 100 },
 };
 
 
