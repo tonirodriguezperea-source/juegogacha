@@ -9,6 +9,7 @@
 <body>
     <nav>
         <button class="nav-btn" onclick="mostrar('lobby')">🏠 Inicio</button>
+        <button onclick="mostrar('inventario-objetos')" class="nav-btn">🎒 Mochila</button>
         <button class="nav-btn" onclick="mostrar('equipo')">🛡️ Equipo</button>
         <button class="nav-btn" onclick="mostrar('pokedex')">📖 Dex</button>
         <button class="nav-btn" onclick="mostrar('misiones')" style="border-color: #4ade80; color: #4ade80;">📜 Misiones</button>
@@ -138,6 +139,11 @@ function regalarTickets() {
         <div id="objeto-invocacion"></div>
         <div id="resultado-invocacion" style="display:none;"></div>
     </div>
+</div>
+
+<div id="inventario-objetos" class="pantalla" style="display:none;">
+    <h2 style="color: #eab308; text-align: center;">Mi Mochila</h2>
+    <div id="mochila-grid" class="grid-tienda"></div>
 </div>
 
 <div id="pantalla-misiones" class="pantalla" style="display:none; padding:20px;">

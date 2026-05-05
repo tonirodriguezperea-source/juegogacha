@@ -109,6 +109,59 @@ function renderTienda() {
     `;
 
     grid.innerHTML = html;
+}function renderTienda() {
+    const grid = document.getElementById('tienda-grid');
+    if (!grid) return;
+
+    actualizarTiendaSiEsNecesario();
+
+    // 1. Empezamos el HTML
+    let html = `
+        <div class="tienda-header" style="grid-column: 1/-1; background: #1a1a2e; padding: 20px; border-radius: 15px; border: 2px solid #eab308; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 style="margin:0; color: #eab308;">Tienda Diaria</h2>
+                <small style="color: #94a3b8;">Los productos cambian cada 24h</small>
+            </div>
+            <div style="font-size: 1.8rem; font-weight: bold; color: #eab308;">💰 <span id="tienda-monedas">${monedas}</span></div>
+        </div>
+    `;
+
+    // 2. Sumamos los personajes (tu código actual)
+    stockTienda.forEach((p) => {
+        const copiasActuales = inventario.filter(inv => inv.id === p.id).length;
+        const precio = PRECIOS_TIENDA[p.rareza] || 1000;
+        const colorRareza = (typeof RAREZAS !== 'undefined') ? RAREZAS[p.rareza] : "#fff";
+        const estaLleno = copiasActuales >= 10;
+
+        html += `
+            <div class="card-tienda" style="background: #1a1a2e; border: 1px solid ${estaLleno ? '#333' : colorRareza}; padding: 15px; border-radius: 15px; text-align: center; opacity: ${estaLleno ? '0.7' : '1'}">
+                <div style="height: 100px; display: flex; align-items: center; justify-content: center;">${obtenerImagenHTML(p)}</div>
+                <h3 style="margin: 10px 0 5px 0; color: white;">${p.nombre}</h3>
+                <div style="color: #eab308; font-weight: bold; margin-bottom: 12px;">${precio} 💰</div>
+                ${estaLleno ? 
+                    `<button disabled style="width: 100%; background: #333; color: #777; border: none; padding: 10px; border-radius: 8px;">MÁXIMO</button>` :
+                    `<button onclick="comprarPersonajeTienda('${p.id}', ${precio})" style="width: 100%; background: #eab308; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">COMPRAR</button>`
+                }
+            </div>
+        `;
+    });
+
+    // 3. SUMAMOS LOS CARAMELOS (Antes del innerHTML)
+    html += `
+        <div style="grid-column: 1/-1; margin-top: 30px;">
+            <h3 style="color: #eab308; border-bottom: 1px solid #333; padding-bottom: 10px;">Suministros</h3>
+        </div>
+        <div class="card-tienda" style="background: #1a1a2e; border: 1px solid #facc15; padding: 15px; border-radius: 15px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">🍬</div>
+            <h3 style="margin: 0; color: white;">Caramelo Raro</h3>
+            <div style="color: #eab308; font-weight: bold; font-size: 1.1rem; margin-bottom: 12px;">300 💰</div>
+            <button onclick="comprarCaramelo()" style="width: 100%; background: #facc15; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">COMPRAR</button>
+            <div style="margin-top: 8px; font-size: 0.75rem; color: #4ade80;">Tienes: ${window.mochila ? window.mochila.caramelo_raro : 0}</div>
+        </div>
+    `;
+
+    // 4. AL FINAL DE TODO, INYECTAMOS
+    grid.innerHTML = html;
 }
 
 // 4. Lógica de Compra de Personaje

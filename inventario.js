@@ -1,48 +1,18 @@
-// inventario.js
+window.mochila = JSON.parse(localStorage.getItem("gq_mochila")) || { caramelo_raro: 0 };
 
-// Estructura para los objetos (Caramelos Raros, Piedras, etc.)
-window.mochila = JSON.parse(localStorage.getItem("gq_mochila")) || {
-    caramelo_raro: 0,
-    polvo_estelar: 0
-};
+function renderMochila() {
+    const grid = document.getElementById('mochila-grid');
+    if (!grid) return;
 
-// Función para añadir objetos
-window.añadirObjeto = function(idObjeto, cantidad) {
-    if (window.mochila[idObjeto] !== undefined) {
-        window.mochila[idObjeto] += cantidad;
-    } else {
-        window.mochila[idObjeto] = cantidad;
-    }
-    guardarMochila();
-};
+    grid.innerHTML = `
+        <div class="card-tienda" style="background: #1a1a2e; border: 1px solid #facc15; padding: 20px; border-radius: 15px; text-align: center; width: 200px; margin: 0 auto;">
+            <div style="font-size: 3rem;">🍬</div>
+            <h3 style="color: white;">Caramelo Raro</h3>
+            <p style="color: #94a3b8; font-size: 0.8rem;">Úsalo desde el menú de cada Pokémon en tu Equipo.</p>
+            <div style="font-size: 1.5rem; color: #facc15; font-weight: bold;">x${window.mochila.caramelo_raro}</div>
+        </div>
+    `;
+}
 
-window.guardarMochila = function() {
-    localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
-};
-
-// Función para subir nivel con Caramelo Raro
-window.usarCaramelo = function(uid) {
-    if (window.mochila.caramelo_raro <= 0) {
-        alert("¡No tienes Caramelos Raros!");
-        return;
-    }
-
-    const pokemon = inventario.find(p => p.uid === uid);
-    if (pokemon) {
-        pokemon.lvl = (pokemon.lvl || 1) + 1;
-        
-        // Bonus de stats por nivel (ejemplo: +5 ataque, +10 vida)
-        pokemon.ataque = (pokemon.ataque || 20) + 5;
-        pokemon.vidaMax = (pokemon.vidaMax || 100) + 10;
-        
-        window.mochila.caramelo_raro--;
-        
-        guardar(); // Guardar inventario pokemon
-        guardarMochila();
-        
-        console.log(`${pokemon.nombre} ha subido al nivel ${pokemon.lvl}`);
-        
-        // Refrescar el menú de copias para ver el nuevo nivel
-        if(typeof abrirMenuCopias === 'function') abrirMenuCopias(pokemon.id);
-    }
-};
+// Modifica tu función mostrar() en logic.js para que llame a renderMochila()
+// ejemplo: if(pantalla === 'inventario-objetos') renderMochila();
