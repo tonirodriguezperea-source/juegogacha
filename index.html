@@ -56,9 +56,9 @@
 <script>
 function regalarTickets() {
     let actuales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
-    localStorage.setItem("gq_tk_normal", actuales + 10);
+    localStorage.setItem("gq_tk_normal", actuales + 1000);
     actualizarHUD();
-    alert("¡Has recibido 10 tickets de regalo!");
+    alert("¡Has recibido 1000 tickets de regalo!");
 }
 </script>
                 </aside>
@@ -121,14 +121,14 @@ function regalarTickets() {
     <div class="banners-container" style="display: flex; justify-content: center; gap: 20px; padding: 20px;">
         <div class="banner-card" style="background: #2d2d44; padding: 20px; border-radius: 15px; border: 2px solid #ef4444; text-align: center; width: 200px;">
             <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" width="80">
-            <h3>Pokémon</h3>
-            <button onclick="invocar('Pokémon')" style="background: #ef4444; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%;">Tirar Ticket</button>
+            <h3>Pokémon (1ra gen.)</h3>
+            <button onclick="invocar('Gen1')" style="background: #ef4444; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%;">Tirar Ticket</button>
         </div>
 
         <div class="banner-card" style="background: #2d2d44; padding: 20px; border-radius: 15px; border: 2px solid #f59e0b; text-align: center; width: 200px;">
-            <img src="https://w7.pngwing.com/pngs/925/968/png-transparent-dragon-ball-thumbnail.png" width="80">
-            <h3>Saiyan</h3>
-            <button onclick="invocar('dragonball')" style="background: #f59e0b; color: black; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%;">Tirar Ticket</button>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Pok%C3%A9_Ball_icon.svg" width="80">
+            <h3>Pokémon (7ma gen.)</h3>
+            <button onclick="invocar('Gen7')" style="background: #f59e0b; color: black; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%;">Tirar Ticket</button>
         </div>
     </div>
 </div>

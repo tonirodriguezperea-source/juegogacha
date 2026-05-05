@@ -58,16 +58,7 @@ const SKINS_DATA = {
     "18": { nombre: "Pidgeot Shiny", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/18.png", precio: 35 }
 };
 
-// Descripciones de la Pokédex
-const descripciones = {
-    "1": "Bulbasaur es un Pokémon tipo planta. Lleva una semilla en su lomo que crece con él.",
-    "2": "Ivysaur es un Pokémon tipo planta. Lleva una semilla con la que duerme, paraliza y envenena.",
-    "4": "Charmander prefiere los lugares cálidos. La llama de su cola indica su salud.",
-    "7": "Squirtle se protege con su caparazón y dispara chorros de agua a presión.",
-    "1200": "Son Goku, el guerrero legendario que protege la Tierra con su fuerza infinita.",
-    "1201": "Vegeta, el príncipe de los saiyans. Su orgullo es tan grande como su poder.",
-    "1202": "Gohan, hijo de Goku. Posee un potencial oculto que despierta en momentos críticos."
-};
+
 
 function guardar() {
     localStorage.setItem("gq_inv", JSON.stringify(inventario));
