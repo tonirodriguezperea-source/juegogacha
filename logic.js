@@ -16,6 +16,7 @@ var equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
 var monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
 var ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
 var stockTienda = JSON.parse(localStorage.getItem("gq_stock_tienda")) || [];
+var stockTienda7 = JSON.parse(localStorage.getItem("gq_stock_tienda7")) || [];
 var ultimaFechaTienda = localStorage.getItem("gq_fecha_tienda") || "";
 var fragmentosEstelares = parseInt(localStorage.getItem("gq_shards")) || 0;
 var skinsPoseidas = JSON.parse(localStorage.getItem("gq_skins_owner")) || []; 
