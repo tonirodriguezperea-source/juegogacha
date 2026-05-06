@@ -640,3 +640,53 @@ function borrarPartida() {
         }
     }
 }
+
+// ================================================================
+// 8. SISTEMA DE NIVEL Y CARAMELOS (CON LÍMITE NV. 100)
+// ================================================================
+
+function usarCaramelo(uid) {
+    // 1. Buscamos al Pokémon en el inventario
+    const p = inventario.find(x => x.uid === uid);
+    if (!p) return;
+
+    // 2. REGLA DE ORO: Si ya es nivel 100, bloqueamos la subida
+    const nivelActual = p.lvl || 1;
+    if (nivelActual >= 100) {
+        alert("¡" + p.nombre + " ya ha alcanzado el nivel máximo (100)!");
+        return; 
+    }
+
+    // 3. Comprobamos si tienes caramelos (ticketsNormales)
+    if (ticketsNormales > 0) {
+        ticketsNormales--; // Restamos 1 caramelo
+        
+        // Subimos nivel
+        p.lvl = nivelActual + 1;
+
+        // 4. MEJORA DE STATS (Ajusta esto a tu gusto)
+        // Buscamos la base para no sumar sobre undefined
+        const baseDB = DB.find(db => db.id === p.id);
+        if (!p.ataque) p.ataque = baseDB ? baseDB.ataque : 50;
+        if (!p.vidaMax) p.vidaMax = baseDB ? baseDB.vidaMax : 500;
+
+        // Subimos un 5% el ataque y la vida por cada nivel
+        p.ataque = Math.round(p.ataque * 1.05);
+        p.vidaMax = Math.round(p.vidaMax * 1.05);
+        p.hp = p.vidaMax; // Curamos al subir de nivel
+
+        // 5. Guardar y refrescar la interfaz
+        guardar();
+        actualizarHUD();
+        
+        // Cerramos y reabrimos el menú para que se vea el cambio
+        if (document.getElementById('overlay-copias')) {
+            document.getElementById('overlay-copias').remove();
+            abrirMenuCopias(p.id);
+        }
+
+        console.log("🍬 Caramelo usado en " + p.nombre + ". Nuevo nivel: " + p.lvl);
+    } else {
+        alert("⚠️ No tienes caramelos (Tickets). Compra más en la TIENDA.");
+    }
+}
