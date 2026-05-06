@@ -195,13 +195,28 @@ function escribirLog(msg) {
 
 function finalizar(win) {
     if (win) {
-        // 1. Subimos nivel a cada uno (esto sí va dentro del bucle)
+        // 1. Subimos nivel a cada uno con LÍMITE 100
         battleState.playerTeam.forEach(p => {
             let char = inventario.find(inv => inv.uid === p.uid);
-            if (char) char.lvl++;
+            if (char) {
+                // Solo sube si es menor a 100
+                if (char.lvl < 100) {
+                    char.lvl++;
+                    
+                    // Opcional: Subir un poco el ATK y HP al subir nivel
+                    // char.ataque = Math.round(char.ataque * 1.02); 
+                    // char.vidaMax = Math.round(char.vidaMax * 1.02);
+                    
+                    console.log(`${char.nombre} ha subido al nivel ${char.lvl}`);
+                } else {
+                    // Si por algún error es 101, lo devolvemos a 100
+                    char.lvl = 100; 
+                    console.log(`${char.nombre} ya está al máximo nivel.`);
+                }
+            }
         });
 
-        // 2. SUMAMOS LA MISIÓN (FUERA del bucle, para que solo sea +1 por combate)
+        // 2. SUMAMOS LA MISIÓN
         avanzarMision('ganar_combates', 1);
 
         guardar();
@@ -210,7 +225,6 @@ function finalizar(win) {
     document.getElementById('battle-screen').style.display = 'none';
     mostrar('lobby');
 }
-
 window.cambiarBicho = function() {
     if (battleState.turn !== 'player' || battleState.playerTeam.length <= 1) return;
     battleState.playerIdx = (battleState.playerIdx + 1) % battleState.playerTeam.length;
