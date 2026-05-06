@@ -646,42 +646,52 @@ function borrarPartida() {
 // ================================================================
 
 function usarCaramelo(uid) {
+    console.log("Intentando usar caramelo en:", uid);
+    
+    // 1. Encontrar al Pokémon
     const p = inventario.find(x => x.uid === uid);
-    if (!p) return;
-
-    // 1. Bloqueo de nivel (el que pusimos antes)
-    if ((p.lvl || 1) >= 100) {
-        alert("Nivel máximo alcanzado.");
+    if (!p) {
+        console.error("No se encontró el Pokémon con UID:", uid);
         return;
     }
 
-    // 2. Verificación de stock
-    if (ticketsNormales > 0) {
-        // RESTA INMEDIATA
-        ticketsNormales--; 
+    // 2. Bloqueo de Nivel 100 (Estricto)
+    let nivelActual = parseInt(p.lvl) || 1;
+    if (nivelActual >= 100) {
+        alert("¡Nivel máximo (100) alcanzado!");
+        return;
+    }
+
+    // 3. Verificación de Tickets (Caramelos)
+    // Usamos window.ticketsNormales para asegurarnos de que tocamos la variable global
+    if (window.ticketsNormales > 0) {
         
-        // Subida de nivel
-        p.lvl = (p.lvl || 1) + 1;
+        // --- LA RESTA ---
+        window.ticketsNormales -= 1;
+        
+        // --- LA SUBIDA ---
+        p.lvl = nivelActual + 1;
 
-        // 3. RE-CALCULAR STATS (Para evitar los undefined de antes)
-        const baseDB = DB.find(db => db.id === p.id);
-        p.ataque = Math.round((p.ataque || baseDB.ataque) * 1.05);
-        p.vidaMax = Math.round((p.vidaMax || baseDB.vidaMax) * 1.05);
-        p.hp = p.vidaMax;
+        // --- ACTUALIZAR STATS PARA EVITAR UNDEFINED ---
+        const baseDB = DB.find(db => db.id == p.id);
+        if (baseDB) {
+            p.ataque = Math.round((p.ataque || baseDB.ataque) * 1.05);
+            p.vidaMax = Math.round((p.vidaMax || baseDB.vidaMax) * 1.05);
+            p.hp = p.vidaMax;
+        }
 
-        // 4. GUARDADO CRÍTICO
-        // Forzamos el guardado antes de cualquier otra cosa
+        // --- GUARDADO Y REFRESCO ---
         guardar(); 
-        
-        // 5. Actualizar la vista
         actualizarHUD();
+        
+        // Cerramos y abrimos el menú para ver el cambio
         if (document.getElementById('overlay-copias')) {
             document.getElementById('overlay-copias').remove();
             abrirMenuCopias(p.id);
         }
-        
-        console.log("🍬 Gastado 1 caramelo. Quedan: " + ticketsNormales);
+
+        console.log("🍬 Éxito. Nivel:", p.lvl, "Tickets restantes:", window.ticketsNormales);
     } else {
-        alert("⚠️ ¡No tienes más caramelos!");
+        alert("⚠️ No tienes caramelos.");
     }
 }
