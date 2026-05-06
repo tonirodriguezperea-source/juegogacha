@@ -42,9 +42,24 @@
                     <div class="news-item"><b>Update:</b> ¡Nuevos héroes añadidos!</div>
                     
                     <button class="nav-btn" 
-                            style="width: 100%; margin-top: 20px; border-color: #ef4444; color: #ef4444;" 
-                            onclick="borrarPartida()">
-                        🗑️ Borrar Partida
+                           function borrarPartida() {
+    // Primera confirmación
+    const confirmar1 = confirm("⚠️ ¿ESTÁS SEGURO? Esto borrará todos tus Pokémon, monedas y progreso.");
+    
+    if (confirmar1) {
+        // Segunda confirmación (por seguridad extrema)
+        const confirmar2 = confirm("❗ ¿ÚLTIMA PALABRA? No podrás recuperar nada.");
+        
+        if (confirmar2) {
+            // Borra todo lo que guardamos en el localStorage
+            localStorage.clear();
+            
+            // Mensaje de éxito y reinicio total de la página
+            alert("Partida borrada. Empezando de cero...");
+            location.reload(); 
+        }
+    }
+}
                     </button>
 
                     <button onclick="regalarTickets()" style="background: #4ade80; color: black; padding: 10px; border-radius: 5px;">
