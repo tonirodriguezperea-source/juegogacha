@@ -625,3 +625,18 @@ function ejecutarCambioReal(id, tipo) {
     
     console.log("Cambio de skin completado para ID:", idNum);
 }
+
+function borrarPartida() {
+    console.log("Intentando borrar partida..."); // Para ver si el botón responde
+    
+    if (confirm("⚠️ ¿ESTÁS SEGURO? Perderás todos tus Pokémon y monedas.")) {
+        if (confirm("❗ ¿ÚLTIMA PALABRA? No hay marcha atrás.")) {
+            // Limpieza absoluta de la memoria
+            localStorage.clear();
+            
+            // Forzamos el reinicio total
+            alert("Partida eliminada correctamente.");
+            window.location.reload();
+        }
+    }
+}
