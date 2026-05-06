@@ -17,18 +17,31 @@ function actualizarTiendaSiEsNecesario() {
     if (ultimaFechaTienda !== hoy) {
         if (typeof DB !== 'undefined' && DB.length > 0) {
             
-            // Filtramos con cuidado
-            const filtro1 = [...DB].filter(p => p.saga === "Pokémon" || p.saga === "Gen1");
-            const filtro7 = [...DB].filter(p => p.saga === "7ma Gen");
+            // 1. Filtrar Pokémon de la 1ª Generación (Saga: "Pokémon")
+            // Sacamos 6 al azar
+            const poolGen1 = DB.filter(p => p.saga === "Pokémon");
+            stockTienda = poolGen1
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 6);
 
-            // Asignamos asegurándonos de que las variables existan
-            window.stockTienda = filtro1.sort(() => 0.5 - Math.random()).slice(0, 6);
-            window.stockTienda7 = filtro7.sort(() => 0.5 - Math.random()).slice(0, 6);
+            // 2. Filtrar Pokémon de la 7ª Generación (Saga: "Gen7")
+            // Sacamos 6 al azar
+            const poolGen7 = DB.filter(p => p.saga === "Gen7");
+            stockTienda7 = poolGen7
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 6);
 
+            // 3. Guardar la fecha para que no rote hasta mañana
             ultimaFechaTienda = hoy;
             
-            if (typeof guardar === 'function') guardar();
-            console.log("✅ Tiendas rotadas. Gen1:", window.stockTienda.length, " | 7ma:", window.stockTienda7.length);
+            // 4. Guardar en LocalStorage y avisar por consola
+            guardar();
+            
+            console.log("✅ Tienda actualizada con éxito:");
+            console.log("Kanto (Gen1): encontrados " + poolGen1.length + ", puestos 6");
+            console.log("Alola (Gen7): encontrados " + poolGen7.length + ", puestos 6");
+        } else {
+            console.error("❌ Error: La base de datos (DB) no está cargada.");
         }
     }
 }
