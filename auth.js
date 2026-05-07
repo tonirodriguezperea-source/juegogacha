@@ -17,11 +17,16 @@ const db = firebase.firestore();
 // 2. Escuchar el estado de la sesión
 auth.onAuthStateChanged((user) => {
     if (user) {
-        console.log("Usuario logueado:", user.email);
+        console.log("Usuario detectado:", user.email);
+        // Si hay usuario, quitamos la pantalla de login SÍ O SÍ
+        const loginScreen = document.getElementById('pantalla-login');
+        if (loginScreen) loginScreen.style.display = 'none';
+        
         cargarDatosNube(user.uid); 
     } else {
-        console.log("Nadie ha iniciado sesión");
-        document.getElementById('pantalla-login').style.display = 'flex';
+        // Si no hay usuario, la mostramos
+        const loginScreen = document.getElementById('pantalla-login');
+        if (loginScreen) loginScreen.style.display = 'flex';
     }
 });
 
@@ -51,44 +56,40 @@ function cargarDatosNube(uid) {
 }
 
 // 4. Funciones globales para los botones del HTML (Usamos window.)
-window.ejecutarLogin = function() {
+window.ejecutarRegistro = function() {
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-pass').value;
     
     if(!email || !pass) return alert("Rellena todos los campos");
 
-    auth.signInWithEmailAndPassword(email, pass)
-        .then(() => {
-            // El onAuthStateChanged se encarga del resto
-        })
-        .catch(err => {
-            document.getElementById('msj-auth').innerText = "Error: Usuario o contraseña incorrectos";
-        });
-};
-
-window.ejecutarRegistro = function() {
-    const email = document.getElementById('login-email').value;
-    const pass = document.getElementById('login-pass').value;
-    
-    if(!email || !pass) return alert("Rellena todos los campos (Mínimo 6 caracteres en contraseña)");
-
     auth.createUserWithEmailAndPassword(email, pass)
         .then((userCredential) => {
-            // Creamos datos iniciales
             const inicial = {
                 monedas: 500,
                 ticketsNormales: 5,
                 inventario: [],
                 mochila: { caramelo_raro: 0 }
-            
             };
             
             db.collection("usuarios").doc(userCredential.user.uid).set(inicial).then(() => {
                 alert("¡Cuenta creada!");
-                location.reload(); // Recargamos para limpiar todo
+                // CAMBIO AQUÍ: Ocultamos la pantalla en lugar de recargar
+                document.getElementById('pantalla-login').style.display = 'none';
             });
         })
         .catch(err => {
-            document.getElementById('msj-auth').innerText = "Error: " + err.message;
+            alert("Error: " + err.message);
         });
+};
+
+window.ejecutarLogin = function() {
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
+
+    auth.signInWithEmailAndPassword(email, pass)
+        .then(() => {
+            // OCULTAR AL ENTRAR
+            document.getElementById('pantalla-login').style.display = 'none';
+        })
+        .catch(err => alert("Error: " + err.message));
 };
