@@ -19,6 +19,7 @@ window.invocar = function(saga) {
     if (poolSaga.length === 0) {
         alert("No se han encontrado personajes de: " + saga);
         return;
+        guardar(); //
     }
 
     // 3. Selección de Rareza

@@ -63,7 +63,7 @@ const SKINS_DATA = {
 
 
 function guardar() {
-    // 1. GUARDADO LOCAL (Lo que ya tenías)
+    // 1. GUARDADO LOCAL (Se mantiene igual)
     localStorage.setItem("gq_inv", JSON.stringify(inventario));
     localStorage.setItem("gq_team", JSON.stringify(equipoUids));
     localStorage.setItem("gq_monedas", monedas);
@@ -75,15 +75,15 @@ function guardar() {
     localStorage.setItem("gq_stock_tienda", JSON.stringify(stockTienda));
     localStorage.setItem("gq_stock_tienda7", JSON.stringify(stockTienda7));
     localStorage.setItem("gq_fecha_tienda", ultimaFechaTienda);
-    // Añadimos la mochila por si acaso faltaba
     localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
 
-    // 2. GUARDADO EN LA NUBE (Firebase)
-    // Verificamos si hay un usuario conectado
+    // 2. GUARDADO EN LA NUBE
     const usuario = firebase.auth().currentUser;
     
     if (usuario) {
-        db.collection("usuarios").doc(usuario.uid).update({
+        // Usamos .set con { merge: true } en lugar de .update
+        // Esto hace que si el documento no existe, lo cree, y si existe, solo cambie los datos nuevos
+        db.collection("usuarios").doc(usuario.uid).set({
             inventario: inventario,
             equipoUids: equipoUids,
             monedas: monedas,
@@ -91,19 +91,19 @@ function guardar() {
             fragmentosEstelares: fragmentosEstelares,
             skinsPoseidas: skinsPoseidas,
             mochila: window.mochila,
-            // Guardamos también la fecha para sincronizar tiendas si quieres
             ultimaFechaTienda: ultimaFechaTienda 
-        })
+        }, { merge: true }) 
         .then(() => {
             console.log("☁️ Partida sincronizada en la nube con éxito.");
         })
         .catch((error) => {
-            console.error("❌ Error al sincronizar en la nube:", error);
+            console.error("❌ Error al sincronizar:", error);
         });
     } else {
-        console.warn("⚠️ Guardado solo local. Inicia sesión para guardar en la nube.");
+        console.warn("⚠️ No hay sesión iniciada.");
     }
 }
+
 
 function actualizarHUD() {
     // --- CONEXIÓN CON LA MOCHILA ---
@@ -749,5 +749,13 @@ window.usarCaramelo = function(uid) {
         console.log(`🍬 Éxito. Nivel: ${p.lvl}. Caramelos restantes: ${window.mochila.caramelo_raro}`);
     } else {
         alert("⚠️ No tienes caramelos en la mochila.");
+        guardar(); //
     }
 };
+
+setInterval(() => {
+    if (firebase.auth().currentUser) {
+        guardar();
+        console.log("Autoguardado periódico realizado ⏱️");
+    }
+}, 30000); // 30000 milisegundos = 30 segundos

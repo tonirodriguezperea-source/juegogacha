@@ -180,6 +180,7 @@ function comprarPersonajeTienda(id, precio) {
     } else {
         alert("❌ No tienes suficientes monedas.");
     }
+    guardar(); //
 }
 
 // 5. Lógica de Compra de Ticket
@@ -194,6 +195,7 @@ function comprarTicketTienda() {
     } else {
         alert("❌ No tienes monedas suficientes.");
     }
+    guardar(); //
 }
 
 function comprarCaramelo() {
@@ -221,4 +223,5 @@ function comprarCaramelo() {
     } else {
         alert("❌ No tienes suficientes monedas.");
     }
+    guardar(); //
 }
