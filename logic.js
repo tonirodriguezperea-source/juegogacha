@@ -695,3 +695,47 @@ function usarCaramelo(uid) {
         alert("⚠️ No tienes caramelos.");
     }
 }
+
+function usarCaramelo(uid) {
+    // 1. Buscamos el Pokémon
+    const p = inventario.find(x => x.uid === uid);
+    if (!p) return;
+
+    // 2. Límite de Nivel 100
+    if ((p.lvl || 1) >= 100) {
+        alert("¡Nivel máximo alcanzado!");
+        return;
+    }
+
+    // 3. LA RESTA (Aquí es donde fallaba)
+    if (ticketsNormales > 0) {
+        ticketsNormales--; // Restamos 1 a la variable global
+        
+        // Subimos nivel
+        p.lvl = (parseInt(p.lvl) || 1) + 1;
+
+        // 4. Actualizar Stats (para que no salgan undefined)
+        const base = DB.find(d => d.id == p.id);
+        if (base) {
+            p.ataque = Math.round((p.ataque || base.ataque) * 1.05);
+            p.vidaMax = Math.round((p.vidaMax || base.vidaMax) * 1.05);
+            p.hp = p.vidaMax;
+        }
+
+        // 5. GUARDADO CRUCIAL
+        guardar(); 
+        
+        // 6. ACTUALIZAR INTERFAZ
+        actualizarHUD();
+        
+        // Refrescamos el panel de copias para que se vea el nuevo nivel y el botón se actualice
+        if (document.getElementById('overlay-copias')) {
+            document.getElementById('overlay-copias').remove();
+            abrirMenuCopias(p.id);
+        }
+
+        console.log("🍬 Caramelo usado. Quedan:", ticketsNormales);
+    } else {
+        alert("⚠️ No tienes suficientes caramelos.");
+    }
+}
