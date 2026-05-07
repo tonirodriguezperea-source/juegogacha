@@ -1,4 +1,4 @@
-// Tu configuración de Firebase (la que copiaste)
+// 1. Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAsUCix_stwxYkRUHwR-zZINJgbP4pYJU",
   authDomain: "gachatara1172.firebaseapp.com",
@@ -14,48 +14,44 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Variable para saber quién está jugando
-let usuarioActual = null;
-
-// Escuchar si el usuario entra o sale
+// 2. Escuchar el estado de la sesión
 auth.onAuthStateChanged((user) => {
     if (user) {
-        usuarioActual = user;
         console.log("Usuario logueado:", user.email);
-        cargarDatosNube(); // Cuando entra, bajamos sus Pokémon
+        cargarDatosNube(user.uid); 
     } else {
-        usuarioActual = null;
         console.log("Nadie ha iniciado sesión");
+        document.getElementById('pantalla-login').style.display = 'flex';
     }
 });
 
-// REGISTRARSE
-function registrar(email, pass) {
-    auth.createUserWithEmailAndPassword(email, pass)
-        .then((userCredential) => {
-            alert("¡Cuenta creada! Bienvenido.");
-            // Creamos su partida inicial en la nube
-            db.collection("usuarios").doc(userCredential.user.uid).set({
-                monedas: 500,
-                ticketsNormales: 0,
-                inventario: [],
-                mochila: { caramelo_raro: 0 }
-            });
-        })
-        .catch((error) => alert("Error: " + error.message));
+// 3. Función para descargar datos de Google a tu juego
+function cargarDatosNube(uid) {
+    db.collection("usuarios").doc(uid).get().then((doc) => {
+        if (doc.exists) {
+            const datos = doc.data();
+            // Actualizamos las variables globales de tu juego
+            window.monedas = datos.monedas || 0;
+            window.inventario = datos.inventario || [];
+            window.mochila = datos.mochila || { caramelo_raro: 0 };
+            window.ticketsNormales = datos.ticketsNormales || 0;
+            window.fragmentosEstelares = d.fragmentosEstelares || 0; // <-- Añade esta
+            window.equipoUids = d.equipoUids || [];               // <-- Añade esta
+            window.skinsPoseidas = d.skinsPoseidas || [];         // <-- Añade esta
+
+            // Actualizamos la interfaz
+            if (typeof actualizarHUD === 'function') actualizarHUD();
+            if (typeof renderMochila === 'function') renderMochila();
+            
+            // Ocultamos el login si ya cargó todo
+            document.getElementById('pantalla-login').style.display = 'none';
+            console.log("Datos sincronizados desde la nube ✅");
+        }
+    }).catch(err => console.error("Error al cargar datos:", err));
 }
 
-// ENTRAR
-function entrar(email, pass) {
-    auth.signInWithEmailAndPassword(email, pass)
-        .then(() => {
-            alert("Has entrado correctamente.");
-            // Al entrar, el listener onAuthStateChanged se encargará de cargar los datos
-        })
-        .catch((error) => alert("Error al entrar: " + error.message));
-}
-
-function ejecutarLogin() {
+// 4. Funciones globales para los botones del HTML (Usamos window.)
+window.ejecutarLogin = function() {
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-pass').value;
     
@@ -63,32 +59,36 @@ function ejecutarLogin() {
 
     auth.signInWithEmailAndPassword(email, pass)
         .then(() => {
-            document.getElementById('pantalla-login').style.display = 'none';
+            // El onAuthStateChanged se encarga del resto
         })
         .catch(err => {
-            document.getElementById('msj-auth').innerText = "Error: Datos incorrectos";
+            document.getElementById('msj-auth').innerText = "Error: Usuario o contraseña incorrectos";
         });
-}
+};
 
-function ejecutarRegistro() {
+window.ejecutarRegistro = function() {
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-pass').value;
     
-    if(!email || !pass) return alert("Rellena todos los campos");
+    if(!email || !pass) return alert("Rellena todos los campos (Mínimo 6 caracteres en contraseña)");
 
     auth.createUserWithEmailAndPassword(email, pass)
         .then((userCredential) => {
-            // Creamos sus datos iniciales en la nube
-            db.collection("usuarios").doc(userCredential.user.uid).set({
+            // Creamos datos iniciales
+            const inicial = {
                 monedas: 500,
                 ticketsNormales: 5,
                 inventario: [],
                 mochila: { caramelo_raro: 0 }
+            
+            };
+            
+            db.collection("usuarios").doc(userCredential.user.uid).set(inicial).then(() => {
+                alert("¡Cuenta creada!");
+                location.reload(); // Recargamos para limpiar todo
             });
-            document.getElementById('pantalla-login').style.display = 'none';
-            alert("¡Cuenta creada!");
         })
         .catch(err => {
             document.getElementById('msj-auth').innerText = "Error: " + err.message;
         });
-}
+};

@@ -63,6 +63,7 @@ const SKINS_DATA = {
 
 
 function guardar() {
+    // 1. GUARDADO LOCAL (Lo que ya tenías)
     localStorage.setItem("gq_inv", JSON.stringify(inventario));
     localStorage.setItem("gq_team", JSON.stringify(equipoUids));
     localStorage.setItem("gq_monedas", monedas);
@@ -74,6 +75,34 @@ function guardar() {
     localStorage.setItem("gq_stock_tienda", JSON.stringify(stockTienda));
     localStorage.setItem("gq_stock_tienda7", JSON.stringify(stockTienda7));
     localStorage.setItem("gq_fecha_tienda", ultimaFechaTienda);
+    // Añadimos la mochila por si acaso faltaba
+    localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
+
+    // 2. GUARDADO EN LA NUBE (Firebase)
+    // Verificamos si hay un usuario conectado
+    const usuario = firebase.auth().currentUser;
+    
+    if (usuario) {
+        db.collection("usuarios").doc(usuario.uid).update({
+            inventario: inventario,
+            equipoUids: equipoUids,
+            monedas: monedas,
+            ticketsNormales: ticketsNormales,
+            fragmentosEstelares: fragmentosEstelares,
+            skinsPoseidas: skinsPoseidas,
+            mochila: window.mochila,
+            // Guardamos también la fecha para sincronizar tiendas si quieres
+            ultimaFechaTienda: ultimaFechaTienda 
+        })
+        .then(() => {
+            console.log("☁️ Partida sincronizada en la nube con éxito.");
+        })
+        .catch((error) => {
+            console.error("❌ Error al sincronizar en la nube:", error);
+        });
+    } else {
+        console.warn("⚠️ Guardado solo local. Inicia sesión para guardar en la nube.");
+    }
 }
 
 function actualizarHUD() {
