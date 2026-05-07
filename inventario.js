@@ -47,9 +47,7 @@ window.añadirObjeto = function(tipo, cantidad) {
     // 2. Sumamos la cantidad
     mochilaActual[tipo] = (mochilaActual[tipo] || 0) + cantidad;
     
-    // 3. ACTUALIZACIÓN CRÍTICA: 
-    // Si lo que añadimos es un caramelo, actualizamos también la variable ticketsNormales
-    // para que la Tienda y el HUD se enteren al instante.
+    // 3. ACTUALIZACIÓN CRÍTICA: Sincronizamos con ticketsNormales para la Tienda
     if (tipo === 'caramelo_raro') {
         window.ticketsNormales = mochilaActual[tipo];
         localStorage.setItem("gq_tk_normal", window.ticketsNormales);
@@ -79,22 +77,24 @@ window.usarCaramelo = function(uid) {
     const p = inventario.find(item => item.uid === uid);
     if (p) {
         // --- EL FRENO DEL NIVEL 100 ---
-        if ((p.lvl || 1) >= 100) {
+        if ((parseInt(p.lvl) || 1) >= 100) {
             alert("¡Este Pokémon ya está al nivel máximo!");
             return;
         }
 
-        // 3. Aplicar subida
+        // 3. Aplicar subida (asegurando números con parseInt)
         p.lvl = (parseInt(p.lvl) || 1) + 1;
-        
-        // Mejora de stats (un poco más equilibrada)
-        p.ataque = (p.ataque || 10) + 5;
-        p.vidaMax = (p.vidaMax || 50) + 15;
-        p.vida = p.vidaMax;
+        p.ataque = (parseInt(p.ataque) || 10) + 5;
+        p.vidaMax = (parseInt(p.vidaMax) || 50) + 15;
+        p.hp = p.vidaMax; // Sincronizamos vida actual con la nueva máxima
 
-        // 4. RESTAR Y GUARDAR (Lo más importante)
+        // 4. RESTAR Y GUARDAR
         window.mochila.caramelo_raro--;
         localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
+        
+        // --- ADICIÓN: Sincronizamos también ticketsNormales al gastar ---
+        window.ticketsNormales = window.mochila.caramelo_raro;
+        localStorage.setItem("gq_tk_normal", window.ticketsNormales);
         
         // 5. Guardar el inventario de Pokémon (el nivel nuevo)
         if (typeof guardar === 'function') {
@@ -102,10 +102,11 @@ window.usarCaramelo = function(uid) {
         }
 
         // 6. Refresco visual total
+        if (typeof actualizarHUD === 'function') actualizarHUD();
+        
         const overlay = document.getElementById('overlay-copias');
         if (overlay) overlay.remove();
         
-        // Si tienes la función para abrir el panel, lo reabrimos para ver los cambios
         if (typeof abrirMenuCopias === 'function') {
             abrirMenuCopias(p.id); 
         }
