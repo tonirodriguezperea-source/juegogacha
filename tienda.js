@@ -42,7 +42,10 @@ function renderTienda() {
     const grid = document.getElementById('tienda-grid');
     if (!grid) return;
 
-    actualizarTiendaSiEsNecesario();
+    if (window.stockTienda.length === 0 && typeof DB !== 'undefined' && DB.length > 0) {
+        ultimaFechaTienda = ""; // Forzamos reseteo de fecha
+        actualizarTiendaSiEsNecesario();
+    }
 
     // Encabezado con monedas del jugador
     let html = `
@@ -184,18 +187,20 @@ function comprarPersonajeTienda(id, precio) {
 }
 
 // 5. Lógica de Compra de Ticket
+// BUSCA ESTA FUNCIÓN Y CAMBIALA POR ESTA:
 function comprarTicketTienda() {
-    if (monedas >= 500) {
-        monedas -= 500;
-        ticketsNormales++;
-        guardar();
+    if (window.monedas >= 500) {
+        window.monedas -= 500;
+        window.ticketsNormales = (window.ticketsNormales || 0) + 1; // <--- FORZAMOS WINDOW
+        
+        guardar(); // Esto ahora sí enviará el ticket nuevo a Firebase
+        
         if(typeof actualizarHUD === 'function') actualizarHUD();
         renderTienda();
         alert("✅ ¡Has comprado 1 Ticket Gacha!");
     } else {
         alert("❌ No tienes monedas suficientes.");
     }
-    guardar(); //
 }
 
 function comprarCaramelo() {
