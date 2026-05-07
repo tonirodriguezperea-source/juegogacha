@@ -663,97 +663,62 @@ function borrarPartida() {
 // 8. SISTEMA DE NIVEL Y CARAMELOS (CON LÍMITE NV. 100)
 // ================================================================
 
-function usarCaramelo(uid) {
+window.usarCaramelo = function(uid) {
     console.log("Intentando usar caramelo en:", uid);
+
+    // 1. Sincronizar mochila antes de empezar
+    window.mochila = JSON.parse(localStorage.getItem("gq_mochila")) || { caramelo_raro: 0 };
     
-    // 1. Encontrar al Pokémon
+    // 2. Encontrar al Pokémon
     const p = inventario.find(x => x.uid === uid);
     if (!p) {
-        console.error("No se encontró el Pokémon con UID:", uid);
+        console.error("No se encontró el Pokémon");
         return;
     }
 
-    // 2. Bloqueo de Nivel 100 (Estricto)
+    // 3. Bloqueo de Nivel 100
     let nivelActual = parseInt(p.lvl) || 1;
     if (nivelActual >= 100) {
         alert("¡Nivel máximo (100) alcanzado!");
         return;
     }
 
-    // 3. Verificación de Tickets (Caramelos)
-    // Usamos window.ticketsNormales para asegurarnos de que tocamos la variable global
-    if (window.ticketsNormales > 0) {
+    // 4. Verificación de Caramelos (Miramos en la mochila que es el dato real)
+    if (window.mochila.caramelo_raro > 0) {
         
-        // --- LA RESTA ---
-        window.ticketsNormales -= 1;
-        
-        // --- LA SUBIDA ---
-        p.lvl = nivelActual + 1;
+        // --- LA RESTA DOBLE (Mochila y Variable Global) ---
+        window.mochila.caramelo_raro -= 1;
+        window.ticketsNormales = window.mochila.caramelo_raro;
 
-        // --- ACTUALIZAR STATS PARA EVITAR UNDEFINED ---
+        // --- LA SUBIDA DE NIVEL Y STATS ---
+        p.lvl = nivelActual + 1;
         const baseDB = DB.find(db => db.id == p.id);
         if (baseDB) {
-            p.ataque = Math.round((p.ataque || baseDB.ataque) * 1.05);
-            p.vidaMax = Math.round((p.vidaMax || baseDB.vidaMax) * 1.05);
+            p.ataque = Math.round((parseInt(p.ataque) || baseDB.ataque) * 1.05);
+            p.vidaMax = Math.round((parseInt(p.vidaMax) || baseDB.vidaMax) * 1.05);
             p.hp = p.vidaMax;
         }
 
-        // --- GUARDADO Y REFRESCO ---
-        guardar(); 
+        // --- GUARDADO TOTAL ---
+        // Guardamos la mochila
+        localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
+        // Guardamos los tickets (para la tienda)
+        localStorage.setItem("gq_tk_normal", window.ticketsNormales);
+        // Guardamos el inventario de pokémon
+        if (typeof guardar === 'function') guardar(); 
+
+        // --- REFRESCO DE INTERFAZ ---
         actualizarHUD();
         
-        // Cerramos y abrimos el menú para ver el cambio
-        if (document.getElementById('overlay-copias')) {
-            document.getElementById('overlay-copias').remove();
-            abrirMenuCopias(p.id);
+        // Si estamos en el menú de copias, lo refrescamos para que se vea el cambio
+        const overlay = document.getElementById('overlay-copias');
+        if (overlay) {
+            overlay.remove();
+            if (typeof abrirMenuCopias === 'function') abrirMenuCopias(p.id);
         }
 
-        console.log("🍬 Éxito. Nivel:", p.lvl, "Tickets restantes:", window.ticketsNormales);
+        console.log(`🍬 Éxito. Nivel: ${p.lvl}. Caramelos restantes: ${window.mochila.caramelo_raro}`);
     } else {
-        alert("⚠️ No tienes caramelos.");
+        alert("⚠️ No tienes caramelos en la mochila.");
     }
-}
-
-function usarCaramelo(uid) {
-    // 1. Buscamos el Pokémon
-    const p = inventario.find(x => x.uid === uid);
-    if (!p) return;
-
-    // 2. Límite de Nivel 100
-    if ((p.lvl || 1) >= 100) {
-        alert("¡Nivel máximo alcanzado!");
-        return;
-    }
-
-    // 3. LA RESTA (Aquí es donde fallaba)
-    if (ticketsNormales > 0) {
-        ticketsNormales--; // Restamos 1 a la variable global
-        
-        // Subimos nivel
-        p.lvl = (parseInt(p.lvl) || 1) + 1;
-
-        // 4. Actualizar Stats (para que no salgan undefined)
-        const base = DB.find(d => d.id == p.id);
-        if (base) {
-            p.ataque = Math.round((p.ataque || base.ataque) * 1.05);
-            p.vidaMax = Math.round((p.vidaMax || base.vidaMax) * 1.05);
-            p.hp = p.vidaMax;
-        }
-
-        // 5. GUARDADO CRUCIAL
-        guardar(); 
-        
-        // 6. ACTUALIZAR INTERFAZ
-        actualizarHUD();
-        
-        // Refrescamos el panel de copias para que se vea el nuevo nivel y el botón se actualice
-        if (document.getElementById('overlay-copias')) {
-            document.getElementById('overlay-copias').remove();
-            abrirMenuCopias(p.id);
-        }
-
-        console.log("🍬 Caramelo usado. Quedan:", ticketsNormales);
-    } else {
-        alert("⚠️ No tienes suficientes caramelos.");
-    }
-}
+};
