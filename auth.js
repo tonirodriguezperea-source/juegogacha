@@ -34,27 +34,46 @@ auth.onAuthStateChanged((user) => {
 function cargarDatosNube(uid) {
     db.collection("usuarios").doc(uid).get().then((doc) => {
         if (doc.exists) {
-            const datos = doc.data();
-            // Actualizamos las variables globales de tu juego
-            window.monedas = datos.monedas || 0;
-            window.inventario = datos.inventario || [];
-            window.mochila = datos.mochila || { caramelo_raro: 0 };
-            window.ticketsNormales = datos.ticketsNormales || 0;
-            window.fragmentosEstelares = d.fragmentosEstelares || 0; // <-- Añade esta
-            window.equipoUids = d.equipoUids || [];               // <-- Añade esta
-            window.skinsPoseidas = d.skinsPoseidas || [];         // <-- Añade esta
+            const d = doc.data(); // Usaremos "d" para abreviar
+            
+            console.log("Descargando datos de la nube para:", uid);
 
-            // Actualizamos la interfaz
+            // 1. Sincronizamos TODAS las variables globales
+            window.monedas = d.monedas || 0;
+            window.ticketsNormales = d.ticketsNormales || 0;
+            window.fragmentosEstelares = d.fragmentosEstelares || 0;
+            window.mochila = d.mochila || { caramelo_raro: 0 };
+            window.inventario = d.inventario || [];
+            window.equipoUids = d.equipoUids || [];
+            window.skinsPoseidas = d.skinsPoseidas || [];
+            
+            // 2. Sincronizamos también el stock de tiendas para que no cambie al refrescar
+            window.stockTienda = d.stockTienda || {};
+            window.stockTienda7 = d.stockTienda7 || {};
+            window.stockSkinsDia = d.stockSkinsDia || {};
+            window.ultimaFechaTienda = d.ultimaFechaTienda || "";
+            window.ultimaFechaSkins = d.ultimaFechaSkins || "";
+
+            // 3. ACTUALIZAMOS LA INTERFAZ (Para que veas los cambios al momento)
             if (typeof actualizarHUD === 'function') actualizarHUD();
             if (typeof renderMochila === 'function') renderMochila();
-            
-            // Ocultamos el login si ya cargó todo
-            document.getElementById('pantalla-login').style.display = 'none';
-            console.log("Datos sincronizados desde la nube ✅");
-        }
-    }).catch(err => console.error("Error al cargar datos:", err));
-}
+            if (typeof renderInventario === 'function') renderInventario();
+            if (typeof actualizarVisualEquipo === 'function') actualizarVisualEquipo(); 
 
+            // 4. Finalizamos
+            const loginScreen = document.getElementById('pantalla-login');
+            if (loginScreen) loginScreen.style.display = 'none';
+            
+            console.log("✅ Datos sincronizados desde la nube con éxito.");
+        } else {
+            console.log("No hay datos previos en la nube, se usarán los locales.");
+            // Si el usuario es nuevo, ocultamos el login igual para que empiece a jugar
+            document.getElementById('pantalla-login').style.display = 'none';
+        }
+    }).catch(err => {
+        console.error("❌ Error al cargar datos de Firebase:", err);
+    });
+}
 // 4. Funciones globales para los botones del HTML (Usamos window.)
 window.ejecutarRegistro = function() {
     const email = document.getElementById('login-email').value;

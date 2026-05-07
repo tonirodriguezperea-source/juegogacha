@@ -63,44 +63,50 @@ const SKINS_DATA = {
 
 
 function guardar() {
-    // 1. GUARDADO LOCAL (Se mantiene igual)
-    localStorage.setItem("gq_inv", JSON.stringify(inventario));
-    localStorage.setItem("gq_team", JSON.stringify(equipoUids));
-    localStorage.setItem("gq_monedas", monedas);
-    localStorage.setItem("gq_tk_normal", ticketsNormales);
-    localStorage.setItem("gq_shards", fragmentosEstelares);
-    localStorage.setItem("gq_skins_owner", JSON.stringify(skinsPoseidas));
-    localStorage.setItem("gq_stock_skins", JSON.stringify(stockSkinsDia));
-    localStorage.setItem("gq_fecha_skins", ultimaFechaSkins);
-    localStorage.setItem("gq_stock_tienda", JSON.stringify(stockTienda));
-    localStorage.setItem("gq_stock_tienda7", JSON.stringify(stockTienda7));
-    localStorage.setItem("gq_fecha_tienda", ultimaFechaTienda);
-    localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
+    // 1. GUARDADO LOCAL (Para que funcione offline)
+    localStorage.setItem("gq_inv", JSON.stringify(window.inventario || []));
+    localStorage.setItem("gq_team", JSON.stringify(window.equipoUids || []));
+    localStorage.setItem("gq_monedas", window.monedas || 0);
+    localStorage.setItem("gq_tk_normal", window.ticketsNormales || 0);
+    localStorage.setItem("gq_shards", window.fragmentosEstelares || 0);
+    localStorage.setItem("gq_skins_owner", JSON.stringify(window.skinsPoseidas || []));
+    localStorage.setItem("gq_stock_skins", JSON.stringify(window.stockSkinsDia || {}));
+    localStorage.setItem("gq_fecha_skins", window.ultimaFechaSkins || "");
+    localStorage.setItem("gq_stock_tienda", JSON.stringify(window.stockTienda || {}));
+    localStorage.setItem("gq_stock_tienda7", JSON.stringify(window.stockTienda7 || {}));
+    localStorage.setItem("gq_fecha_tienda", window.ultimaFechaTienda || "");
+    localStorage.setItem("gq_mochila", JSON.stringify(window.mochila || {}));
 
-    // 2. GUARDADO EN LA NUBE
+    // 2. GUARDADO EN LA NUBE (Firebase)
     const usuario = firebase.auth().currentUser;
     
     if (usuario) {
-        // Usamos .set con { merge: true } en lugar de .update
-        // Esto hace que si el documento no existe, lo cree, y si existe, solo cambie los datos nuevos
-        db.collection("usuarios").doc(usuario.uid).set({
-            inventario: inventario,
-            equipoUids: equipoUids,
-            monedas: monedas,
-            ticketsNormales: ticketsNormales,
-            fragmentosEstelares: fragmentosEstelares,
-            skinsPoseidas: skinsPoseidas,
-            mochila: window.mochila,
-            ultimaFechaTienda: ultimaFechaTienda 
-        }, { merge: true }) 
+        // Creamos el objeto con TODO lo que queremos salvar
+        const datosAGuardar = {
+            monedas: window.monedas || 0,
+            ticketsNormales: window.ticketsNormales || 0,
+            fragmentosEstelares: window.fragmentosEstelares || 0,
+            inventario: window.inventario || [],
+            equipoUids: window.equipoUids || [],
+            skinsPoseidas: window.skinsPoseidas || [],
+            mochila: window.mochila || { caramelo_raro: 0 },
+            ultimaFechaTienda: window.ultimaFechaTienda || "",
+            ultimaFechaSkins: window.ultimaFechaSkins || "",
+            // Guardamos también el stock de las tiendas para que no cambien al refrescar
+            stockTienda: window.stockTienda || {},
+            stockTienda7: window.stockTienda7 || {},
+            stockSkinsDia: window.stockSkinsDia || {}
+        };
+
+        db.collection("usuarios").doc(usuario.uid).set(datosAGuardar, { merge: true })
         .then(() => {
-            console.log("☁️ Partida sincronizada en la nube con éxito.");
+            console.log("☁️ ¡Nube actualizada! (Monedas, Tickets, Shards y Caramelos guardados)");
         })
         .catch((error) => {
-            console.error("❌ Error al sincronizar:", error);
+            console.error("❌ Error crítico al sincronizar:", error);
         });
     } else {
-        console.warn("⚠️ No hay sesión iniciada.");
+        console.warn("⚠️ No se pudo subir a la nube: Usuario no identificado.");
     }
 }
 
