@@ -1,6 +1,6 @@
 // 1. Configuración de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyAsUCix_stwxYkRUHwR-zZINJgbP4pYJU",
+  apiKey: "AIzaSyASUcIx_stwxuYkRUhWR-zZINJgbP4pYJU",
   authDomain: "gachatara1172.firebaseapp.com",
   projectId: "gachatara1172",
   storageBucket: "gachatara1172.firebasestorage.app",
