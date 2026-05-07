@@ -196,19 +196,28 @@ function comprarTicketTienda() {
     }
 }
 
-// 6. Lógica de Caramelos
 function comprarCaramelo() {
     const PRECIO_CARAMELO = 300;
+
     if (monedas >= PRECIO_CARAMELO) {
+        // 1. Restamos el dinero
         monedas -= PRECIO_CARAMELO;
-        if (typeof añadirObjeto === 'function') {
-            añadirObjeto("caramelo_raro", 1);
+
+        // 2. Usamos la función maestra que arreglamos antes
+        // Esta ya se encarga de guardar en LocalStorage y sincronizar el HUD
+        if (typeof window.añadirObjeto === 'function') {
+            window.añadirObjeto("caramelo_raro", 1);
         } else {
+            // Plan B por si acaso no carga el otro archivo
             window.mochila.caramelo_raro = (window.mochila.caramelo_raro || 0) + 1;
+            localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
         }
-        guardar();
-        if(typeof actualizarHUD === 'function') actualizarHUD();
+
+        // 3. Guardamos el estado de las monedas y refrescamos la tienda
+        guardar(); 
         renderTienda();
+        
+        console.log("🛒 Compra exitosa: 1 Caramelo Raro.");
     } else {
         alert("❌ No tienes suficientes monedas.");
     }
