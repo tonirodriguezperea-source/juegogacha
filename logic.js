@@ -77,22 +77,40 @@ function guardar() {
 }
 
 function actualizarHUD() {
-    const tks = ticketsNormales || 0;
+    // --- CONEXIÓN CON LA MOCHILA ---
+    // En lugar de usar la variable suelta, leemos directamente el dato real
+    const tks = (window.mochila && window.mochila.caramelo_raro !== undefined) 
+                ? window.mochila.caramelo_raro 
+                : (ticketsNormales || 0);
+
     const mons = monedas || 0;
-    const shards = fragmentosEstelares || 0; // <-- Nueva variable
+    const shards = fragmentosEstelares || 0;
 
     const idsTickets = ['val-tk-normal', 'val-tk-normal-hud', 'cont-tickets'];
     const idsMonedas = ['cont-monedas', 'val-monedas', 'tienda-monedas'];
-    const idsShards = ['val-shards', 'val-shards-hud']; // <-- Nuevos IDs para el HTML
+    const idsShards = ['val-shards', 'val-shards-hud'];
 
-    idsTickets.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = tks; });
-    idsMonedas.forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerText = mons; });
+    // 1. Actualizamos Caramelos (Tickets)
+    idsTickets.forEach(id => { 
+        const el = document.getElementById(id);
+        if(el) el.innerText = tks; 
+    });
+
+    // 2. Actualizamos Monedas
+    idsMonedas.forEach(id => { 
+        const el = document.getElementById(id);
+        if(el) el.innerText = mons; 
+    });
     
-    // Actualizamos los nuevos contadores de Fragmentos
+    // 3. Actualizamos Fragmentos
     idsShards.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerText = shards;
     });
+
+    // 4. EXTRA: Si tienes el texto de "Tienes: X" en la tienda, lo actualizamos también
+    const stockTienda = document.getElementById('stock-caramelos');
+    if (stockTienda) stockTienda.innerText = "Tienes: " + tks;
 }
 // ================================================================
 // 2. MOTOR VISUAL (RENDERIZADO DE SPRITES Y EMOJIS)
