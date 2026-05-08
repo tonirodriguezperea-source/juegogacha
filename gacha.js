@@ -1,10 +1,10 @@
 /** * GACHA SYSTEM 2.0 - Corregido (Sin duplicados y con límite real) */
 
 window.invocar = function(saga) {
-    // 1. Sincronizar tickets
-    ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
+    // 1. Sincronizar tickets (usamos window.ticketsNormales para ser consistentes con el resto del juego)
+    window.ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
 
-    if (ticketsNormales <= 0) {
+    if (window.ticketsNormales <= 0) {
         alert("¡No tienes tickets! Consigue más en la tienda o en batalla.");
         return;
     }
@@ -19,23 +19,51 @@ window.invocar = function(saga) {
     if (poolSaga.length === 0) {
         alert("No se han encontrado personajes de: " + saga);
         return;
-        guardar(); //
     }
 
-    // 3. Selección de Rareza
+    // 3. Selección de Rareza (Añadida la Secreta con 1%)
     const rand = Math.random() * 100;
-    let rareza = rand < 2 ? "legendario" : rand < 10 ? "epico" : rand < 30 ? "raro" : "comun";
+    let rareza;
+
+    if (rand <= 1) {
+        rareza = "Secreta";      // 1% para tus Megas
+    } else if (rand <= 3) {
+        rareza = "legendario";   // 2%
+    } else if (rand <= 10) {
+        rareza = "epico";        // 7%
+    } else if (rand <= 30) {
+        rareza = "raro";         // 20%
+    } else {
+        rareza = "comun";        // 70%
+    }
     
+    // Intentamos filtrar por la rareza que ha salido
     let posibles = poolSaga.filter(p => p.rareza === rareza);
-    if (posibles.length === 0) posibles = poolSaga; 
+
+    // Si por lo que sea no hay personajes de esa rareza en esta saga, 
+    // buscamos comunes para no romper el juego
+    if (posibles.length === 0) {
+        posibles = poolSaga.filter(p => p.rareza === "comun") || poolSaga;
+    }
     
     const bichoBase = posibles[Math.floor(Math.random() * posibles.length)];
 
-    // --- IMPORTANTE: GASTAR TICKET AQUÍ Y GUARDAR ---
-    ticketsNormales--; 
-    localStorage.setItem("gq_tk_normal", ticketsNormales);
+    // 4. GASTAR TICKET Y SINCRONIZAR
+    window.ticketsNormales--; 
+    localStorage.setItem("gq_tk_normal", window.ticketsNormales);
+
+    // Sincronizamos con Firebase inmediatamente para evitar trucos de F5
+    if (typeof guardar === 'function') {
+        guardar(); 
+    }
     
-    // Lanzamos la animación y ella se encarga de guardar el bicho (o las monedas)
+    // Actualizamos la barrita de arriba para que el usuario vea que ha gastado el ticket
+    if (typeof actualizarHUD === 'function') {
+        actualizarHUD();
+    }
+    
+    // 5. Lanzamos la animación
+    console.log("¡Invocación iniciada! Rareza:", rareza, "Bicho:", bichoBase.nombre);
     ejecutarAnimacionGacha(saga, bichoBase);
 };
 

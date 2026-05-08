@@ -750,3 +750,43 @@ nav {
     height: 35px; /* Altura fija para que todos los botones sean iguales */
     flex-shrink: 0; /* Evita que el botón se haga pequeño si hay mucho texto arriba */
 }
+
+/* Brillo especial para las Megas */
+.rareza-Secreta {
+    border: 4px solid #facc15 !important;
+    box-shadow: 0 0 25px #facc15 !important;
+    animation: glow-secreto 1.5s infinite alternate;
+}
+
+@keyframes glow-secreto {
+    from { box-shadow: 0 0 10px #facc15; }
+    to { box-shadow: 0 0 30px #fbbf24; transform: scale(1.02); }
+}
+
+/* Color del texto Secreto */
+.txt-secreto {
+    color: #facc15;
+    text-shadow: 0 0 5px black;
+    font-weight: bold;
+}
+
+/* Efecto para la rareza Secreta en Rojo */
+.rareza-Secreta {
+    border: 3px solid #ff4d4d !important;
+    box-shadow: 0 0 20px rgba(255, 77, 77, 0.5) !important;
+    animation: pulso-rojo 2s infinite;
+}
+
+@keyframes pulso-rojo {
+    0% { box-shadow: 0 0 10px rgba(255, 77, 77, 0.4); }
+    50% { box-shadow: 0 0 25px rgba(255, 77, 77, 0.8); }
+    100% { box-shadow: 0 0 10px rgba(255, 77, 77, 0.4); }
+}
+
+/* El nombre del Pokémon en el HUD o cartas */
+.txt-secreto {
+    color: #ff4d4d;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
