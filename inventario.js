@@ -4,18 +4,13 @@ window.mochila = JSON.parse(localStorage.getItem("gq_mochila")) || { caramelo_ra
 function renderMochila() {
     console.log("Ejecutando renderMochila..."); 
     
-    // FORZAR LECTURA: Esto es vital para que si compraste en la tienda, el dato aparezca aquí
-    window.mochila = JSON.parse(localStorage.getItem("gq_mochila")) || { caramelo_raro: 0 };
-    
+    // Sincronizamos con el estado actual
     const grid = document.getElementById('mochila-grid');
-    if (!grid) {
-        console.error("Error crítico: No existe 'mochila-grid' en el HTML");
-        return;
-    }
+    if (!grid) return;
 
-    grid.innerHTML = ""; // Limpiar antes de dibujar
+    grid.innerHTML = ""; 
 
-    if (window.mochila.caramelo_raro <= 0) {
+    if (!window.mochila || window.mochila.caramelo_raro <= 0) {
         grid.innerHTML = `
             <div style="text-align:center; width:100%; padding:40px; color:#94a3b8;">
                 <p style="font-size:1.2rem;">🎒 Tu mochila está vacía</p>
@@ -24,11 +19,10 @@ function renderMochila() {
         return;
     }
 
-    // Dibujamos el caramelo
     grid.innerHTML = `
         <div style="background: #1a1a2e; border: 2px solid #facc15; padding: 20px; border-radius: 20px; text-align: center; width: 200px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); margin: 10px;">
             <div style="font-size: 3rem; margin-bottom: 10px; filter: drop-shadow(0 0 5px #facc15);">🍬</div>
-            <h3 style="color: white; margin: 5px 0; font-family: sans-serif;">Caramelo Raro</h3>
+            <h3 style="color: white; margin: 5px 0;">Caramelo Raro</h3>
             <div style="background: #facc15; color: black; display: inline-block; padding: 5px 15px; border-radius: 10px; font-weight: bold; font-size: 1.2rem; margin: 10px 0;">
                 x${window.mochila.caramelo_raro}
             </div>
@@ -37,71 +31,54 @@ function renderMochila() {
     `;
 }
 
-// Globalizamos para que logic.js y tienda.js la vean siempre
 window.renderMochila = renderMochila;
 
 window.añadirObjeto = function(tipo, cantidad) {
-    // 1. Leemos la mochila del disco duro
-    let mochilaActual = JSON.parse(localStorage.getItem("gq_mochila")) || { caramelo_raro: 0 };
+    if (!window.mochila) window.mochila = { caramelo_raro: 0 };
     
-    // 2. Sumamos la cantidad
-    mochilaActual[tipo] = (mochilaActual[tipo] || 0) + cantidad;
+    // 1. Sumamos la cantidad
+    window.mochila[tipo] = (window.mochila[tipo] || 0) + cantidad;
     
-    // 3. ACTUALIZACIÓN CRÍTICA: Sincronizamos con ticketsNormales para la Tienda
-    if (tipo === 'caramelo_raro') {
-        window.ticketsNormales = mochilaActual[tipo];
-        localStorage.setItem("gq_tk_normal", window.ticketsNormales);
-    }
+    // 2. Guardamos localmente
+    localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
     
-    // 4. Guardamos la mochila
-    window.mochila = mochilaActual; 
-    localStorage.setItem("gq_mochila", JSON.stringify(mochilaActual));
-    
-    // 5. Refrescamos visualmente todo
+    // 3. ¡IMPORTANTE! Guardamos en la nube (Firebase)
+    if (typeof guardar === 'function') guardar(); 
+
+    // 4. Refrescamos visualmente
     if (typeof actualizarHUD === 'function') actualizarHUD();
     if (typeof renderMochila === 'function') renderMochila();
 
-    console.log(`✅ Objeto añadido: ${tipo}. Nueva cantidad: ${mochilaActual[tipo]}`);
+    console.log(`✅ Objeto añadido: ${tipo}. Total: ${window.mochila[tipo]}`);
 };
 
 window.usarCaramelo = function(uid) {
-    // 1. Sincronizar con el disco duro (LocalStorage)
-    window.mochila = JSON.parse(localStorage.getItem("gq_mochila")) || { caramelo_raro: 0 };
-
-    // 2. Comprobar si hay caramelos
-    if (window.mochila.caramelo_raro <= 0) {
+    if (!window.mochila || window.mochila.caramelo_raro <= 0) {
         alert("¡No tienes caramelos!");
         return;
     }
 
-    const p = inventario.find(item => item.uid === uid);
+    const p = window.inventario.find(item => item.uid === uid);
     if (p) {
-        // --- EL FRENO DEL NIVEL 100 ---
         if ((parseInt(p.lvl) || 1) >= 100) {
             alert("¡Este Pokémon ya está al nivel máximo!");
             return;
         }
 
-        // 3. Aplicar subida (asegurando números con parseInt)
+        // Aplicar subida
         p.lvl = (parseInt(p.lvl) || 1) + 1;
         p.ataque = (parseInt(p.ataque) || 10) + 5;
         p.vidaMax = (parseInt(p.vidaMax) || 50) + 15;
-        p.hp = p.vidaMax; // Sincronizamos vida actual con la nueva máxima
+        p.hp = p.vidaMax; 
 
-        // 4. RESTAR Y GUARDAR
+        // Restamos el caramelo de la variable global
         window.mochila.caramelo_raro--;
+        
+        // Guardamos todo (LocalStorage + Firebase)
         localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
-        
-        // --- ADICIÓN: Sincronizamos también ticketsNormales al gastar ---
-        window.ticketsNormales = window.mochila.caramelo_raro;
-        localStorage.setItem("gq_tk_normal", window.ticketsNormales);
-        
-        // 5. Guardar el inventario de Pokémon (el nivel nuevo)
-        if (typeof guardar === 'function') {
-            guardar(); 
-        }
+        if (typeof guardar === 'function') guardar(); 
 
-        // 6. Refresco visual total
+        // Refresco visual
         if (typeof actualizarHUD === 'function') actualizarHUD();
         
         const overlay = document.getElementById('overlay-copias');
@@ -110,7 +87,5 @@ window.usarCaramelo = function(uid) {
         if (typeof abrirMenuCopias === 'function') {
             abrirMenuCopias(p.id); 
         }
-
-        console.log(`🍬 Caramelo usado. Nivel: ${p.lvl}. Quedan: ${window.mochila.caramelo_raro}`);
     }
 };

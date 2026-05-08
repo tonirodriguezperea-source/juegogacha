@@ -11,17 +11,27 @@ window.cambiarSkinMenu = function(id, tipo) {
 // ================================================================
 // 1. VARIABLES GLOBALES Y PERSISTENCIA (SISTEMA DE GUARDADO)
 // ================================================================
-var inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
-var equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
-var monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
-var ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
-var stockTienda = JSON.parse(localStorage.getItem("gq_stock_tienda")) || [];
-var stockTienda7 = JSON.parse(localStorage.getItem("gq_stock_tienda7")) || [];
-var ultimaFechaTienda = localStorage.getItem("gq_fecha_tienda") || "";
-var fragmentosEstelares = parseInt(localStorage.getItem("gq_shards")) || 0;
-var skinsPoseidas = JSON.parse(localStorage.getItem("gq_skins_owner")) || []; 
-var stockSkinsDia = JSON.parse(localStorage.getItem("gq_stock_skins")) || [];
-var ultimaFechaSkins = localStorage.getItem("gq_fecha_skins") || "";
+// ================================================================
+// 1. VARIABLES GLOBALES (SISTEMA DE GUARDADO SINCRONIZADO)
+// ================================================================
+
+// Usamos window. para que Firebase y todos los archivos JS compartan los mismos datos
+window.inventario = JSON.parse(localStorage.getItem("gq_inv")) || [];
+window.equipoUids = JSON.parse(localStorage.getItem("gq_team")) || [];
+window.monedas = parseInt(localStorage.getItem("gq_monedas")) || 0;
+window.ticketsNormales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
+window.fragmentosEstelares = parseInt(localStorage.getItem("gq_shards")) || 0;
+
+// La mochila es vital para los caramelos
+window.mochila = JSON.parse(localStorage.getItem("gq_mochila")) || { caramelo_raro: 0 };
+
+// Variables de la Tienda y Skins
+window.stockTienda = JSON.parse(localStorage.getItem("gq_stock_tienda")) || [];
+window.stockTienda7 = JSON.parse(localStorage.getItem("gq_stock_tienda7")) || [];
+window.ultimaFechaTienda = localStorage.getItem("gq_fecha_tienda") || "";
+window.skinsPoseidas = JSON.parse(localStorage.getItem("gq_skins_owner")) || []; 
+window.stockSkinsDia = JSON.parse(localStorage.getItem("gq_stock_skins")) || [];
+window.ultimaFechaSkins = localStorage.getItem("gq_fecha_skins") || "";
 
 
 // Precios estándar por rareza (para usar en toda la app)
@@ -112,41 +122,30 @@ function guardar() {
 
 
 function actualizarHUD() {
-    // --- CONEXIÓN CON LA MOCHILA ---
-    // En lugar de usar la variable suelta, leemos directamente el dato real
-    const tks = (window.mochila && window.mochila.caramelo_raro !== undefined) 
-                ? window.mochila.caramelo_raro 
-                : (ticketsNormales || 0);
+    // 1. Cargamos los valores reales
+    const tksReales = window.ticketsNormales || 0;
+    const caramelosReales = (window.mochila && window.mochila.caramelo_raro) ? window.mochila.caramelo_raro : 0;
+    const mons = window.monedas || 0;
 
-    const mons = monedas || 0;
-    const shards = fragmentosEstelares || 0;
-
+    // 2. IDs donde van los TICKETS (Asegúrate de que estos IDs en tu HTML NO sean los mismos que los de caramelos)
     const idsTickets = ['val-tk-normal', 'val-tk-normal-hud', 'cont-tickets'];
-    const idsMonedas = ['cont-monedas', 'val-monedas', 'tienda-monedas'];
-    const idsShards = ['val-shards', 'val-shards-hud'];
-
-    // 1. Actualizamos Caramelos (Tickets)
     idsTickets.forEach(id => { 
         const el = document.getElementById(id);
-        if(el) el.innerText = tks; 
+        if(el) el.innerText = tksReales; 
     });
 
-    // 2. Actualizamos Monedas
+    // 3. ID donde van los CARAMELOS (Cámbiale el nombre si hace falta)
+    const elCaramelo = document.getElementById('val-caramelos-mochila');
+    if (elCaramelo) elCaramelo.innerText = caramelosReales;
+
+    // 4. Monedas
+    const idsMonedas = ['cont-monedas', 'val-monedas', 'tienda-monedas'];
     idsMonedas.forEach(id => { 
         const el = document.getElementById(id);
         if(el) el.innerText = mons; 
     });
-    
-    // 3. Actualizamos Fragmentos
-    idsShards.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerText = shards;
-    });
+}kCaramelosText.innerText = "Tienes: " + caramelos;
 
-    // 4. EXTRA: Si tienes el texto de "Tienes: X" en la tienda, lo actualizamos también
-    const stockTienda = document.getElementById('stock-caramelos');
-    if (stockTienda) stockTienda.innerText = "Tienes: " + tks;
-}
 // ================================================================
 // 2. MOTOR VISUAL (RENDERIZADO DE SPRITES Y EMOJIS)
 // ================================================================
@@ -695,21 +694,18 @@ function borrarPartida() {
 }
 
 // ================================================================
-// 8. SISTEMA DE NIVEL Y CARAMELOS (CON LÍMITE NV. 100)
+// 8. SISTEMA DE NIVEL Y CARAMELOS (CORREGIDO)
 // ================================================================
 
 window.usarCaramelo = function(uid) {
     console.log("Intentando usar caramelo en:", uid);
 
-    // 1. Sincronizar mochila antes de empezar
+    // 1. Sincronizar mochila (Dato real de caramelos)
     window.mochila = JSON.parse(localStorage.getItem("gq_mochila")) || { caramelo_raro: 0 };
     
     // 2. Encontrar al Pokémon
-    const p = inventario.find(x => x.uid === uid);
-    if (!p) {
-        console.error("No se encontró el Pokémon");
-        return;
-    }
+    const p = window.inventario.find(x => x.uid === uid);
+    if (!p) return;
 
     // 3. Bloqueo de Nivel 100
     let nivelActual = parseInt(p.lvl) || 1;
@@ -718,14 +714,13 @@ window.usarCaramelo = function(uid) {
         return;
     }
 
-    // 4. Verificación de Caramelos (Miramos en la mochila que es el dato real)
+    // 4. Verificación de Caramelos
     if (window.mochila.caramelo_raro > 0) {
         
-        // --- LA RESTA DOBLE (Mochila y Variable Global) ---
+        // --- RESTAMOS SOLO CARAMELO (Sin tocar tickets) ---
         window.mochila.caramelo_raro -= 1;
-        window.ticketsNormales = window.mochila.caramelo_raro;
 
-        // --- LA SUBIDA DE NIVEL Y STATS ---
+        // --- SUBIDA DE NIVEL Y STATS ---
         p.lvl = nivelActual + 1;
         const baseDB = DB.find(db => db.id == p.id);
         if (baseDB) {
@@ -734,30 +729,35 @@ window.usarCaramelo = function(uid) {
             p.hp = p.vidaMax;
         }
 
-        // --- GUARDADO TOTAL ---
-        // Guardamos la mochila
+        // --- GUARDADO TOTAL Y SINCRONIZACIÓN ---
         localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
-        // Guardamos los tickets (para la tienda)
-        localStorage.setItem("gq_tk_normal", window.ticketsNormales);
-        // Guardamos el inventario de pokémon
+        
+        // Enviamos a la nube
         if (typeof guardar === 'function') guardar(); 
 
         // --- REFRESCO DE INTERFAZ ---
         actualizarHUD();
         
-        // Si estamos en el menú de copias, lo refrescamos para que se vea el cambio
+        // Refrescamos el menú de copias para ver el nuevo nivel
         const overlay = document.getElementById('overlay-copias');
         if (overlay) {
             overlay.remove();
             if (typeof abrirMenuCopias === 'function') abrirMenuCopias(p.id);
         }
 
-        console.log(`🍬 Éxito. Nivel: ${p.lvl}. Caramelos restantes: ${window.mochila.caramelo_raro}`);
+        console.log(`🍬 Caramelo usado. Nivel: ${p.lvl}. Restan: ${window.mochila.caramelo_raro}`);
     } else {
         alert("⚠️ No tienes caramelos en la mochila.");
-        guardar(); //
     }
 };
+
+// Autoguardado cada 60 segundos (30 era un poco rápido para Firebase gratis)
+setInterval(() => {
+    if (firebase.auth().currentUser && typeof guardar === 'function') {
+        guardar();
+        console.log("⏱️ Autoguardado en la nube realizado.");
+    }
+}, 60000);
 
 setInterval(() => {
     if (firebase.auth().currentUser) {

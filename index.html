@@ -70,10 +70,23 @@
 </button>
 <script>
 function regalarTickets() {
-    let actuales = parseInt(localStorage.getItem("gq_tk_normal")) || 0;
-    localStorage.setItem("gq_tk_normal", actuales + 1000);
-    actualizarHUD();
-    alert("¡Has recibido 1000 tickets de regalo!");
+    // 1. Actualizamos la variable global del juego
+    // Sumamos 1000 a lo que ya tengamos en memoria
+    window.ticketsNormales = (window.ticketsNormales || 0) + 1000;
+
+    // 2. Guardamos en LocalStorage (para respaldo rápido)
+    localStorage.setItem("gq_tk_normal", window.ticketsNormales);
+
+    // 3. ¡LO MÁS IMPORTANTE! Sincronizamos con Firebase
+    // Esto enviará los nuevos tickets a tu consola naranja de Google
+    guardar();
+
+    // 4. Actualizamos la interfaz para que el jugador vea el número cambiar
+    if (typeof actualizarHUD === 'function') {
+        actualizarHUD();
+    }
+
+    alert("🎁 ¡Partida sincronizada! Has recibido 1000 tickets de regalo.");
 }
 </script>
                 </aside>

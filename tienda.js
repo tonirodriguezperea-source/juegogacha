@@ -231,27 +231,34 @@ function comprarTicketTienda() {
 function comprarCaramelo() {
     const PRECIO_CARAMELO = 300;
 
-    if (monedas >= PRECIO_CARAMELO) {
-        // 1. Restamos el dinero
-        monedas -= PRECIO_CARAMELO;
+    // 1. Usamos window.monedas para asegurar que afectamos a la variable global
+    if (window.monedas >= PRECIO_CARAMELO) {
+        // 2. Restamos el dinero de la variable global
+        window.monedas -= PRECIO_CARAMELO;
 
-        // 2. Usamos la función maestra que arreglamos antes
-        // Esta ya se encarga de guardar en LocalStorage y sincronizar el HUD
+        // 3. Lógica de la mochila (Aseguramos que sume y guarde)
         if (typeof window.añadirObjeto === 'function') {
             window.añadirObjeto("caramelo_raro", 1);
+            // Nota: Si añadirObjeto ya tiene un guardar() dentro, perfecto.
         } else {
-            // Plan B por si acaso no carga el otro archivo
+            // Plan B: Si no existe añadirObjeto, lo hacemos a mano pero bien hecho
+            if (!window.mochila) window.mochila = { caramelo_raro: 0 };
             window.mochila.caramelo_raro = (window.mochila.caramelo_raro || 0) + 1;
+            
+            // Guardamos en LocalStorage por seguridad
             localStorage.setItem("gq_mochila", JSON.stringify(window.mochila));
         }
 
-        // 3. Guardamos el estado de las monedas y refrescamos la tienda
+        // 4. EL PASO MÁS IMPORTANTE: Sincronizar monedas y mochila con Firebase
         guardar(); 
+        
+        // 5. Actualizar visualmente
+        if (typeof actualizarHUD === 'function') actualizarHUD();
         renderTienda();
         
-        console.log("🛒 Compra exitosa: 1 Caramelo Raro.");
+        console.log("🛒 Compra exitosa y sincronizada en la nube: 1 Caramelo Raro.");
     } else {
         alert("❌ No tienes suficientes monedas.");
     }
-    guardar(); //
+    // Eliminamos el segundo guardar() que estaba aquí fuera para evitar envíos vacíos
 }
