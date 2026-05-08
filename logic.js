@@ -144,7 +144,7 @@ function actualizarHUD() {
         const el = document.getElementById(id);
         if(el) el.innerText = mons; 
     });
-}kCaramelosText.innerText = "Tienes: " + caramelos;
+}
 
 // ================================================================
 // 2. MOTOR VISUAL (RENDERIZADO DE SPRITES Y EMOJIS)
