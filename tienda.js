@@ -42,11 +42,19 @@ function renderTienda() {
     const grid = document.getElementById('tienda-grid');
     if (!grid) return;
 
-    // --- SECCIÓN DE SEGURIDAD AÑADIDA ---
-    // Si el stock está vacío por un error de carga, forzamos la regeneración
-    if ((!window.stockTienda || window.stockTienda.length === 0) && typeof DB !== 'undefined' && DB.length > 0) {
-        console.log("Sincronizando stock faltante...");
-        ultimaFechaTienda = ""; 
+    // --- ARREGLO PARA EL ERROR DE FOREACH ---
+    // Nos aseguramos de que stockTienda sea SIEMPRE una lista
+    if (!Array.isArray(window.stockTienda)) {
+        window.stockTienda = []; 
+    }
+    if (!Array.isArray(window.stockTienda7)) {
+        window.stockTienda7 = [];
+    }
+
+    // Si están vacías, forzamos la creación del stock
+    if (window.stockTienda.length === 0 && typeof DB !== 'undefined' && DB.length > 0) {
+        console.log("Generando stock de emergencia...");
+        ultimaFechaTienda = ""; // Reseteamos fecha para obligar a actualizarTiendaSiEsNecesario
         actualizarTiendaSiEsNecesario();
     }
     // ------------------------------------
