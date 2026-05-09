@@ -88,26 +88,6 @@ function regalarTickets() {
 
     alert("🎁 ¡Partida sincronizada! Has recibido 1000 tickets de regalo.");
 }
-function testShards() {
-    // 1. Sumamos 50 a la variable global (window para que todos lo vean)
-    window.fragmentosEstelares = (window.fragmentosEstelares || 0) + 50;
-
-    // 2. Guardamos en el almacenamiento local
-    localStorage.setItem("gq_shards", window.fragmentosEstelares);
-
-    // 3. Sincronizamos con Firebase (tu nube)
-    if (typeof guardar === 'function') {
-        guardar();
-    }
-
-    // 4. Actualizamos el HUD para que el número cambie en pantalla
-    if (typeof actualizarHUD === 'function') {
-        actualizarHUD();
-    }
-
-    console.log("✨ Fragmentos añadidos. Total:", window.fragmentosEstelares);
-    alert("✨ ¡Modo Debug! Has recibido 50 Fragmentos Estelares.");
-}
 </script>
                 </aside>
             </div>

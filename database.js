@@ -267,41 +267,12 @@ const DB = [
     { id: 806, nombre: "Blacephalon", emoji: "🤡", saga: "Gen7", tipo: "Fuego", rareza: "legendario", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/806.png", descripcion: "Ultraente Explosivo. Hace estallar su cabeza." },
     { id: 807, nombre: "Zeraora", emoji: "⚡", saga: "Gen7", tipo: "Eléctrico", rareza: "legendario", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/807.png", descripcion: "Pokémon favorito de una leyenda de INS La Pineda (tarda)." },
     { id: 808, nombre: "Meltan", emoji: "🔩", saga: "Gen7", tipo: "Acero", rareza: "comun", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/808.png", descripcion: "Pokémon Tuerca. Su cuerpo es de metal líquido." },
-    { id: 809, nombre: "Melmetal", emoji: "⚙️", saga: "Gen7", tipo: "Acero", rareza: "epico", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/809.png", descripcion: "Pokémon Tuerca. El coloso de metal más pesado." },
-
-    //megas1ra
-     { id: 1026, nombre: "Mega-Venusaur", emoji: "🌺", saga: "Gen1", tipo: "Planta", rareza: "Secreta", ataque: 155, vidaMax: 1450, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10033.png", descripcion: "La flor de su lomo ha crecido tanto que ahora cubre todo su cuerpo." },
-    { id: 1027, nombre: "Mega-Charizard X", emoji: "🔥", saga: "Gen1", tipo: "Fuego", rareza: "Secreta", ataque: 175, vidaMax: 1380, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10034.png", descripcion: "Su cuerpo se vuelve negro y sus llamas arden con un color azul intenso." },
-    { id: 1028, nombre: "Mega-Charizard Y", emoji: "🔥", saga: "Gen1", tipo: "Fuego", rareza: "Secreta", ataque: 190, vidaMax: 1300, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10035.png", descripcion: "Sus alas se vuelven más grandes y su capacidad de vuelo aumenta drásticamente." },
-    { id: 1029, nombre: "Mega-Blastoise", emoji: "💧", saga: "Gen1", tipo: "Agua", rareza: "Secreta", ataque: 165, vidaMax: 1500, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10036.png", descripcion: "Un cañón colosal nace en su espalda, capaz de disparar chorros de agua a kilómetros." },
-    { id: 1030, nombre: "Mega-Beedrill", emoji: "🐝", saga: "Gen1", tipo: "Bicho", rareza: "Secreta", ataque: 180, vidaMax: 1100, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10090.png", descripcion: "Sus cuatro aguijones inyectan un veneno fulminante a gran velocidad." },
-    { id: 1031, nombre: "Mega-Pidgeot", emoji: "🦅", saga: "Gen1", tipo: "Normal", rareza: "Secreta", ataque: 150, vidaMax: 1250, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10091.png", descripcion: "Sus alas poseen una fuerza capaz de generar ráfagas huracanadas." },
-    { id: 1032, nombre: "Mega-Alakazam", emoji: "🥄", saga: "Gen1", tipo: "Psíquico", rareza: "Secreta", ataque: 200, vidaMax: 1050, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10037.png", descripcion: "Sus cucharas canalizan energía mental capaz de leer el futuro inmediato." },
-    { id: 1033, nombre: "Mega-Slowbro", emoji: "🐚", saga: "Gen1", tipo: "Agua", rareza: "Secreta", ataque: 130, vidaMax: 1800, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10071.png", descripcion: "El Shellder lo ha engullido, convirtiéndose en una armadura total." },
-    { id: 1034, nombre: "Mega-Gengar", emoji: "👻", saga: "Gen1", tipo: "Fantasma", rareza: "Secreta", ataque: 195, vidaMax: 1200, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10038.png", descripcion: "Su tercer ojo le permite ver dimensiones y hundirse en sombras." },
-    { id: 1035, nombre: "Mega-Kangaskhan", emoji: "🐨", saga: "Gen1", tipo: "Normal", rareza: "Secreta", ataque: 160, vidaMax: 1600, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10039.png", descripcion: "La cría sale de la bolsa y lucha valientemente junto a su madre." },
-    { id: 1036, nombre: "Mega-Pinsir", emoji: "🦂", saga: "Gen1", tipo: "Bicho", rareza: "Secreta", ataque: 185, vidaMax: 1350, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10040.png", descripcion: "Le han crecido alas y ahora puede despedazar enemigos desde el aire." },
-    { id: 1037, nombre: "Mega-Gyarados", emoji: "🐉", saga: "Gen1", tipo: "Agua", rareza: "Secreta", ataque: 190, vidaMax: 1550, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10041.png", descripcion: "Su instinto destructivo ha despertado. Nada detiene su furia." },
-    { id: 1038, nombre: "Mega-Aerodactyl", emoji: "🦴", saga: "Gen1", tipo: "Roca", rareza: "Secreta", ataque: 175, vidaMax: 1400, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10042.png", descripcion: "Partes de su cuerpo se han petrificado, duras como el diamante." },
-    { id: 1039, nombre: "Mega-Mewtwo X", emoji: "🧬", saga: "Gen1", tipo: "Psíquico", rareza: "Secreta", ataque: 210, vidaMax: 1700, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10043.png", descripcion: "Su musculatura combina fuerza física y poderes mentales." },
-    { id: 1040, nombre: "Mega-Mewtwo Y", emoji: "🧠", saga: "Gen1", tipo: "Psíquico", rareza: "Secreta", ataque: 220, vidaMax: 1400, sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/10044.png", descripcion: "Su poder mental es capaz de reducir edificios a cenizas." },
-    
+    { id: 809, nombre: "Melmetal", emoji: "⚙️", saga: "Gen7", tipo: "Acero", rareza: "epico", sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/809.png", descripcion: "Pokémon Tuerca. El coloso de metal más pesado." }
 ];
 
 
-
-
-
-
-
-
-
-
-
-
-
 const RAREZAS = { 
-    comun: '#94a3b8', raro: '#4ade80', epico: '#a855f7', legendario: '#f59e0b', Secreta: '#ff4d4d'
+    comun: '#94a3b8', raro: '#4ade80', epico: '#a855f7', legendario: '#f59e0b' 
 };
 
 const TABLA_TIPOS = { 
