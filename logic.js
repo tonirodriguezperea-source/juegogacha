@@ -73,7 +73,8 @@ const SKINS_DATA = {
 
 
 function guardar() {
-    // 1. GUARDADO LOCAL (Para que funcione offline)
+    // 1. GUARDADO LOCAL
+    // IMPORTANTE: Asegúrate de que esta clave ("gq_inv") sea la misma que usas al CARGAR
     localStorage.setItem("gq_inv", JSON.stringify(window.inventario || []));
     localStorage.setItem("gq_team", JSON.stringify(window.equipoUids || []));
     localStorage.setItem("gq_monedas", window.monedas || 0);
@@ -91,18 +92,16 @@ function guardar() {
     const usuario = firebase.auth().currentUser;
     
     if (usuario) {
-        // Creamos el objeto con TODO lo que queremos salvar
         const datosAGuardar = {
             monedas: window.monedas || 0,
             ticketsNormales: window.ticketsNormales || 0,
             fragmentosEstelares: window.fragmentosEstelares || 0,
-            inventario: window.inventario || [],
+            inventario: window.inventario || [], // <--- Aquí van tus Megas
             equipoUids: window.equipoUids || [],
             skinsPoseidas: window.skinsPoseidas || [],
             mochila: window.mochila || { caramelo_raro: 0 },
             ultimaFechaTienda: window.ultimaFechaTienda || "",
             ultimaFechaSkins: window.ultimaFechaSkins || "",
-            // Guardamos también el stock de las tiendas para que no cambien al refrescar
             stockTienda: window.stockTienda || {},
             stockTienda7: window.stockTienda7 || {},
             stockSkinsDia: window.stockSkinsDia || {}
@@ -110,40 +109,50 @@ function guardar() {
 
         db.collection("usuarios").doc(usuario.uid).set(datosAGuardar, { merge: true })
         .then(() => {
-            console.log("☁️ ¡Nube actualizada! (Monedas, Tickets, Shards y Caramelos guardados)");
+            console.log("☁️ Nube sincronizada. Items en inventario:", window.inventario.length);
         })
         .catch((error) => {
-            console.error("❌ Error crítico al sincronizar:", error);
+            console.error("❌ Error en Firebase:", error);
         });
-    } else {
-        console.warn("⚠️ No se pudo subir a la nube: Usuario no identificado.");
     }
 }
 
 
 function actualizarHUD() {
-    // 1. Cargamos los valores reales
+    // 1. Cargamos los valores reales (Añadimos fragmentos)
     const tksReales = window.ticketsNormales || 0;
     const caramelosReales = (window.mochila && window.mochila.caramelo_raro) ? window.mochila.caramelo_raro : 0;
     const mons = window.monedas || 0;
+    
+    // El "truco" para los fragmentos: busca en la variable global o en el nombre alternativo
+    const shardsReales = window.fragmentosEstelares || window.shards || 0;
 
-    // 2. IDs donde van los TICKETS (Asegúrate de que estos IDs en tu HTML NO sean los mismos que los de caramelos)
+    // 2. IDs de TICKETS
     const idsTickets = ['val-tk-normal', 'val-tk-normal-hud', 'cont-tickets'];
     idsTickets.forEach(id => { 
         const el = document.getElementById(id);
         if(el) el.innerText = tksReales; 
     });
 
-    // 3. ID donde van los CARAMELOS (Cámbiale el nombre si hace falta)
+    // 3. ID de CARAMELOS
     const elCaramelo = document.getElementById('val-caramelos-mochila');
     if (elCaramelo) elCaramelo.innerText = caramelosReales;
 
-    // 4. Monedas
+    // 4. IDs de MONEDAS
     const idsMonedas = ['cont-monedas', 'val-monedas', 'tienda-monedas'];
     idsMonedas.forEach(id => { 
         const el = document.getElementById(id);
         if(el) el.innerText = mons; 
     });
+
+    // 5. SECCIÓN NUEVA: PUNTOS ESTELARES (SHARDS)
+    // Buscamos el ID que tienes en el index.html: "val-shards-hud"
+    const elShards = document.getElementById('val-shards-hud');
+    if (elShards) {
+        elShards.innerText = shardsReales;
+        // Consola para que tú veas si está funcionando por detrás
+        console.log("✨ HUD Shards actualizado:", shardsReales);
+    }
 }
 
 // ================================================================
