@@ -57,7 +57,6 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const objeto = document.getElementById('objeto-invocacion');
     const resultado = document.getElementById('resultado-invocacion');
     
-    // Aseguramos que se vea la animación
     overlay.style.display = 'flex';
     resultado.style.display = 'none';
     objeto.style.display = 'flex';
@@ -73,30 +72,32 @@ function ejecutarAnimacionGacha(saga, personaje) {
             objeto.style.display = 'none';
             resultado.style.display = 'block';
             
-            // Lógica de copias
-            const copias = inventario.filter(p => parseInt(p.id) === parseInt(personaje.id)).length;
+            // 1. COMPROBACIÓN DE SEGURIDAD
+            if (!window.inventario) window.inventario = [];
+
+            const copias = window.inventario.filter(p => parseInt(p.id) === parseInt(personaje.id)).length;
             
             if (copias >= 10) {
                 const premios = { comun: 100, raro: 250, epico: 600, legendario: 1500, Secreta: 3000 };
                 const valor = premios[personaje.rareza] || 100;
-                window.monedas += valor; // Usamos window para asegurar
+                window.monedas += valor;
                 
                 resultado.innerHTML = `
                     <div style="text-align:center;">
                         ${obtenerImagenHTML(personaje, "sprite-revelado")}
-                        <h3 style="color:#ff4444;">DESEO REPETIDO</h3>
+                        <h3 style="color:#ff4444;">REPETIDO</h3>
                         <h2 style="color:#eab308;">+💰 ${valor}</h2>
                     </div>`;
             } else {
-                // GUARDADO EN EL ARRAY LOCAL
-                const nuevoBicho = { 
+                // 2. AÑADIR AL INVENTARIO (Usando window. para asegurar)
+                const bichoNuevo = { 
                     ...personaje, 
-                    uid: "UID-" + Date.now(), 
+                    uid: "UID-" + Date.now() + Math.random().toString(36).substr(2, 4), 
                     lvl: 1, 
                     xp: 0, 
                     estrellas: 0 
                 };
-                inventario.push(nuevoBicho);
+                window.inventario.push(bichoNuevo);
                 
                 resultado.innerHTML = `
                     <div style="text-align:center;">
@@ -108,15 +109,18 @@ function ejecutarAnimacionGacha(saga, personaje) {
                     </div>`;
             }
 
-            // BOTÓN CORREGIDO: Usamos window.cerrarGacha explícitamente
             resultado.innerHTML += `
                 <button onclick="window.cerrarGacha()" class="nav-btn" style="margin-top:20px; background:#f59e0b; color:black; padding:12px 30px; border-radius:10px; font-weight:bold; cursor:pointer; border:none;">
                     CONTINUAR
                 </button>`;
 
-            // FORZAR GUARDADO TRAS CUALQUIER CAMBIO
-            localStorage.setItem("gq_inventario", JSON.stringify(window.inventario));
-            if (typeof window.guardar === 'function') { window.guardar(); }
+            // 3. GUARDADO CRÍTICO (Usamos la clave "gq_inv" que tiene tu función guardar)
+            localStorage.setItem("gq_inv", JSON.stringify(window.inventario));
+            
+            if (typeof window.guardar === 'function') { 
+                window.guardar(); 
+            }
+            
             actualizarHUD();
             
         }, 600);
@@ -125,6 +129,21 @@ function ejecutarAnimacionGacha(saga, personaje) {
 
 // Asegúrate de que esta función esté fuera para que el botón la vea
 window.cerrarGacha = function() {
-    document.getElementById('gacha-animacion').style.display = 'none';
+    console.log("Cerrando y forzando guardado final...");
+    
+    // 1. Guardado de seguridad en el navegador (Local)
+    localStorage.setItem("gq_inventario", JSON.stringify(window.inventario));
+    localStorage.setItem("gq_tk_normal", window.ticketsNormales);
+    localStorage.setItem("gq_monedas", window.monedas);
+
+    // 2. Intentar guardado en Firebase (Nube)
+    if (typeof window.guardar === 'function') {
+        window.guardar();
+    }
+
+    // 3. Cerrar interfaz
+    const overlay = document.getElementById('gacha-animacion');
+    if (overlay) overlay.style.display = 'none';
+    
     if (typeof mostrar === 'function') mostrar('equipo');
 };

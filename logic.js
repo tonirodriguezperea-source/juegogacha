@@ -73,7 +73,8 @@ const SKINS_DATA = {
 
 
 function guardar() {
-    // 1. GUARDADO LOCAL (Para que funcione offline)
+    // 1. GUARDADO LOCAL
+    // IMPORTANTE: Asegúrate de que esta clave ("gq_inv") sea la misma que usas al CARGAR
     localStorage.setItem("gq_inv", JSON.stringify(window.inventario || []));
     localStorage.setItem("gq_team", JSON.stringify(window.equipoUids || []));
     localStorage.setItem("gq_monedas", window.monedas || 0);
@@ -91,18 +92,16 @@ function guardar() {
     const usuario = firebase.auth().currentUser;
     
     if (usuario) {
-        // Creamos el objeto con TODO lo que queremos salvar
         const datosAGuardar = {
             monedas: window.monedas || 0,
             ticketsNormales: window.ticketsNormales || 0,
             fragmentosEstelares: window.fragmentosEstelares || 0,
-            inventario: window.inventario || [],
+            inventario: window.inventario || [], // <--- Aquí van tus Megas
             equipoUids: window.equipoUids || [],
             skinsPoseidas: window.skinsPoseidas || [],
             mochila: window.mochila || { caramelo_raro: 0 },
             ultimaFechaTienda: window.ultimaFechaTienda || "",
             ultimaFechaSkins: window.ultimaFechaSkins || "",
-            // Guardamos también el stock de las tiendas para que no cambien al refrescar
             stockTienda: window.stockTienda || {},
             stockTienda7: window.stockTienda7 || {},
             stockSkinsDia: window.stockSkinsDia || {}
@@ -110,13 +109,11 @@ function guardar() {
 
         db.collection("usuarios").doc(usuario.uid).set(datosAGuardar, { merge: true })
         .then(() => {
-            console.log("☁️ ¡Nube actualizada! (Monedas, Tickets, Shards y Caramelos guardados)");
+            console.log("☁️ Nube sincronizada. Items en inventario:", window.inventario.length);
         })
         .catch((error) => {
-            console.error("❌ Error crítico al sincronizar:", error);
+            console.error("❌ Error en Firebase:", error);
         });
-    } else {
-        console.warn("⚠️ No se pudo subir a la nube: Usuario no identificado.");
     }
 }
 
