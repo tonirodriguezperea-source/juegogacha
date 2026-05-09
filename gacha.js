@@ -57,75 +57,74 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const objeto = document.getElementById('objeto-invocacion');
     const resultado = document.getElementById('resultado-invocacion');
     
+    // Aseguramos que se vea la animación
     overlay.style.display = 'flex';
     resultado.style.display = 'none';
     objeto.style.display = 'flex';
     
-    // Si es secreta, la estrella brilla en ROJO
-    const colorEstrella = personaje.rareza === "Secreta" ? "#ff4d4d" : "#f59e0b";
-
-    objeto.innerHTML = `
-        <div id="estrella-deseo" class="objeto-vibrando" style="font-size: 100px; filter: drop-shadow(0 0 30px ${colorEstrella});">
-            ⭐
-        </div>`;
+    const colorEfecto = personaje.rareza === "Secreta" ? "#ff4d4d" : "#f59e0b";
+    objeto.innerHTML = `<div id="estrella-deseo" class="objeto-vibrando" style="font-size:100px; filter:drop-shadow(0 0 30px ${colorEfecto});">⭐</div>`;
 
     setTimeout(() => {
-        const estrella = document.getElementById('estrella-deseo');
-        if (estrella) {
-            estrella.style.transition = "all 0.5s ease-out";
-            estrella.style.transform = "scale(2.5)";
-            estrella.style.opacity = "0";
-        }
+        const est = document.getElementById('estrella-deseo');
+        if (est) { est.style.transform = "scale(2.5)"; est.style.opacity = "0"; }
         
         setTimeout(() => {
             objeto.style.display = 'none';
             resultado.style.display = 'block';
             
-            // --- LÓGICA DE COPIAS CORREGIDA ---
+            // Lógica de copias
             const copias = inventario.filter(p => parseInt(p.id) === parseInt(personaje.id)).length;
             
             if (copias >= 10) {
-                // AÑADIDA "Secreta" a los premios para que no de error
                 const premios = { comun: 100, raro: 250, epico: 600, legendario: 1500, Secreta: 3000 };
                 const valor = premios[personaje.rareza] || 100;
-                monedas += valor;
+                window.monedas += valor; // Usamos window para asegurar
                 
                 resultado.innerHTML = `
                     <div style="text-align:center;">
                         ${obtenerImagenHTML(personaje, "sprite-revelado")}
-                        <h3 style="color:#ff4444; margin-top:10px;">DESEO REPETIDO</h3>
-                        <p style="color:#94a3b8;">Ya tienes el máximo de copias de este bicho.</p>
-                        <h2 style="color:#eab308;">+💰 ${valor} Monedas</h2>
+                        <h3 style="color:#ff4444;">DESEO REPETIDO</h3>
+                        <h2 style="color:#eab308;">+💰 ${valor}</h2>
                     </div>`;
             } else {
-                // AÑADIR AL INVENTARIO
-                const bichoConseguido = {
+                // GUARDADO EN EL ARRAY LOCAL
+                const nuevoBicho = { 
                     ...personaje, 
-                    uid: "UID-" + Date.now() + Math.random().toString(36).substr(2, 5),
-                    lvl: 1,
-                    xp: 0,
+                    uid: "UID-" + Date.now(), 
+                    lvl: 1, 
+                    xp: 0, 
                     estrellas: 0 
                 };
-                inventario.push(bichoConseguido);
+                inventario.push(nuevoBicho);
                 
                 resultado.innerHTML = `
                     <div style="text-align:center;">
-                        <div style="transform: scale(1.8); margin-bottom: 30px;">
+                        <div style="transform:scale(1.6); margin-bottom:20px;">
                             ${obtenerImagenHTML(personaje, "sprite-revelado")}
                         </div>
-                        <h3 style="color: #94a3b8; margin:0; letter-spacing: 3px;">${personaje.rareza === "Secreta" ? "¡¡REVELACIÓN SECRETA!!" : "¡NUEVO DESEO!"}</h3>
-                        <h2 style="color:${RAREZAS[personaje.rareza] || '#ff4d4d'}; font-size: 2.5rem; margin: 15px 0;">
-                            ${personaje.nombre}
-                        </h2>
+                        <h3 style="color:#94a3b8;">${personaje.rareza === "Secreta" ? "¡REVELACIÓN SECRETA!" : "¡NUEVO DESEO!"}</h3>
+                        <h2 style="color:${RAREZAS[personaje.rareza] || '#ff4d4d'}; font-size:2rem;">${personaje.nombre}</h2>
                     </div>`;
             }
-            
-            resultado.innerHTML += `<br><button onclick="cerrarGacha()" class="nav-btn" style="margin-top:30px; background:#f59e0b; color:black; padding:12px 40px; border-radius:10px; font-weight:bold; cursor:pointer;">CONTINUAR</button>`;
-            
-            // GUARDADO FINAL EN FIREBASE Y LOCAL
-            guardar(); 
+
+            // BOTÓN CORREGIDO: Usamos window.cerrarGacha explícitamente
+            resultado.innerHTML += `
+                <button onclick="window.cerrarGacha()" class="nav-btn" style="margin-top:20px; background:#f59e0b; color:black; padding:12px 30px; border-radius:10px; font-weight:bold; cursor:pointer; border:none;">
+                    CONTINUAR
+                </button>`;
+
+            // FORZAR GUARDADO TRAS CUALQUIER CAMBIO
+            localStorage.setItem("gq_inventario", JSON.stringify(window.inventario));
+            if (typeof window.guardar === 'function') { window.guardar(); }
             actualizarHUD();
-            if (typeof avanzarMision === 'function') avanzarMision('gacha_3', 1); 
+            
         }, 600);
-    }, 1800);
+    }, 1200);
 }
+
+// Asegúrate de que esta función esté fuera para que el botón la vea
+window.cerrarGacha = function() {
+    document.getElementById('gacha-animacion').style.display = 'none';
+    if (typeof mostrar === 'function') mostrar('equipo');
+};
