@@ -15,21 +15,50 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // 2. Escuchar el estado de la sesión
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        console.log("Usuario detectado:", user.email);
-        // Si hay usuario, quitamos la pantalla de login SÍ O SÍ
-        const loginScreen = document.getElementById('pantalla-login');
-        if (loginScreen) loginScreen.style.display = 'none';
-        
-        cargarDatosNube(user.uid); 
-    } else {
-        // Si no hay usuario, la mostramos
-        const loginScreen = document.getElementById('pantalla-login');
-        if (loginScreen) loginScreen.style.display = 'flex';
-    }
-});
+function cargarDatosNube(uid) {
+    db.collection("usuarios").doc(uid).get().then((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            console.log("📦 Datos recibidos de la nube...");
 
+            // 1. CARGA INTELIGENTE DEL INVENTARIO
+            // Leemos lo que hay en el PC (local) y lo que hay en la Nube
+            const invLocal = JSON.parse(localStorage.getItem("gq_inv")) || [];
+            const invNube = data.inventario || [];
+
+            // Si el PC tiene más bichos, nos quedamos con los del PC y actualizamos la nube
+            if (invLocal.length > invNube.length) {
+                console.warn("⚠️ ¡Detectado desfase! El PC tiene más Pokémon. Sincronizando nube...");
+                window.inventario = invLocal;
+                // Forzamos guardado para que la nube se actualice con los nuevos
+                if (typeof guardar === 'function') guardar(); 
+            } else {
+                // Si la nube es igual o más grande, usamos la nube
+                window.inventario = invNube;
+                localStorage.setItem("gq_inv", JSON.stringify(window.inventario));
+            }
+
+            // 2. CARGA DEL RESTO DE VARIABLES (Siempre el valor más alto)
+            window.monedas = Math.max(window.monedas || 0, data.monedas || 0);
+            window.ticketsNormales = Math.max(window.ticketsNormales || 0, data.ticketsNormales || 0);
+            window.fragmentosEstelares = Math.max(window.fragmentosEstelares || 0, data.fragmentosEstelares || 0);
+
+            // 3. CARGA DE OTROS DATOS (Equipos, Mochila, etc)
+            window.equipoUids = data.equipoUids || [];
+            window.mochila = data.mochila || { caramelo_raro: 0 };
+            window.skinsPoseidas = data.skinsPoseidas || [];
+            
+            // Actualizamos visualmente el juego
+            if (typeof actualizarHUD === 'function') actualizarHUD();
+            
+            console.log("✅ Carga completada. Inventario actual:", window.inventario.length);
+        } else {
+            console.log("🆕 Usuario nuevo: No hay datos en la nube aún.");
+        }
+    }).catch((error) => {
+        console.error("❌ Error al cargar de la nube:", error);
+    });
+}
 // 3. Función para descargar datos de Google a tu juego
 function cargarDatosNube(uid) {
     db.collection("usuarios").doc(uid).get().then((doc) => {
