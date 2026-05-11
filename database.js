@@ -289,7 +289,7 @@ const DB = [
 
     //InazumaEleven1
     
-    { id: 1041, nombre: "Mark Evans", saga: "Inazuma1", tipo: "Roca", rareza: "legendario", ataque: 120, vidaMax: 1500, sprite: "https://i.postimg.cc/9Fm8fW8Z/Endou-Face.png", descripcion: "¡El capitán del Raimon! Un portero legendario que nunca se rinde." },
+    { id: 1041, nombre: "Mark Evans", saga: "Inazuma1", tipo: "Roca", rareza: "legendario", ataque: 120, vidaMax: 1500, sprite: "https://raw.githubusercontent.com/DeividS02/Gacha-Assets/main/inazuma/mark-face.png", descripcion: "¡El capitán del Raimon! Un portero legendario que nunca se rinde." },
     { id: 1042, nombre: "Axel Blaze", saga: "Inazuma1", tipo: "Fuego", rareza: "legendario", ataque: 180, vidaMax: 1100, sprite: "https://i.postimg.cc/8cm8N8Zf/Gouenji-Face.png", descripcion: "El delantero de fuego. Su Tornado de Fuego es imparable." },
     { id: 1043, nombre: "Jude Sharp", saga: "Inazuma1", tipo: "Psíquico", rareza: "legendario", ataque: 150, vidaMax: 1200, sprite: "https://i.postimg.cc/6q9699S0/Kidou-Face.png", descripcion: "El estratega del equipo. Ve todo lo que ocurre en el campo." },
     { id: 1044, nombre: "Nathan Swift", saga: "Inazuma1", tipo: "Volador", rareza: "epico", ataque: 140, vidaMax: 1000, sprite: "https://i.postimg.cc/vH4pS8Z0/Kazemaru-Face.png", descripcion: "El jugador más rápido del Raimon. Controla la banda con su velocidad." },
