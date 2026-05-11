@@ -288,7 +288,7 @@ const DB = [
     
 
     //InazumaEleven1
-    [
+    
     { id: 1041, nombre: "Mark Evans", saga: "Inazuma1", tipo: "Roca", rareza: "legendario", ataque: 120, vidaMax: 1500, sprite: "https://i.imgur.com/8N8v6fT.png", descripcion: "¡El capitán del Raimon! Un portero legendario que nunca se rinde." },
     { id: 1042, nombre: "Axel Blaze", saga: "Inazuma1", tipo: "Fuego", rareza: "legendario", ataque: 180, vidaMax: 1100, sprite: "https://i.imgur.com/kP1K0x7.png", descripcion: "El delantero de fuego. Su Tornado de Fuego es imparable." },
     { id: 1043, nombre: "Jude Sharp", saga: "Inazuma1", tipo: "Psíquico", rareza: "legendario", ataque: 150, vidaMax: 1200, sprite: "https://i.imgur.com/PAnFvH4.png", descripcion: "El estratega del equipo. Ve todo lo que ocurre en el campo." },
@@ -306,7 +306,7 @@ const DB = [
     { id: 1055, nombre: "Willy Glass", saga: "Inazuma1", tipo: "Hada", rareza: "comun", ataque: 50, vidaMax: 500, sprite: "https://i.imgur.com/MizM9p7.png", descripcion: "Él dice que es un genio, aunque prefiere estar en el banquillo." },
     { id: 1056, nombre: "Shadow Cimmerian", saga: "Inazuma1", tipo: "Siniestro", rareza: "Secreta", ataque: 190, vidaMax: 1050, sprite: "https://i.imgur.com/0uB0mS9.png", descripcion: "Un delantero envuelto en misterio con una potencia aterradora." },
     { id: 1057, nombre: "Paul Peabody", saga: "Inazuma1", tipo: "Roca", rareza: "Secreta", ataque: 110, vidaMax: 1500, sprite: "https://i.imgur.com/X3u7M7R.png", descripcion: "El aprendiz de Mark Evans. ¡Pequeño en estatura pero gigante en espíritu y defensa!" }
-]
+
 ];
 
 
