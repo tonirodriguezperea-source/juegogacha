@@ -8,6 +8,7 @@ window.invocar = function(saga) {
         return;
     }
 
+    // 1. Buscamos en la DB (Asegúrate de que tu base de datos se llame DB)
     const busquedaLimpia = saga.toLowerCase().replace(/\s/g, ""); 
     const poolSaga = DB.filter(p => {
         const sagaDBLimpia = p.saga.toLowerCase().replace(/\s/g, "");
@@ -19,36 +20,37 @@ window.invocar = function(saga) {
         return;
     }
 
+    // 2. Sistema de Probabilidades
     const rand = Math.random() * 100;
     let rareza;
 
-    if (rand <= 1) {
-        rareza = "Secreta";      // 1% Megas
-    } else if (rand <= 3) {
-        rareza = "legendario";   // 2%
-    } else if (rand <= 10) {
-        rareza = "epico";        // 7%
-    } else if (rand <= 30) {
-        rareza = "raro";         // 20%
-    } else {
-        rareza = "comun";        // 70%
-    }
+    if (rand <= 1) rareza = "Secreta";
+    else if (rand <= 3) rareza = "legendario";
+    else if (rand <= 10) rareza = "epico";
+    else if (rand <= 30) rareza = "raro";
+    else rareza = "comun";
     
+    // 3. Filtrar por rareza
     let posibles = poolSaga.filter(p => p.rareza === rareza);
 
+    // --- EL ARREGLO CRÍTICO AQUÍ ---
+    // Si no hay personajes de esa rareza en la saga (como pasa con Fimosis King)
+    // elegimos cualquier personaje disponible de esa saga para que no de error.
     if (posibles.length === 0) {
-        posibles = poolSaga.filter(p => p.rareza === "comun") || poolSaga;
+        posibles = poolSaga; 
     }
     
     const bichoBase = posibles[Math.floor(Math.random() * posibles.length)];
 
+    // 4. Consumir ticket y guardar
     window.ticketsNormales--; 
     localStorage.setItem("gq_tk_normal", window.ticketsNormales);
 
-    // Sincronización inmediata antes de la animación
     if (typeof guardar === 'function') { guardar(); }
     if (typeof actualizarHUD === 'function') { actualizarHUD(); }
     
+    // 5. Lanzar animación
+    // Pasamos el personaje encontrado directamente
     ejecutarAnimacionGacha(saga, bichoBase);
 };
 
