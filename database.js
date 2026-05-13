@@ -305,7 +305,7 @@ const DB = [
     { id: 1054, nombre: "Tod Ironside", saga: "Inazuma1", tipo: "Siniestro", rareza: "comun", ataque: 85, vidaMax: 1300, sprite: "https://i.postimg.cc/8P4pS8Z0/Shorin-Face.png", descripcion: "Defensa veloz y con mucha energía." },
     { id: 1055, nombre: "Willy Glass", saga: "Inazuma1", tipo: "Hada", rareza: "comun", ataque: 50, vidaMax: 500, sprite: "https://i.postimg.cc/0y4pS8Z0/Megane-Face.png", descripcion: "Él dice que es un genio, aunque prefiere estar en el banquillo." },
     { id: 1056, nombre: "Shadow Cimmerian", saga: "Inazuma1", tipo: "Siniestro", rareza: "Secreta", ataque: 190, vidaMax: 1050, sprite: "https://i.postimg.cc/qM4pS8Z0/Shadow-Face.png", descripcion: "Un delantero envuelto en misterio con una potencia aterradora." },
-    { id: 1057, nombre: "Paul Peabody", saga: "Inazuma1", tipo: "Roca", rareza: "Secreta", ataque: 110, vidaMax: 1500, sprite: "https://i.postimg.cc/v84pS8Z0/Peabody-Face.png", descripcion: "El aprendiz de Mark Evans. ¡Pequeño en estatura pero gigante en espíritu y defensa!" }
+    { id: 1057, nombre: "Fimosis King", saga: "Inazuma1", tipo: "Lucha", rareza: "Secreta", ataque: 110, vidaMax: 1500, sprite: "sprite/fimosisking.jpg", descripcion: "El aprendiz de Mark Evans. ¡Pequeño en estatura pero gigante en espíritu y defensa!" }
 
 ];
 
