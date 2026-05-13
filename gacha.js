@@ -57,6 +57,13 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const objeto = document.getElementById('objeto-invocacion');
     const resultado = document.getElementById('resultado-invocacion');
     
+    // --- MEJORA DE SEGURIDAD 1: Evitar el cuelgue inicial ---
+    if (!personaje) {
+        console.error("Error: El personaje es undefined. Cancelando gacha para evitar pantalla negra.");
+        if (overlay) overlay.style.display = 'none';
+        return;
+    }
+
     overlay.style.display = 'flex';
     resultado.style.display = 'none';
     objeto.style.display = 'flex';
@@ -75,7 +82,9 @@ function ejecutarAnimacionGacha(saga, personaje) {
             // 1. COMPROBACIÓN DE SEGURIDAD
             if (!window.inventario) window.inventario = [];
 
-            const copias = window.inventario.filter(p => parseInt(p.id) === parseInt(personaje.id)).length;
+            // --- MEJORA DE SEGURIDAD 2: Asegurar que ID existe antes de filtrar ---
+            const personajeId = personaje.id || 0;
+            const copias = window.inventario.filter(p => p && parseInt(p.id) === parseInt(personajeId)).length;
             
             if (copias >= 10) {
                 const premios = { comun: 100, raro: 250, epico: 600, legendario: 1500, Secreta: 3000 };
@@ -89,7 +98,7 @@ function ejecutarAnimacionGacha(saga, personaje) {
                         <h2 style="color:#eab308;">+💰 ${valor}</h2>
                     </div>`;
             } else {
-                // 2. AÑADIR AL INVENTARIO (Usando window. para asegurar)
+                // 2. AÑADIR AL INVENTARIO
                 const bichoNuevo = { 
                     ...personaje, 
                     uid: "UID-" + Date.now() + Math.random().toString(36).substr(2, 4), 
@@ -99,13 +108,16 @@ function ejecutarAnimacionGacha(saga, personaje) {
                 };
                 window.inventario.push(bichoNuevo);
                 
+                // --- MEJORA DE SEGURIDAD 3: Color por defecto si RAREZAS no existe ---
+                const colorNombre = (typeof RAREZAS !== 'undefined' && RAREZAS[personaje.rareza]) ? RAREZAS[personaje.rareza] : '#ff4d4d';
+
                 resultado.innerHTML = `
                     <div style="text-align:center;">
                         <div style="transform:scale(1.6); margin-bottom:20px;">
                             ${obtenerImagenHTML(personaje, "sprite-revelado")}
                         </div>
                         <h3 style="color:#94a3b8;">${personaje.rareza === "Secreta" ? "¡REVELACIÓN SECRETA!" : "¡NUEVO DESEO!"}</h3>
-                        <h2 style="color:${RAREZAS[personaje.rareza] || '#ff4d4d'}; font-size:2rem;">${personaje.nombre}</h2>
+                        <h2 style="color:${colorNombre}; font-size:2rem;">${personaje.nombre}</h2>
                     </div>`;
             }
 
@@ -114,14 +126,16 @@ function ejecutarAnimacionGacha(saga, personaje) {
                     CONTINUAR
                 </button>`;
 
-            // 3. GUARDADO CRÍTICO (Usamos la clave "gq_inv" que tiene tu función guardar)
+            // 3. GUARDADO CRÍTICO
             localStorage.setItem("gq_inv", JSON.stringify(window.inventario));
             
             if (typeof window.guardar === 'function') { 
                 window.guardar(); 
             }
             
-            actualizarHUD();
+            if (typeof actualizarHUD === 'function') {
+                actualizarHUD();
+            }
             
         }, 600);
     }, 1200);
