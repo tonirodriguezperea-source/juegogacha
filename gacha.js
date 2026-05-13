@@ -57,6 +57,12 @@ function ejecutarAnimacionGacha(saga, personaje) {
     const objeto = document.getElementById('objeto-invocacion');
     const resultado = document.getElementById('resultado-invocacion');
     
+    // --- SOLUCIÓN AL NOMBRE DE LA BASE DE DATOS ---
+    // Si PERSONAJES no existe, intentamos usar DB (que es como lo tienes en tu archivo)
+    if (!window.PERSONAJES && typeof DB !== 'undefined') {
+        window.PERSONAJES = DB;
+    }
+
     // --- MEJORA DE SEGURIDAD 1: Evitar el cuelgue inicial ---
     if (!personaje) {
         console.error("Error: El personaje es undefined. Cancelando gacha para evitar pantalla negra.");
@@ -89,11 +95,11 @@ function ejecutarAnimacionGacha(saga, personaje) {
             if (copias >= 10) {
                 const premios = { comun: 100, raro: 250, epico: 600, legendario: 1500, Secreta: 3000 };
                 const valor = premios[personaje.rareza] || 100;
-                window.monedas += valor;
+                window.monedas += (window.monedas || 0) + valor;
                 
                 resultado.innerHTML = `
                     <div style="text-align:center;">
-                        ${obtenerImagenHTML(personaje, "sprite-revelado")}
+                        ${typeof obtenerImagenHTML === 'function' ? obtenerImagenHTML(personaje, "sprite-revelado") : `<img src="${personaje.sprite}" class="sprite-revelado">`}
                         <h3 style="color:#ff4444;">REPETIDO</h3>
                         <h2 style="color:#eab308;">+💰 ${valor}</h2>
                     </div>`;
@@ -108,13 +114,16 @@ function ejecutarAnimacionGacha(saga, personaje) {
                 };
                 window.inventario.push(bichoNuevo);
                 
-                // --- MEJORA DE SEGURIDAD 3: Color por defecto si RAREZAS no existe ---
-                const colorNombre = (typeof RAREZAS !== 'undefined' && RAREZAS[personaje.rareza]) ? RAREZAS[personaje.rareza] : '#ff4d4d';
+                // --- MEJORA DE SEGURIDAD 3: Color por defecto ---
+                let colorNombre = '#ff4d4d';
+                if (typeof RAREZAS !== 'undefined' && RAREZAS[personaje.rareza]) {
+                    colorNombre = RAREZAS[personaje.rareza];
+                }
 
                 resultado.innerHTML = `
                     <div style="text-align:center;">
                         <div style="transform:scale(1.6); margin-bottom:20px;">
-                            ${obtenerImagenHTML(personaje, "sprite-revelado")}
+                            ${typeof obtenerImagenHTML === 'function' ? obtenerImagenHTML(personaje, "sprite-revelado") : `<img src="${personaje.sprite}" class="sprite-revelado">`}
                         </div>
                         <h3 style="color:#94a3b8;">${personaje.rareza === "Secreta" ? "¡REVELACIÓN SECRETA!" : "¡NUEVO DESEO!"}</h3>
                         <h2 style="color:${colorNombre}; font-size:2rem;">${personaje.nombre}</h2>
