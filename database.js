@@ -288,7 +288,7 @@ const DB = [
     
 
     //Randoms
-    { id: 1057, nombre: "Fimosis King", saga: "Randoms", tipo: "Lucha", rareza: "Secreta", ataque: 110, vidaMax: 1500, sprite: "sprites/fimosisking.jpg", descripcion: "El aprendiz de Mark Evans. ¡Pequeño en estatura pero gigante en espíritu y defensa!" }
+    { id: 1057, nombre: "Fimosis King", saga: "Randoms", tipo: "Lucha", rareza: "Secreta", ataque: 110, vidaMax: 1500, sprite: "sprites/fimosisking.png", descripcion: "El aprendiz de Mark Evans. ¡Pequeño en estatura pero gigante en espíritu y defensa!" }
 
 ];
 
