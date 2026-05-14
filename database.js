@@ -290,8 +290,14 @@ const DB = [
     //Randoms
     { id: 1057, nombre: "Fimosis King", saga: "Randoms", tipo: "Lucha", rareza: "Secreta", ataque: 110, vidaMax: 1500, sprite: "sprites/fimosisking.png", descripcion: "El fichaje de moda, Fimosis King es una gran persona. (Creado por: Pol)"},
     { id: 1058, nombre: "Tung Tung Sahur", saga: "Randoms", tipo: "Planta", rareza: "legendario", ataque: 150, vidaMax: 1000, sprite: "sprites/tungtungsahur.png", descripcion: "Famoso brainrot que le rompió la pierna a Adam. SU palo es muy largo, su bate también."},
-    { id: 1059, nombre: "Ares Pro", saga: "Randoms", tipo: "Fantasma", rareza: "raro", ataque: 60, vidaMax: 800, sprite: "sprites/arespro.png", descripcion: "Es Ares Pro, nada mas que añadir."}
+    { id: 1059, nombre: "Ares Pro", saga: "Randoms", tipo: "Fantasma", rareza: "raro", ataque: 60, vidaMax: 800, sprite: "sprites/arespro.png", descripcion: "Es Ares Pro, nada mas que añadir."},
+    { id: 1060, nombre: "Tu Tu Tu Sahur", saga: "Randoms", tipo: "Roca", rareza: "legendario", ataque: 140, vidaMax: 1300, sprite: "sprites/tututusahur.png", descripcion: "Leyenda de los edificios, su mirada seria da respeto. (Idea de Axcel)."},
+    { id: 1061, nombre: "Kar Ker Kar", saga: "Randoms", tipo: "Planta", rareza: "epico", ataque: 180, vidaMax: 700, sprite: "sprites/karkerkar.png", descripcion: "Su mirada seria intimida, per es buen tio."},
+
+
+
 ];
+
 
 
 
