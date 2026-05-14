@@ -288,8 +288,9 @@ const DB = [
     
 
     //Randoms
-    { id: 1057, nombre: "Fimosis King", saga: "Randoms", tipo: "Lucha", rareza: "Secreta", ataque: 110, vidaMax: 1500, sprite: "sprites/fimosisking.png", descripcion: "El aprendiz de Mark Evans. ¡Pequeño en estatura pero gigante en espíritu y defensa!" }
-
+    { id: 1057, nombre: "Fimosis King", saga: "Randoms", tipo: "Lucha", rareza: "Secreta", ataque: 110, vidaMax: 1500, sprite: "sprites/fimosisking.png", descripcion: "El fichaje de moda, Fimosis King es una gran persona. (Creado por: Pol)"},
+    { id: 1058, nombre: "Tung Tung Sahur", saga: "Randoms", tipo: "Planta", rareza: "legendario", ataque: 150, vidaMax: 1000, sprite: "sprites/tungtungsahur.png", descripcion: "Famoso brainrot que le rompió la pierna a Adam. SU palo es muy largo, su bate también."},
+    { id: 1059, nombre: "Ares Pro", saga: "Randoms", tipo: "Fantasma", rareza: "raro", ataque: 60, vidaMax: 800, sprite: "sprites/arespro.png", descripcion: "Es Ares Pro, nada mas que añadir."}
 ];
 
 
